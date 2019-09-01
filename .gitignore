@@ -168,5 +168,5 @@ grpc_gw/main
 src
 pkg
 
-/observer/settings/local_config.yaml
-observer/rpc/observer_grpc.pye
+/wallets/settings/local_config.yaml
+wallets/rpc/wallets_grpc.pye

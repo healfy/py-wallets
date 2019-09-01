@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-swagger/options/annotations.proto";
+
+
+package wallets;
+
+option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+  info: {
+    title: "Wallets service";
+    version: "1.0";
+  };
+  schemes: HTTP;
+  consumes: "application/json";
+  produces: "application/json";
+  base_path: "/api";
+};
+
+
+// WalletsService server
+service Wallets {
+	rpc Healthz(HealthzRequest) returns (HealthzResponse) {};
+	rpc GetWallet(WalletRequest) returns (WalletResponse) {};
+	rpc StartMonitoring(MonitoringRequest) returns (MonitoringResponse) {};
+	rpc StopMonitoring(MonitoringRequest) returns (MonitoringResponse) {};
+}
+
+enum ResponseStatus {
+	NOT_SET = 0;
+	SUCCESS = 1;
+	ERROR = 2;
+	INVALID_REQUEST = 3;
+}
+
+message ResponseHeader {
+	ResponseStatus status = 1;
+	string description = 2;
+}
+
+message HealthzRequest {};
+
+
+message HealthzResponse {
+	ResponseHeader header = 1;
+}
+
+message Wallet {
+	int64 id = 1;
+	string currency_slug = 2;
+	string address = 3;
+	bool is_platform = 4;
+	int64 external_id = 5;
+
+}
+
+message MonitoringRequest {
+	Wallet wallet = 1;
+}
+
+message WalletRequest {
+	Wallet wallet = 1;
+}
+
+message WalletResponse {
+	ResponseHeader header = 1;
+// todo
+}
+
+message MonitoringResponse {
+	ResponseHeader header = 1;
+}
