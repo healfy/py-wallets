@@ -31,6 +31,10 @@ class WalletsBase(abc.ABC):
     async def StopMonitoring(self, stream):
         pass
 
+    @abc.abstractmethod
+    async def CheckBalance(self, stream):
+        pass
+
     def __mapping__(self):
         return {
             '/wallets.Wallets/Healthz': grpclib.const.Handler(
@@ -56,6 +60,12 @@ class WalletsBase(abc.ABC):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 wallets_pb2.MonitoringRequest,
                 wallets_pb2.MonitoringResponse,
+            ),
+            '/wallets.Wallets/CheckBalance': grpclib.const.Handler(
+                self.CheckBalance,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                wallets_pb2.CheckBalanceRequest,
+                wallets_pb2.CheckBalanceResponse,
             ),
         }
 
@@ -86,4 +96,10 @@ class WalletsStub:
             '/wallets.Wallets/StopMonitoring',
             wallets_pb2.MonitoringRequest,
             wallets_pb2.MonitoringResponse,
+        )
+        self.CheckBalance = grpclib.client.UnaryUnaryMethod(
+            channel,
+            '/wallets.Wallets/CheckBalance',
+            wallets_pb2.CheckBalanceRequest,
+            wallets_pb2.CheckBalanceResponse,
         )

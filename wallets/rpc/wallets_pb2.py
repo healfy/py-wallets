@@ -24,7 +24,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='wallets',
   syntax='proto3',
   serialized_options=_b('\222AE\022\026\n\017Wallets service2\0031.0\"\004/api*\001\0012\020application/json:\020application/json'),
-  serialized_pb=_b('\n\rwallets.proto\x12\x07wallets\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cgoogle/api/annotations.proto\x1a,protoc-gen-swagger/options/annotations.proto\"N\n\x0eResponseHeader\x12\'\n\x06status\x18\x01 \x01(\x0e\x32\x17.wallets.ResponseStatus\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\"\x10\n\x0eHealthzRequest\":\n\x0fHealthzResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"f\n\x06Wallet\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x15\n\rcurrency_slug\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\x12\x13\n\x0bis_platform\x18\x04 \x01(\x08\x12\x13\n\x0b\x65xternal_id\x18\x05 \x01(\x03\"4\n\x11MonitoringRequest\x12\x1f\n\x06wallet\x18\x01 \x01(\x0b\x32\x0f.wallets.Wallet\"0\n\rWalletRequest\x12\x1f\n\x06wallet\x18\x01 \x01(\x0b\x32\x0f.wallets.Wallet\"9\n\x0eWalletResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"=\n\x12MonitoringResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader*J\n\x0eResponseStatus\x12\x0b\n\x07NOT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\t\n\x05\x45RROR\x10\x02\x12\x13\n\x0fINVALID_REQUEST\x10\x03\x32\xa4\x02\n\x07Wallets\x12>\n\x07Healthz\x12\x17.wallets.HealthzRequest\x1a\x18.wallets.HealthzResponse\"\x00\x12>\n\tGetWallet\x12\x16.wallets.WalletRequest\x1a\x17.wallets.WalletResponse\"\x00\x12L\n\x0fStartMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"\x00\x12K\n\x0eStopMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"\x00\x42H\x92\x41\x45\x12\x16\n\x0fWallets service2\x03\x31.0\"\x04/api*\x01\x01\x32\x10\x61pplication/json:\x10\x61pplication/jsonb\x06proto3')
+  serialized_pb=_b('\n\rwallets.proto\x12\x07wallets\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cgoogle/api/annotations.proto\x1a,protoc-gen-swagger/options/annotations.proto\"N\n\x0eResponseHeader\x12\'\n\x06status\x18\x01 \x01(\x0e\x32\x17.wallets.ResponseStatus\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\"\x10\n\x0eHealthzRequest\":\n\x0fHealthzResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"Q\n\x06Wallet\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x15\n\rcurrency_slug\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\x12\x13\n\x0bis_platform\x18\x04 \x01(\x08\"4\n\x11MonitoringRequest\x12\x1f\n\x06wallet\x18\x01 \x01(\x0b\x32\x0f.wallets.Wallet\"0\n\rWalletRequest\x12\x1f\n\x06wallet\x18\x01 \x01(\x0b\x32\x0f.wallets.Wallet\"9\n\x0eWalletResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"=\n\x12MonitoringResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"A\n\x13\x43heckBalanceRequest\x12\x15\n\rbody_currency\x18\x01 \x01(\t\x12\x13\n\x0b\x62ody_amount\x18\x02 \x01(\t\"?\n\x14\x43heckBalanceResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader*J\n\x0eResponseStatus\x12\x0b\n\x07NOT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\t\n\x05\x45RROR\x10\x02\x12\x13\n\x0fINVALID_REQUEST\x10\x03\x32\xf3\x02\n\x07Wallets\x12>\n\x07Healthz\x12\x17.wallets.HealthzRequest\x1a\x18.wallets.HealthzResponse\"\x00\x12>\n\tGetWallet\x12\x16.wallets.WalletRequest\x1a\x17.wallets.WalletResponse\"\x00\x12L\n\x0fStartMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"\x00\x12K\n\x0eStopMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"\x00\x12M\n\x0c\x43heckBalance\x12\x1c.wallets.CheckBalanceRequest\x1a\x1d.wallets.CheckBalanceResponse\"\x00\x42H\x92\x41\x45\x12\x16\n\x0fWallets service2\x03\x31.0\"\x04/api*\x01\x01\x32\x10\x61pplication/json:\x10\x61pplication/jsonb\x06proto3')
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,google_dot_protobuf_dot_duration__pb2.DESCRIPTOR,google_dot_api_dot_annotations__pb2.DESCRIPTOR,protoc__gen__swagger_dot_options_dot_annotations__pb2.DESCRIPTOR,])
 
@@ -53,8 +53,8 @@ _RESPONSESTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=655,
-  serialized_end=729,
+  serialized_start=766,
+  serialized_end=840,
 )
 _sym_db.RegisterEnumDescriptor(_RESPONSESTATUS)
 
@@ -194,13 +194,6 @@ _WALLET = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='external_id', full_name='wallets.Wallet.external_id', index=4,
-      number=5, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -214,7 +207,7 @@ _WALLET = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=325,
-  serialized_end=427,
+  serialized_end=406,
 )
 
 
@@ -244,8 +237,8 @@ _MONITORINGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=429,
-  serialized_end=481,
+  serialized_start=408,
+  serialized_end=460,
 )
 
 
@@ -275,8 +268,8 @@ _WALLETREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=483,
-  serialized_end=531,
+  serialized_start=462,
+  serialized_end=510,
 )
 
 
@@ -306,8 +299,8 @@ _WALLETRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=533,
-  serialized_end=590,
+  serialized_start=512,
+  serialized_end=569,
 )
 
 
@@ -337,8 +330,77 @@ _MONITORINGRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=592,
-  serialized_end=653,
+  serialized_start=571,
+  serialized_end=632,
+)
+
+
+_CHECKBALANCEREQUEST = _descriptor.Descriptor(
+  name='CheckBalanceRequest',
+  full_name='wallets.CheckBalanceRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='body_currency', full_name='wallets.CheckBalanceRequest.body_currency', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='body_amount', full_name='wallets.CheckBalanceRequest.body_amount', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=634,
+  serialized_end=699,
+)
+
+
+_CHECKBALANCERESPONSE = _descriptor.Descriptor(
+  name='CheckBalanceResponse',
+  full_name='wallets.CheckBalanceResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='header', full_name='wallets.CheckBalanceResponse.header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=701,
+  serialized_end=764,
 )
 
 _RESPONSEHEADER.fields_by_name['status'].enum_type = _RESPONSESTATUS
@@ -347,6 +409,7 @@ _MONITORINGREQUEST.fields_by_name['wallet'].message_type = _WALLET
 _WALLETREQUEST.fields_by_name['wallet'].message_type = _WALLET
 _WALLETRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _MONITORINGRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
+_CHECKBALANCERESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 DESCRIPTOR.message_types_by_name['ResponseHeader'] = _RESPONSEHEADER
 DESCRIPTOR.message_types_by_name['HealthzRequest'] = _HEALTHZREQUEST
 DESCRIPTOR.message_types_by_name['HealthzResponse'] = _HEALTHZRESPONSE
@@ -355,6 +418,8 @@ DESCRIPTOR.message_types_by_name['MonitoringRequest'] = _MONITORINGREQUEST
 DESCRIPTOR.message_types_by_name['WalletRequest'] = _WALLETREQUEST
 DESCRIPTOR.message_types_by_name['WalletResponse'] = _WALLETRESPONSE
 DESCRIPTOR.message_types_by_name['MonitoringResponse'] = _MONITORINGRESPONSE
+DESCRIPTOR.message_types_by_name['CheckBalanceRequest'] = _CHECKBALANCEREQUEST
+DESCRIPTOR.message_types_by_name['CheckBalanceResponse'] = _CHECKBALANCERESPONSE
 DESCRIPTOR.enum_types_by_name['ResponseStatus'] = _RESPONSESTATUS
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -414,6 +479,20 @@ MonitoringResponse = _reflection.GeneratedProtocolMessageType('MonitoringRespons
   ))
 _sym_db.RegisterMessage(MonitoringResponse)
 
+CheckBalanceRequest = _reflection.GeneratedProtocolMessageType('CheckBalanceRequest', (_message.Message,), dict(
+  DESCRIPTOR = _CHECKBALANCEREQUEST,
+  __module__ = 'wallets_pb2'
+  # @@protoc_insertion_point(class_scope:wallets.CheckBalanceRequest)
+  ))
+_sym_db.RegisterMessage(CheckBalanceRequest)
+
+CheckBalanceResponse = _reflection.GeneratedProtocolMessageType('CheckBalanceResponse', (_message.Message,), dict(
+  DESCRIPTOR = _CHECKBALANCERESPONSE,
+  __module__ = 'wallets_pb2'
+  # @@protoc_insertion_point(class_scope:wallets.CheckBalanceResponse)
+  ))
+_sym_db.RegisterMessage(CheckBalanceResponse)
+
 
 DESCRIPTOR._options = None
 
@@ -423,8 +502,8 @@ _WALLETS = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=732,
-  serialized_end=1024,
+  serialized_start=843,
+  serialized_end=1214,
   methods=[
   _descriptor.MethodDescriptor(
     name='Healthz',
@@ -460,6 +539,15 @@ _WALLETS = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_MONITORINGREQUEST,
     output_type=_MONITORINGRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='CheckBalance',
+    full_name='wallets.Wallets.CheckBalance',
+    index=4,
+    containing_service=None,
+    input_type=_CHECKBALANCEREQUEST,
+    output_type=_CHECKBALANCERESPONSE,
     serialized_options=None,
   ),
 ])

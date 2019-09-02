@@ -18,3 +18,4 @@ MONITORING_TEMPLATE: 'monitoring_result.html'
 ALARM_TEMPLATE: 'balance_alarm.html'
 RECIPIENTS : []
 MONITORING_TIMEOUT_PERIOD: 12 # hours
+PGSTRING: 'postgresql:///wallets'

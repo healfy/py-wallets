@@ -54,6 +54,9 @@ class BlockChainServiceGateWay:
         return [serializers.WalletSchema().load(elem) for elem
                 in response_data]
 
+    def get_wallet_transactions(self):
+        pass
+
     @retry(stop_max_attempt_number=app.config['REMOTE_OPERATION_ATTEMPT_NUMBER'])
     def _base_request(self, request_message, request_method,
                       bad_response_msg: str = "Bad response from blockchain gateway.",

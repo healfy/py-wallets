@@ -26,6 +26,7 @@ service Wallets {
 	rpc GetWallet(WalletRequest) returns (WalletResponse) {};
 	rpc StartMonitoring(MonitoringRequest) returns (MonitoringResponse) {};
 	rpc StopMonitoring(MonitoringRequest) returns (MonitoringResponse) {};
+	rpc CheckBalance(CheckBalanceRequest) returns (CheckBalanceResponse) {}
 }
 
 enum ResponseStatus {
@@ -52,7 +53,6 @@ message Wallet {
 	string currency_slug = 2;
 	string address = 3;
 	bool is_platform = 4;
-	int64 external_id = 5;
 
 }
 
@@ -70,5 +70,14 @@ message WalletResponse {
 }
 
 message MonitoringResponse {
+	ResponseHeader header = 1;
+}
+
+message CheckBalanceRequest {
+	string body_currency = 1;
+    string body_amount = 2;
+}
+
+message CheckBalanceResponse {
 	ResponseHeader header = 1;
 }

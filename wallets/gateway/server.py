@@ -1,21 +1,33 @@
 from wallets.rpc import wallets_grpc
-from wallets.rpc.wallets_pb2_grpc import wallets__pb2 as w_pb2
+from wallets.gateway import method_classes
+from wallets import db
 
 
 class WalletsService(wallets_grpc.WalletsBase):
 
     async def Healthz(self, stream):
         request = await stream.recv_message()
-        print("Healthchecking")
-        await stream.send_message(w_pb2.HealthzResponse(
-
+        await stream.send_message(method_classes.HeathzMethod.process(
+            request, db.session
         ))
 
     async def GetWallet(self, stream):
         pass
 
     async def StartMonitoring(self, stream):
-        pass
+        request = await stream.recv_message()
+        await stream.send_message(method_classes.StartMonitoringMethod.process(
+            request, db.session
+        ))
 
     async def StopMonitoring(self, stream):
-        pass
+        request = await stream.recv_message()
+        await stream.send_message(method_classes.StopMonitoringMethod.process(
+            request, db.session
+        ))
+
+    async def CheckBalance(self, stream):
+        request = await stream.recv_message()
+        await stream.send_message(method_classes.CheckBalanceMethod.process(
+            request, db.session
+        ))

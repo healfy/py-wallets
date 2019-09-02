@@ -9,6 +9,3 @@ def start_remote_gateways():
     currencies_service_gw = currencies_gateway.CurrenciesServiceGateway()
     blockchain_service_gw = bgw_gateway.BlockChainServiceGateWay()
     return currencies_service_gw, blockchain_service_gw
-
-
-start_remote_gateways()

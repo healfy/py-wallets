@@ -6,8 +6,8 @@ import consul.aio
 sys.path.extend(["../", "./", "../rpc", "./rpc"])
 
 from grpclib.server import Server
-from observer import app, logger
-from observer.server.server import ObserverServe
+from wallets import app, logger
+from wallets.gateway.server import WalletsService
 
 
 @asyncio.coroutine
@@ -37,7 +37,7 @@ def serve():
     addr, port = app.config['ADDRESS'], app.config['PORT']
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(watch_config())
-    server = Server([ObserverServe()], loop=loop)
+    server = Server([WalletsService()], loop=loop)
     loop.run_until_complete(server.start(addr, port))
     logger.info(f"starting observer server {addr}:{port}")
     try:
