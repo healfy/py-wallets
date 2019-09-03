@@ -1,7 +1,7 @@
 import abc
 import typing
 from google.protobuf.json_format import MessageToDict
-from wallets.rpc.wallets_pb2_grpc import wallets__pb2 as w_p2
+from wallets.rpc import wallets_pb2 as w_p2
 
 
 class BaseRequestObject:

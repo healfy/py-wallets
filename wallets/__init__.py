@@ -11,16 +11,16 @@ from flask_sqlalchemy import SQLAlchemy
 from wallets.settings.config import conf
 from wallets.shared.logging import logger
 from wallets.gateway import start_remote_gateways
-from wallets.common import BaseModel
+from wallets.common.models import BaseModel
 
 sys.path.extend(
     ['/', '/app',
-     'observer',
-     'observer/rpc',
+     'wallets',
+     'wallets/rpc',
      '/app/rpc',
      '..',
      '../rpc',
-     '/etc/observer']
+     '/etc/wallets']
 )  # for docker
 
 DBSession = scoped_session(sessionmaker())

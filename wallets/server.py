@@ -40,6 +40,7 @@ def serve():
     server = Server([WalletsService()], loop=loop)
     loop.run_until_complete(server.start(addr, port))
     logger.info(f"starting observer server {addr}:{port}")
+    print(f"starting observer server {addr}:{port}")
     try:
         loop.run_forever()
     except KeyboardInterrupt:

@@ -1,4 +1,5 @@
 import abc
+import json
 import traceback
 from decimal import Decimal
 from decimal import ROUND_HALF_UP
@@ -6,9 +7,38 @@ from flask import render_template
 
 from wallets import app
 from wallets import logger
+from wallets import session_scope
+from wallets.common import Wallet
+from wallets.bgw_gateway.serializers import TransactionResponseSchema
 from wallets.utils import send_message
 from wallets.gateway import currencies_service_gw as c_gw
 from wallets.gateway import blockchain_service_gw as b_gw
+
+
+class SaveTrxMixin:
+
+    @classmethod
+    def _is_first_trx(cls, wallet: Wallet):
+        return all([wallet.transactions, wallet.active_transactions])
+
+    @classmethod
+    def save(cls, wallet: Wallet, trx: TransactionResponseSchema):
+        with session_scope() as session:
+            try:
+                if cls._is_first_trx(wallet):
+                    wallet.active_transactions = json.dumps(trx)
+                else:
+                    issued_trx = json.loads(wallet.active_transactions)
+
+
+                wallet.transactions = json.dumps(trx)
+            except Exception as e:
+                logger.error(
+                    f"Class {cls.__name__} failed with {e.__class__.__name__}: "
+                    f"{e}. {traceback.format_stack()}")
+                session.rollback()
+            finally:
+                session.remove()
 
 
 class BaseMonitorClass(abc.ABC):
@@ -98,3 +128,14 @@ class CheckWalletMonitor(BaseMonitorClass):
                     app.config['MONITORING_TEMPLATE'], **context
                 )
                 send_message(html, msg)
+
+
+class CheckTransactionsMonitor(BaseMonitorClass, SaveTrxMixin):
+
+    @classmethod
+    def get_data(cls):
+        return Wallet.query.filter(on_monitoring=True).all()
+
+    @classmethod
+    def _execute(cls):
+        wallets = cls.get_data()

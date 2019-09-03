@@ -11,7 +11,7 @@ from wallets import request_objects
 from wallets.utils import send_message
 from wallets.common import Wallet
 from wallets.gateway import blockchain_service_gw
-from wallets.rpc.wallets_pb2_grpc import wallets__pb2 as w_pb2
+from wallets.rpc import wallets_pb2 as w_pb2
 
 
 class ServerMethod(ABC):

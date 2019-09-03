@@ -175,6 +175,10 @@ class Wallet(BaseModel):
                           comment='All transactions on current wallet',
                           default=None)
 
+    active_transactions = Column(JSON,
+                                 comment='Active trx on this wallet',
+                                 default=None)
+
     is_platform = Column(Boolean,
                          comment='is platform wallet',
                          default=False,

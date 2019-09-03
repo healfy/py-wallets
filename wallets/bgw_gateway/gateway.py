@@ -4,7 +4,7 @@ from decimal import Decimal
 from google.protobuf.json_format import MessageToDict
 from retrying import retry
 
-from wallets.rpc import bc_gw
+from wallets.rpc.blockchain_gateway_pb2_grpc import blockchain__gateway__pb2 as bc_gw
 from wallets.rpc import blockchain_gateway_pb2_grpc as bgw_grpc
 from wallets import app
 from wallets import logger
