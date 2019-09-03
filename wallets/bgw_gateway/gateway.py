@@ -1,27 +1,35 @@
+import grpc
 import typing
 from decimal import Decimal
-import grpc
 from google.protobuf.json_format import MessageToDict
 from retrying import retry
 
-from wallets.rpc import blockchain_gateway_pb2_grpc, bc_gw
+from wallets.rpc import bc_gw
+from wallets.rpc import blockchain_gateway_pb2_grpc as bgw_grpc
 from wallets import app
 from wallets import logger
-from . import serializers
-from .exceptions import *
+from .exceptions import BlockchainBadResponseException
+from .serializers import (
+    WalletSchema,
+    GetBalanceResponseSchema,
+    TransactionSchema,
+)
 
 
 class BlockChainServiceGateWay:
     """Hold logic for interacting with remote blockchain gateway service."""
 
-    def get_balance_by_slug(self, slug: int) -> Decimal:
+    gw_address: str = app.config['BLOCKCHAIN_GW_ADDRESS']
+    timeout: int = app.config['BLOCKCHAIN_GW_TIMEOUT']
+    bad_response_msg: str = 'Bad response from blockchain gateway.'
+    allowed_statuses: typing.Tuple[int] = (bc_gw.SUCCESS,)
+
+    def get_balance_by_slug(self, slug: str) -> Decimal:
         """ Get actual balance by wallet slug """
         request_message = bc_gw.GetBalanceBySlugRequest(slug=slug)
 
-        with grpc.insecure_channel(
-                app.config['BLOCKCHAIN_GW_ADDRESS']) as channel:
-
-            client = blockchain_gateway_pb2_grpc.BlockchainGatewayServiceStub(
+        with grpc.insecure_channel(self.gw_address) as channel:
+            client = bgw_grpc.BlockchainGatewayServiceStub(
                 channel)
 
             response_data = self._base_request(
@@ -31,17 +39,15 @@ class BlockChainServiceGateWay:
                                  f"for wallet with slug={slug}."
             )
 
-        return serializers.GetBalanceResponseSchema().load(
+        return GetBalanceResponseSchema().load(
             response_data).get('balance')
 
     def get_platform_wallets_balance(self) -> typing.List:
         """ Get balance of all platform wallets """
         request_message = bc_gw.EmptyRequest()
 
-        with grpc.insecure_channel(
-                app.config['BLOCKCHAIN_GW_ADDRESS']) as channel:
-
-            client = blockchain_gateway_pb2_grpc.BlockchainGatewayServiceStub(
+        with grpc.insecure_channel(self.gw_address) as channel:
+            client = bgw_grpc.BlockchainGatewayServiceStub(
                 channel)
 
             response_data = self._base_request(
@@ -50,30 +56,50 @@ class BlockChainServiceGateWay:
                 bad_response_msg=f"Could not get balance for platform wallets."
             )
 
-        response_data = response_data['wallets']
-        return [serializers.WalletSchema().load(elem) for elem
-                in response_data]
+        return [WalletSchema().load(elem) for elem in response_data['wallets']]
 
-    def get_wallet_transactions(self):
-        pass
+    def get_transactions_list(self, external_id: int = None,
+                              wallet_address: str = None) -> typing.Dict:
 
-    @retry(stop_max_attempt_number=app.config['REMOTE_OPERATION_ATTEMPT_NUMBER'])
+        """Return transactions list for wallet identifiable by id or address.
+        """
+        if not any([external_id, wallet_address]):
+            raise ValueError(
+                'Expect at least one of external_id, wallet_address'
+            )
+
+        message = bc_gw.GetTransactionsListRequest(
+            walletId=external_id, walletAddress=wallet_address)
+
+        with grpc.insecure_channel(self.gw_address) as channel:
+            client = bgw_grpc.BlockchainGatewayServiceStub(channel)
+            response_data = self._base_request(
+                message,
+                client.GetTransactionsList,
+                bad_response_msg=f"Could not get transaction "
+                                 f"list with params {message}."
+            )
+        return TransactionSchema(many=True).load(
+            response_data.get('transactions', [])
+        )
+
+    @retry(
+        stop_max_attempt_number=app.config['REMOTE_OPERATION_ATTEMPT_NUMBER'])
     def _base_request(self, request_message, request_method,
-                      bad_response_msg: str = "Bad response from blockchain gateway.",
-                      allowed_statuses: typing.Tuple[int] = (bc_gw.SUCCESS,)) -> \
+                      bad_response_msg: str = "") -> \
             typing.Optional[typing.Dict[str, typing.Any]]:
         """
         :param request_message: protobuf message request object
         :param request_method: client request method
-        :param bad_response_msg: exception message for failed status
-        :param allowed_statuses: tuple of allowed response statuses,
+        :param bad_response_msg: exception message for failed method
         in actual status not in allowed_statuses it raises.
         """
+        if bad_response_msg:
+            self.bad_response_msg = bad_response_msg
         try:
-            response = request_method(request_message, timeout=app.config[
-                'BLOCKCHAIN_GW_TIMEOUT'])
+            response = request_method(request_message, timeout=self.timeout)
             status = response.status.status
-            if status in allowed_statuses:
+            if status in self.allowed_statuses:
                 if status != bc_gw.SUCCESS:
                     logger.warning(str(
                         f"{self.__class__.__name__} got "
@@ -82,9 +108,9 @@ class BlockChainServiceGateWay:
                         "\n", " "))
                 return MessageToDict(response, preserving_proto_field_name=True)
             raise BlockchainBadResponseException(str(
-                bad_response_msg + f" Got status "
-                                   f"{bc_gw.ResponseStatus.Name(status)}: "
-                                   f"{response.status.description}.").replace(
+                self.bad_response_msg + f" Got status "
+                                        f"{bc_gw.ResponseStatus.Name(status)}: "
+                                        f"{response.status.description}.").replace(
                 "\n", " "))
         except Exception as exc:
             logger.warning(

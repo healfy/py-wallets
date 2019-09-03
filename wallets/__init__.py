@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 from flask_sqlalchemy import SQLAlchemy
 
 from wallets.settings.config import conf
-from wallets.logging import logger
+from wallets.shared.logging import logger
 from wallets.gateway import start_remote_gateways
 from wallets.common import BaseModel
 

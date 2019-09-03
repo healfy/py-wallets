@@ -7,6 +7,8 @@ from flask import render_template
 from wallets import app
 from wallets import logger
 from wallets.utils import send_message
+from wallets.gateway import currencies_service_gw as c_gw
+from wallets.gateway import blockchain_service_gw as b_gw
 
 
 class BaseMonitorClass(abc.ABC):
