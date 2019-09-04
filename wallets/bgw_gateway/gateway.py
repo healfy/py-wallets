@@ -4,23 +4,23 @@ from decimal import Decimal
 from google.protobuf.json_format import MessageToDict
 from retrying import retry
 
-from wallets.rpc.blockchain_gateway_pb2_grpc import blockchain__gateway__pb2 as bc_gw
+from wallets.rpc import blockchain_gateway_pb2 as bc_gw
 from wallets.rpc import blockchain_gateway_pb2_grpc as bgw_grpc
-from wallets import app
+from wallets.settings.config import conf
 from wallets import logger
 from .exceptions import BlockchainBadResponseException
 from .serializers import (
     WalletSchema,
-    GetBalanceResponseSchema,
     TransactionSchema,
+    GetBalanceResponseSchema,
 )
 
 
 class BlockChainServiceGateWay:
     """Hold logic for interacting with remote blockchain gateway service."""
 
-    gw_address: str = app.config['BLOCKCHAIN_GW_ADDRESS']
-    timeout: int = app.config['BLOCKCHAIN_GW_TIMEOUT']
+    gw_address: str = conf['BLOCKCHAIN_GW_ADDRESS']
+    timeout: int = conf['BLOCKCHAIN_GW_TIMEOUT']
     bad_response_msg: str = 'Bad response from blockchain gateway.'
     allowed_statuses: typing.Tuple[int] = (bc_gw.SUCCESS,)
 
@@ -84,7 +84,7 @@ class BlockChainServiceGateWay:
         )
 
     @retry(
-        stop_max_attempt_number=app.config['REMOTE_OPERATION_ATTEMPT_NUMBER'])
+        stop_max_attempt_number=conf['REMOTE_OPERATION_ATTEMPT_NUMBER'])
     def _base_request(self, request_message, request_method,
                       bad_response_msg: str = "") -> \
             typing.Optional[typing.Dict[str, typing.Any]]:

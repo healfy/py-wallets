@@ -1,6 +1,7 @@
 from marshmallow import fields
 from marshmallow import Schema
 from wallets.utils import DecimalStringField
+from wallets.common import TransactionSchema
 
 
 class WalletSchema(Schema):
@@ -10,16 +11,6 @@ class WalletSchema(Schema):
 
 class GetBalanceResponseSchema(Schema):
     balance = DecimalStringField(missing='0')
-
-
-class TransactionSchema(Schema):
-    id = fields.Integer()
-    address_from = fields.Str(load_from='from', required=True)
-    address_to = fields.Str(load_from='to')
-    is_output = fields.Bool(load_from='isOutput', required=False, missing=False)
-    currency_slug = fields.Str(load_from='currencySlug', required=True)
-    amount = DecimalStringField(load_from='value', required=True)
-    hash = fields.Str(required=True)
 
 
 class TransactionResponseSchema(Schema):

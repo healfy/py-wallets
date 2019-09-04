@@ -1,15 +1,15 @@
 import abc
-import json
 import traceback
 from decimal import Decimal
 from decimal import ROUND_HALF_UP
 from flask import render_template
 
-from wallets import app
+from wallets.settings.config import conf
 from wallets import logger
 from wallets import session_scope
 from wallets.common import Wallet
-from wallets.bgw_gateway.serializers import TransactionResponseSchema
+from wallets.common import Transaction
+from wallets.common import TransactionSchema
 from wallets.utils import send_message
 from wallets.gateway import currencies_service_gw as c_gw
 from wallets.gateway import blockchain_service_gw as b_gw
@@ -18,27 +18,21 @@ from wallets.gateway import blockchain_service_gw as b_gw
 class SaveTrxMixin:
 
     @classmethod
-    def _is_first_trx(cls, wallet: Wallet):
-        return all([wallet.transactions, wallet.active_transactions])
-
-    @classmethod
-    def save(cls, wallet: Wallet, trx: TransactionResponseSchema):
+    def save(cls, wallet: Wallet, request_object: TransactionSchema):
         with session_scope() as session:
             try:
-                if cls._is_first_trx(wallet):
-                    wallet.active_transactions = json.dumps(trx)
-                else:
-                    issued_trx = json.loads(wallet.active_transactions)
-
-
-                wallet.transactions = json.dumps(trx)
+                trx = Transaction.from_dict(request_object)
+                session.add(trx)
+                session.commit()
+                wallet.transaction_id = trx.id
+                session.commit()
             except Exception as e:
                 logger.error(
                     f"Class {cls.__name__} failed with {e.__class__.__name__}: "
                     f"{e}. {traceback.format_stack()}")
                 session.rollback()
             finally:
-                session.remove()
+                session.close()
 
 
 class BaseMonitorClass(abc.ABC):
@@ -103,7 +97,7 @@ class CheckWalletMonitor(BaseMonitorClass):
                 wallet['current'] = wallet['currencySlug']
             context = dict(wallets=wallets)
             context['warning'] = 'Attention, service currencies is unavailable'
-            html = render_template(app.config['MONITORING_TEMPLATE'], **context)
+            html = render_template(conf['MONITORING_TEMPLATE'], **context)
             send_message(html, msg)
         else:
             result = []
@@ -115,7 +109,7 @@ class CheckWalletMonitor(BaseMonitorClass):
                 ).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP) \
                     if rate else int(bool(rate))
 
-                if usd_balance <= Decimal(app.config['MIN_BALANCE_USD']):
+                if usd_balance <= Decimal(conf['MIN_BALANCE_USD']):
                     result.append(
                         {'currencySlug': wallet['currencySlug'],
                          'value': usd_balance,
@@ -125,7 +119,7 @@ class CheckWalletMonitor(BaseMonitorClass):
             if result:
                 context = dict(wallets=result)
                 html = render_template(
-                    app.config['MONITORING_TEMPLATE'], **context
+                    conf['MONITORING_TEMPLATE'], **context
                 )
                 send_message(html, msg)
 

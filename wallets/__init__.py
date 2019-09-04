@@ -7,21 +7,12 @@ from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from flask_sqlalchemy import SQLAlchemy
+sys.path.extend(['/', '/app', 'wallets', 'wallets/rpc', '/app/rpc', '..', '../rpc', '/etc/wallets'])  # for docker
 
 from wallets.settings.config import conf
 from wallets.shared.logging import logger
 from wallets.gateway import start_remote_gateways
-from wallets.common.models import BaseModel
-
-sys.path.extend(
-    ['/', '/app',
-     'wallets',
-     'wallets/rpc',
-     '/app/rpc',
-     '..',
-     '../rpc',
-     '/etc/wallets']
-)  # for docker
+from wallets.common import BaseModel
 
 DBSession = scoped_session(sessionmaker())
 engine = None

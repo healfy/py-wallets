@@ -117,3 +117,4 @@ Dockerfile*
 grpc_gw/grpc_gw
 wallets/settings/local_config.yaml
 wallets/rpc/wallets_grpc.pye
+wallets/alembic/versions/

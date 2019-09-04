@@ -1,11 +1,12 @@
 import pytz
 import requests
+from enum import IntEnum
 from decimal import Decimal
 from datetime import datetime
 from threading import Thread
 from marshmallow import fields
 from google.protobuf import timestamp_pb2
-from wallets import app
+from wallets.settings.config import conf
 
 
 def threaded(fn):
@@ -49,13 +50,20 @@ class DatetimeField(fields.Field):
 
 def send_message(html, subject):
 
-    url = f'https://api.mailgun.net/v3/{app.config["MAIL_DOMAIN"]}/messages'
-    auth = ('api', f'{app.config["MAIL_PASSWORD"]}')
+    url = f'https://api.mailgun.net/v3/{conf["MAIL_DOMAIN"]}/messages'
+    auth = ('api', f'{conf["MAIL_PASSWORD"]}')
     data = {
-        'from': f'Mailgun User <{app.config["MAIL_USERNAME"]}>',
-        'to': app.config["RECIPIENTS"],
+        'from': f'Mailgun User <{conf["MAIL_USERNAME"]}>',
+        'to': conf["RECIPIENTS"],
         'subject': subject,
         'html': html,
     }
     response = requests.post(url, auth=auth, data=data)
     response.raise_for_status()
+
+
+class TransactionStatus(IntEnum):
+    """Transfer states statuses."""
+    ACTIVE = 1
+    CONFIRMED = 2
+    IGNORED = 3

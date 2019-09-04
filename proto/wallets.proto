@@ -53,6 +53,7 @@ message Wallet {
 	string currency_slug = 2;
 	string address = 3;
 	bool is_platform = 4;
+	int64 external_id = 5;
 
 }
 

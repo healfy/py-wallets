@@ -14,14 +14,17 @@ from sqlalchemy import (
     Text,
     func,
     inspect,
-    JSON)
-
+    ForeignKey)
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_continuum import make_versioned
 from sqlalchemy_mixins import AllFeaturesMixin
 
 from .seriallizers import WalletSchema
+from .seriallizers import TransactionSchema
+from wallets.utils import TransactionStatus
 from wallets.rpc import wallets_pb2
+from wallets.rpc import blockchain_gateway_pb2
 
 if TYPE_CHECKING:
     Base = object
@@ -89,16 +92,17 @@ class BaseModel(Base, AllFeaturesMixin):
         self.created_at = func.now()
         self.updated_at = func.now()
 
+    def as_dict(self):
+        raise NotImplementedError('NotImplemented')
+
     def to_message(self):
-        data = self.schema_class().dump(self).data
-        return self.message_class(**data)
+        return self.message_class(**self.as_dict())
 
     @classmethod
     def from_message(cls, msg):
         schema = cls.schema_class()
         return cls.from_dict(
-            schema.load(MessageToDict(msg, preserving_proto_field_name=True)
-                        ).data)
+            schema.load(MessageToDict(msg, preserving_proto_field_name=True)))
 
     def __repr__(self) -> str:
         return "<Model{} ({})>".format(self.__class__.__name__, self.id)
@@ -121,9 +125,6 @@ class BaseModel(Base, AllFeaturesMixin):
         self.deleted_at = datetime.utcnow().replace(tzinfo=pytz.utc)
         self.is_deleted = True
 
-    def dict(self, exclude=None) -> typing.Dict[str, typing.Any]:
-        return row2dict(self, exclude)
-
     @classmethod
     def from_dict(cls, d: typing.Dict):
         res: dict = deepcopy(d)
@@ -133,14 +134,6 @@ class BaseModel(Base, AllFeaturesMixin):
                 res[rel.key + "_id"] = res[rel.key].id
         new_obj = cls(**res)
         return new_obj
-
-    def update_from_dict(self, d: typing.Dict):
-        rs = inspect(self.__class__).relationships.keys()
-        for k, v in d.items():
-            if k not in rs:
-                setattr(self, k, v)
-            else:
-                setattr(self, k + '_id', v['id'])
 
     def save(self):
         raise NotImplementedError('Mixing save cannot store versions')
@@ -155,8 +148,8 @@ class Wallet(BaseModel):
     __tablename__ = "wallets"
     __versioned__: dict = {}
 
-    schema_class = WalletSchema  # marshmallow schema class
-    message_class = wallets_pb2.Wallet  # proto message for this model
+    schema_class = WalletSchema
+    message_class = wallets_pb2.Wallet
 
     currency_slug = Column(Text,
                            comment='Wallet currency slug',
@@ -171,14 +164,6 @@ class Wallet(BaseModel):
                          index=True,
                          nullable=False)
 
-    transactions = Column(JSON,
-                          comment='All transactions on current wallet',
-                          default=None)
-
-    active_transactions = Column(JSON,
-                                 comment='Active trx on this wallet',
-                                 default=None)
-
     is_platform = Column(Boolean,
                          comment='is platform wallet',
                          default=False,
@@ -189,3 +174,70 @@ class Wallet(BaseModel):
                            default=True,
                            nullable=False,
                            index=True)
+
+    transaction_id = Column(Integer,
+                            ForeignKey('transactions.id'),
+                            nullable=True,
+                            default=None,
+                            index=True)
+
+    transaction = relationship("Transaction",
+                               foreign_keys='Wallet.transaction_id',
+                               cascade='merge',
+                               cascade_backrefs=False,
+                               backref='wallet')
+
+    def as_dict(self):
+        return {
+            'id': self.id,
+            'address': self.address,
+            'is_platform': self.is_platform,
+            'currency_slug': self.currency_slug,
+            'external_id': self.external_id,
+        }
+
+
+class Transaction(BaseModel):
+    """BlockChain transaction"""
+
+    __tablename__ = "transactions"
+    __versioned__: dict = {}
+
+    schema_class = TransactionSchema
+    message_class = blockchain_gateway_pb2.Transaction
+
+    is_output = Column(Boolean,
+                       comment='transaction type',
+                       default=False)
+
+    status = Column(Integer,
+                    index=True,
+                    default=TransactionStatus.ACTIVE.value,
+                    nullable=False,
+                    comment='current transfer status')
+    hash = Column(Text,
+                  nullable=False,
+                  comment='transaction hash')
+
+    address_from = Column(Text,
+                          comment='initiator of transaction')
+
+    address_to = Column(Text,
+                        comment='to whom transfer transaction')
+
+    currency_slug = Column(Text,
+                           comment='transaction currency')
+
+    value = Column(Text,
+                   comment='transactions amount')
+
+    def as_dict(self):
+        return {
+            'id': self.id,
+            'to': self.address_to,
+            'from': self.address_from,
+            'isOutput': self.is_output,
+            'currencySlug': self.currency_slug,
+            'value': self.value,
+            'hash': self.hash,
+        }
