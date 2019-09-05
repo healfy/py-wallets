@@ -8,10 +8,10 @@ from wallets.rpc import blockchain_gateway_pb2 as bc_gw
 from wallets.rpc import blockchain_gateway_pb2_grpc as bgw_grpc
 from wallets.settings.config import conf
 from wallets import logger
+from wallets.common import TransactionSchema
 from .exceptions import BlockchainBadResponseException
 from .serializers import (
     WalletSchema,
-    TransactionSchema,
     GetBalanceResponseSchema,
 )
 
@@ -59,7 +59,7 @@ class BlockChainServiceGateWay:
         return [WalletSchema().load(elem) for elem in response_data['wallets']]
 
     def get_transactions_list(self, external_id: int = None,
-                              wallet_address: str = None) -> typing.Dict:
+                              wallet_address: str = None) -> typing.List:
 
         """Return transactions list for wallet identifiable by id or address.
         """
@@ -79,9 +79,7 @@ class BlockChainServiceGateWay:
                 bad_response_msg=f"Could not get transaction "
                                  f"list with params {message}."
             )
-        return TransactionSchema(many=True).load(
-            response_data.get('transactions', [])
-        )
+        return [TransactionSchema().load(elem, unknown=True) for elem in response_data.get('transactions', [])]
 
     @retry(
         stop_max_attempt_number=conf['REMOTE_OPERATION_ATTEMPT_NUMBER'])

@@ -62,6 +62,11 @@ def send_message(html, subject):
     response.raise_for_status()
 
 
+def simple_generator(iterable_object):
+    for obj in iterable_object:
+        yield obj
+
+
 class TransactionStatus(IntEnum):
     """Transfer states statuses."""
     ACTIVE = 1

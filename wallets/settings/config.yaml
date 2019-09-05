@@ -17,5 +17,16 @@ CELERY_NAMESPACE: 'local'
 MONITORING_TEMPLATE: 'monitoring_result.html'
 ALARM_TEMPLATE: 'balance_alarm.html'
 RECIPIENTS : []
-MONITORING_TIMEOUT_PERIOD: 12 # hours
+MONITORING_TRANSACTIONS_PERIOD: 5 # minutes
+MONITORING_WALLETS_PERIOD: 12 # hours
 PGSTRING: 'postgresql:///wallets'
+Ethereum: 1000
+Bitcoin: 1000
+Binance-coin: 1000
+TrueUSD: 1000
+OmiseGo: 500
+Basic-Attention-Token: 500
+Holo: 500
+Chainlink: 500
+Zilliqa: 500
+USD-Coin: 1000

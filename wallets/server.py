@@ -43,6 +43,7 @@ def serve():
     print(f"starting observer server {addr}:{port}")
     try:
         loop.run_forever()
+        from wallets import tasks
     except KeyboardInterrupt:
         pass
     server.close()
