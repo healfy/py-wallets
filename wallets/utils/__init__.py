@@ -1,12 +1,13 @@
 import pytz
+import typing
 import requests
-from enum import IntEnum
 from decimal import Decimal
 from datetime import datetime
 from threading import Thread
 from marshmallow import fields
 from google.protobuf import timestamp_pb2
 from wallets.settings.config import conf
+from wallets.common import models
 
 
 def threaded(fn):
@@ -67,8 +68,12 @@ def simple_generator(iterable_object):
         yield obj
 
 
-class TransactionStatus(IntEnum):
-    """Transfer states statuses."""
-    ACTIVE = 1
-    CONFIRMED = 2
-    IGNORED = 3
+def get_existing_wallet(_id: int = None, address: str = None
+                        ) -> typing.Optional[models.Wallet]:
+    if _id is not None:
+        return models.Wallet.query.get(_id)
+    if address is not None:
+        return models.Wallet.query.filter(models.Wallet.address == address).first()
+    raise ValueError(
+        'Get wallet error: expect at least one of id, address parameters.'
+    )

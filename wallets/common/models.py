@@ -2,6 +2,7 @@ import pytz
 import warnings
 import typing
 from copy import deepcopy
+from decimal import Decimal
 from datetime import datetime
 from typing import TYPE_CHECKING
 from google.protobuf.json_format import MessageToDict
@@ -11,10 +12,16 @@ from sqlalchemy import (
     DateTime,
     Integer,
     Numeric,
+    DECIMAL,
     Text,
     func,
     inspect,
-    ForeignKey)
+    ForeignKey,
+    case)
+from sqlalchemy.sql.functions import sum
+from sqlalchemy.sql.functions import coalesce
+
+from sqlalchemy.orm import Session
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_continuum import make_versioned
@@ -22,9 +29,9 @@ from sqlalchemy_mixins import AllFeaturesMixin
 
 from .seriallizers import WalletSchema
 from .seriallizers import TransactionSchema
-from wallets.utils import TransactionStatus
-from wallets.rpc import wallets_pb2
+from wallets.utils.consts import TransferStatus
 from wallets.rpc import blockchain_gateway_pb2
+from wallets.rpc import wallets_pb2
 
 if TYPE_CHECKING:
     Base = object
@@ -51,8 +58,7 @@ def row2dict(obj, exclude=None) -> dict:
             if not key.startswith('_') and not key.endswith(
                     '_id') and key not in exclude:
                 val = getattr(obj, key)
-                fields_dict[key] = val.dict(exclude=exclude) if hasattr(val,
-                                                                        'dict') else val
+                fields_dict[key] = val.dict(exclude=exclude) if hasattr(val, 'dict') else val
     return fields_dict
 
 
@@ -92,11 +98,11 @@ class BaseModel(Base, AllFeaturesMixin):
         self.created_at = func.now()
         self.updated_at = func.now()
 
-    def as_dict(self):
+    def _as_message_dict(self):
         raise NotImplementedError('NotImplemented')
 
     def to_message(self):
-        return self.message_class(**self.as_dict())
+        return self.message_class(**self._as_message_dict())
 
     @classmethod
     def from_message(cls, msg):
@@ -187,7 +193,7 @@ class Wallet(BaseModel):
                                cascade_backrefs=False,
                                backref='wallet')
 
-    def as_dict(self):
+    def _as_message_dict(self):
         return {
             'id': self.id,
             'address': self.address,
@@ -195,6 +201,35 @@ class Wallet(BaseModel):
             'currency_slug': self.currency_slug,
             'external_id': self.external_id,
         }
+
+    def get_balance(self, session: Session) -> Decimal:
+
+        sum_trx = row2dict(session.query(
+            coalesce(sum(
+                case(
+                    [Transaction.is_output == True, -1 * Transaction.value],
+                    else_=Transaction.value
+                )
+            ), 0).label('sum_value'),
+        ).join(
+            Transaction.id == Wallet.transaction_id,
+            Transaction.currency_slug == self.currency_slug,
+        ).filter(
+            Transaction.is_fee_trx == False,
+            Transaction.is_deleted == False,
+            Wallet.id == self.id
+        ))['sum_value']
+
+        percents = row2dict(session.query(
+            coalesce(sum(Charges.amount), 0).label('percents_sum')
+        ).join(
+            Charges.wallet_id == Wallet.id
+        ).filter(
+            Charges.is_deleted == False,
+            Wallet.id == self.id
+        ))['percents_sum']
+
+        return percents + sum_trx
 
 
 class Transaction(BaseModel):
@@ -210,11 +245,11 @@ class Transaction(BaseModel):
                        comment='transaction type',
                        default=False)
 
-    status = Column(Integer,
-                    index=True,
-                    default=TransactionStatus.ACTIVE.value,
-                    nullable=False,
-                    comment='current transfer status')
+    transfer_status = Column(Integer,
+                             index=True,
+                             default=TransferStatus.ACTIVE.value,
+                             nullable=False,
+                             comment='current transfer status')
     hash = Column(Text,
                   nullable=False,
                   comment='transaction hash')
@@ -228,10 +263,14 @@ class Transaction(BaseModel):
     currency_slug = Column(Text,
                            comment='transaction currency')
 
-    value = Column(Text,
+    value = Column(DECIMAL,
                    comment='transactions amount')
 
-    def as_dict(self):
+    is_fee_trx = Column(Boolean,
+                        comment='Is it transaction to send fee on wallet',
+                        default=False)
+
+    def _as_message_dict(self):
         return {
             'id': self.id,
             'to': self.address_to,
@@ -241,3 +280,25 @@ class Transaction(BaseModel):
             'value': self.value,
             'hash': self.hash,
         }
+
+
+class Charges(BaseModel):
+    """ Daily interest charges"""
+
+    __tablename__ = "charges"
+    __versioned__: dict = {}
+
+    amount = Column(DECIMAL,
+                    comment='Amount of actual charge')
+
+    wallet_id = Column(Integer,
+                       ForeignKey('wallets.id'),
+                       index=True)
+
+    wallet = relationship("Wallet",
+                          foreign_keys='Charges.wallet_id',
+                          cascade='merge',
+                          cascade_backrefs=False,
+                          backref='charges')
+    charged_body = Column(DECIMAL,
+                          comment='Amount on which percents was calculated')

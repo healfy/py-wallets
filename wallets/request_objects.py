@@ -79,7 +79,8 @@ class WalletMessage(BaseRequestObject):
         return True
 
 
-class BaseMonitoringRequest(BaseRequestObject, metaclass=abc.ABCMeta):
+class BaseMonitoringRequest(BaseRequestObject,
+                            metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def dict(self) -> dict:
         """
@@ -123,3 +124,22 @@ class MonitoringRequestObject(BaseMonitoringRequest):
                 return False
         self._errors.add(ValueError('need wallet message to send'))
         return False
+
+
+class WalletBalanceRequestObject(BaseRequestObject):
+
+    address: str
+    external_id: int
+
+    def is_valid(self):
+        if not self.address or self.external_id:
+            self._errors.add(ValueError(
+                'address or external_id should be provided')
+            )
+            return False
+        return True
+
+
+class TransactionRequestObject(BaseRequestObject):
+    pass
+

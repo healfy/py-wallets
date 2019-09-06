@@ -9,6 +9,7 @@ from wallets import app
 from wallets import logger
 from wallets import request_objects
 from wallets.utils import send_message
+from wallets.utils import get_existing_wallet
 from wallets.common import Wallet
 from wallets.gateway import blockchain_service_gw
 from wallets.rpc import wallets_pb2 as w_pb2
@@ -188,3 +189,27 @@ class StopMonitoringMethod(ServerMethod):
         session.commit()
         response_msg.header.status = w_pb2.SUCCESS
         return response_msg
+
+
+class GetWalletBalanceMethod(ServerMethod):
+    request_obj_cls = request_objects.WalletBalanceRequestObject
+    response_msg_cls = w_pb2.WalletBalanceResponse
+
+    @classmethod
+    def _execute(
+            cls,
+            request_obj: request_objects.WalletBalanceRequestObject,
+            response_msg: w_pb2.WalletBalanceResponse,
+            session
+    ) -> w_pb2.WalletBalanceResponse:
+        wallet = get_existing_wallet(_id=request_obj.external_id,
+                                     address=request_obj.address)
+        balance = wallet.get_balance(session)
+        response_msg.balance = balance if balance else '0'
+        response_msg.header.status = w_pb2.SUCCESS
+        return response_msg
+
+
+class UpdateTrxMethod(ServerMethod):
+    request_obj_cls = request_objects.WalletBalanceRequestObject
+    response_msg_cls = w_pb2.TransactionResponse

@@ -20,7 +20,7 @@ class WalletsBase(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def GetWallet(self, stream):
+    async def GetWalletBalance(self, stream):
         pass
 
     @abc.abstractmethod
@@ -35,6 +35,10 @@ class WalletsBase(abc.ABC):
     async def CheckBalance(self, stream):
         pass
 
+    @abc.abstractmethod
+    async def UpdateTrx(self, stream):
+        pass
+
     def __mapping__(self):
         return {
             '/wallets.Wallets/Healthz': grpclib.const.Handler(
@@ -43,11 +47,11 @@ class WalletsBase(abc.ABC):
                 wallets_pb2.HealthzRequest,
                 wallets_pb2.HealthzResponse,
             ),
-            '/wallets.Wallets/GetWallet': grpclib.const.Handler(
-                self.GetWallet,
+            '/wallets.Wallets/GetWalletBalance': grpclib.const.Handler(
+                self.GetWalletBalance,
                 grpclib.const.Cardinality.UNARY_UNARY,
-                wallets_pb2.WalletRequest,
-                wallets_pb2.WalletResponse,
+                wallets_pb2.WalletBalanceRequest,
+                wallets_pb2.WalletBalanceResponse,
             ),
             '/wallets.Wallets/StartMonitoring': grpclib.const.Handler(
                 self.StartMonitoring,
@@ -67,6 +71,12 @@ class WalletsBase(abc.ABC):
                 wallets_pb2.CheckBalanceRequest,
                 wallets_pb2.CheckBalanceResponse,
             ),
+            '/wallets.Wallets/UpdateTrx': grpclib.const.Handler(
+                self.UpdateTrx,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                wallets_pb2.TransactionRequest,
+                wallets_pb2.TransactionResponse,
+            ),
         }
 
 
@@ -79,11 +89,11 @@ class WalletsStub:
             wallets_pb2.HealthzRequest,
             wallets_pb2.HealthzResponse,
         )
-        self.GetWallet = grpclib.client.UnaryUnaryMethod(
+        self.GetWalletBalance = grpclib.client.UnaryUnaryMethod(
             channel,
-            '/wallets.Wallets/GetWallet',
-            wallets_pb2.WalletRequest,
-            wallets_pb2.WalletResponse,
+            '/wallets.Wallets/GetWalletBalance',
+            wallets_pb2.WalletBalanceRequest,
+            wallets_pb2.WalletBalanceResponse,
         )
         self.StartMonitoring = grpclib.client.UnaryUnaryMethod(
             channel,
@@ -102,4 +112,10 @@ class WalletsStub:
             '/wallets.Wallets/CheckBalance',
             wallets_pb2.CheckBalanceRequest,
             wallets_pb2.CheckBalanceResponse,
+        )
+        self.UpdateTrx = grpclib.client.UnaryUnaryMethod(
+            channel,
+            '/wallets.Wallets/UpdateTrx',
+            wallets_pb2.TransactionRequest,
+            wallets_pb2.TransactionResponse,
         )

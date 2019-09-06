@@ -3,7 +3,7 @@ from marshmallow import Schema
 from wallets.utils import DecimalStringField
 
 
-class WalletSchema(Schema):
+class WalletBalanceSchema(Schema):
     currencySlug = fields.Str()
     value = DecimalStringField(missing='0')
 

@@ -24,7 +24,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='wallets',
   syntax='proto3',
   serialized_options=_b('\222AE\022\026\n\017Wallets service2\0031.0\"\004/api*\001\0012\020application/json:\020application/json'),
-  serialized_pb=_b('\n\rwallets.proto\x12\x07wallets\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cgoogle/api/annotations.proto\x1a,protoc-gen-swagger/options/annotations.proto\"N\n\x0eResponseHeader\x12\'\n\x06status\x18\x01 \x01(\x0e\x32\x17.wallets.ResponseStatus\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\"\x10\n\x0eHealthzRequest\":\n\x0fHealthzResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"f\n\x06Wallet\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x15\n\rcurrency_slug\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\x12\x13\n\x0bis_platform\x18\x04 \x01(\x08\x12\x13\n\x0b\x65xternal_id\x18\x05 \x01(\x03\"4\n\x11MonitoringRequest\x12\x1f\n\x06wallet\x18\x01 \x01(\x0b\x32\x0f.wallets.Wallet\"0\n\rWalletRequest\x12\x1f\n\x06wallet\x18\x01 \x01(\x0b\x32\x0f.wallets.Wallet\"9\n\x0eWalletResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"=\n\x12MonitoringResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"A\n\x13\x43heckBalanceRequest\x12\x15\n\rbody_currency\x18\x01 \x01(\t\x12\x13\n\x0b\x62ody_amount\x18\x02 \x01(\t\"?\n\x14\x43heckBalanceResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader*J\n\x0eResponseStatus\x12\x0b\n\x07NOT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\t\n\x05\x45RROR\x10\x02\x12\x13\n\x0fINVALID_REQUEST\x10\x03\x32\xf3\x02\n\x07Wallets\x12>\n\x07Healthz\x12\x17.wallets.HealthzRequest\x1a\x18.wallets.HealthzResponse\"\x00\x12>\n\tGetWallet\x12\x16.wallets.WalletRequest\x1a\x17.wallets.WalletResponse\"\x00\x12L\n\x0fStartMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"\x00\x12K\n\x0eStopMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"\x00\x12M\n\x0c\x43heckBalance\x12\x1c.wallets.CheckBalanceRequest\x1a\x1d.wallets.CheckBalanceResponse\"\x00\x42H\x92\x41\x45\x12\x16\n\x0fWallets service2\x03\x31.0\"\x04/api*\x01\x01\x32\x10\x61pplication/json:\x10\x61pplication/jsonb\x06proto3')
+  serialized_pb=_b('\n\rwallets.proto\x12\x07wallets\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cgoogle/api/annotations.proto\x1a,protoc-gen-swagger/options/annotations.proto\"N\n\x0eResponseHeader\x12\'\n\x06status\x18\x01 \x01(\x0e\x32\x17.wallets.ResponseStatus\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\"\x10\n\x0eHealthzRequest\":\n\x0fHealthzResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"f\n\x06Wallet\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x15\n\rcurrency_slug\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\x12\x13\n\x0bis_platform\x18\x04 \x01(\x08\x12\x13\n\x0b\x65xternal_id\x18\x05 \x01(\x03\"4\n\x11MonitoringRequest\x12\x1f\n\x06wallet\x18\x01 \x01(\x0b\x32\x0f.wallets.Wallet\"<\n\x14WalletBalanceRequest\x12\x13\n\x0b\x65xternal_id\x18\x01 \x01(\x03\x12\x0f\n\x07\x61\x64\x64ress\x18\x02 \x01(\t\"Q\n\x15WalletBalanceResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\x12\x0f\n\x07\x62\x61lance\x18\x02 \x01(\t\"=\n\x12MonitoringResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"A\n\x13\x43heckBalanceRequest\x12\x15\n\rbody_currency\x18\x01 \x01(\t\x12\x13\n\x0b\x62ody_amount\x18\x02 \x01(\t\"?\n\x14\x43heckBalanceResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"\xc5\x01\n\x0bTransaction\x12\x0c\n\x04\x66rom\x18\x01 \x01(\t\x12\n\n\x02to\x18\x02 \x01(\t\x12\x0c\n\x04hash\x18\x03 \x01(\t\x12\x11\n\twallet_id\x18\x04 \x01(\x03\x12\r\n\x05value\x18\x05 \x01(\t\x12\x10\n\x08isOutput\x18\x06 \x01(\x08\x12\x14\n\x0c\x63urrencySlug\x18\x07 \x01(\t\x12\x30\n\x0ftransfer_status\x18\x08 \x01(\x0e\x32\x17.wallets.TransferStatus\x12\x12\n\nis_fee_trx\x18\t \x01(\x08\"?\n\x12TransactionRequest\x12)\n\x0btransaction\x18\x01 \x03(\x0b\x32\x14.wallets.Transaction\">\n\x13TransactionResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader*J\n\x0eResponseStatus\x12\x0b\n\x07NOT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\t\n\x05\x45RROR\x10\x02\x12\x13\n\x0fINVALID_REQUEST\x10\x03*F\n\x0eTransferStatus\x12\r\n\tUNDEFINED\x10\x00\x12\n\n\x06\x41\x43TIVE\x10\x01\x12\r\n\tCONFIRMED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x32\xd2\x03\n\x07Wallets\x12>\n\x07Healthz\x12\x17.wallets.HealthzRequest\x1a\x18.wallets.HealthzResponse\"\x00\x12S\n\x10GetWalletBalance\x12\x1d.wallets.WalletBalanceRequest\x1a\x1e.wallets.WalletBalanceResponse\"\x00\x12L\n\x0fStartMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"\x00\x12K\n\x0eStopMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"\x00\x12M\n\x0c\x43heckBalance\x12\x1c.wallets.CheckBalanceRequest\x1a\x1d.wallets.CheckBalanceResponse\"\x00\x12H\n\tUpdateTrx\x12\x1b.wallets.TransactionRequest\x1a\x1c.wallets.TransactionResponse\"\x00\x42H\x92\x41\x45\x12\x16\n\x0fWallets service2\x03\x31.0\"\x04/api*\x01\x01\x32\x10\x61pplication/json:\x10\x61pplication/jsonb\x06proto3')
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,google_dot_protobuf_dot_duration__pb2.DESCRIPTOR,google_dot_api_dot_annotations__pb2.DESCRIPTOR,protoc__gen__swagger_dot_options_dot_annotations__pb2.DESCRIPTOR,])
 
@@ -53,16 +53,51 @@ _RESPONSESTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=787,
-  serialized_end=861,
+  serialized_start=1152,
+  serialized_end=1226,
 )
 _sym_db.RegisterEnumDescriptor(_RESPONSESTATUS)
 
 ResponseStatus = enum_type_wrapper.EnumTypeWrapper(_RESPONSESTATUS)
+_TRANSFERSTATUS = _descriptor.EnumDescriptor(
+  name='TransferStatus',
+  full_name='wallets.TransferStatus',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='UNDEFINED', index=0, number=0,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='ACTIVE', index=1, number=1,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CONFIRMED', index=2, number=2,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='FAILED', index=3, number=3,
+      serialized_options=None,
+      type=None),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=1228,
+  serialized_end=1298,
+)
+_sym_db.RegisterEnumDescriptor(_TRANSFERSTATUS)
+
+TransferStatus = enum_type_wrapper.EnumTypeWrapper(_TRANSFERSTATUS)
 NOT_SET = 0
 SUCCESS = 1
 ERROR = 2
 INVALID_REQUEST = 3
+UNDEFINED = 0
+ACTIVE = 1
+CONFIRMED = 2
+FAILED = 3
 
 
 
@@ -249,17 +284,24 @@ _MONITORINGREQUEST = _descriptor.Descriptor(
 )
 
 
-_WALLETREQUEST = _descriptor.Descriptor(
-  name='WalletRequest',
-  full_name='wallets.WalletRequest',
+_WALLETBALANCEREQUEST = _descriptor.Descriptor(
+  name='WalletBalanceRequest',
+  full_name='wallets.WalletBalanceRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='wallet', full_name='wallets.WalletRequest.wallet', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
+      name='external_id', full_name='wallets.WalletBalanceRequest.external_id', index=0,
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='address', full_name='wallets.WalletBalanceRequest.address', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -276,21 +318,28 @@ _WALLETREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=483,
-  serialized_end=531,
+  serialized_end=543,
 )
 
 
-_WALLETRESPONSE = _descriptor.Descriptor(
-  name='WalletResponse',
-  full_name='wallets.WalletResponse',
+_WALLETBALANCERESPONSE = _descriptor.Descriptor(
+  name='WalletBalanceResponse',
+  full_name='wallets.WalletBalanceResponse',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='header', full_name='wallets.WalletResponse.header', index=0,
+      name='header', full_name='wallets.WalletBalanceResponse.header', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='balance', full_name='wallets.WalletBalanceResponse.balance', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -306,8 +355,8 @@ _WALLETRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=533,
-  serialized_end=590,
+  serialized_start=545,
+  serialized_end=626,
 )
 
 
@@ -337,8 +386,8 @@ _MONITORINGRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=592,
-  serialized_end=653,
+  serialized_start=628,
+  serialized_end=689,
 )
 
 
@@ -375,8 +424,8 @@ _CHECKBALANCEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=655,
-  serialized_end=720,
+  serialized_start=691,
+  serialized_end=756,
 )
 
 
@@ -406,28 +455,183 @@ _CHECKBALANCERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=722,
-  serialized_end=785,
+  serialized_start=758,
+  serialized_end=821,
+)
+
+
+_TRANSACTION = _descriptor.Descriptor(
+  name='Transaction',
+  full_name='wallets.Transaction',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='from', full_name='wallets.Transaction.from', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='to', full_name='wallets.Transaction.to', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='hash', full_name='wallets.Transaction.hash', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='wallet_id', full_name='wallets.Transaction.wallet_id', index=3,
+      number=4, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='wallets.Transaction.value', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='isOutput', full_name='wallets.Transaction.isOutput', index=5,
+      number=6, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='currencySlug', full_name='wallets.Transaction.currencySlug', index=6,
+      number=7, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='transfer_status', full_name='wallets.Transaction.transfer_status', index=7,
+      number=8, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='is_fee_trx', full_name='wallets.Transaction.is_fee_trx', index=8,
+      number=9, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=824,
+  serialized_end=1021,
+)
+
+
+_TRANSACTIONREQUEST = _descriptor.Descriptor(
+  name='TransactionRequest',
+  full_name='wallets.TransactionRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='transaction', full_name='wallets.TransactionRequest.transaction', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1023,
+  serialized_end=1086,
+)
+
+
+_TRANSACTIONRESPONSE = _descriptor.Descriptor(
+  name='TransactionResponse',
+  full_name='wallets.TransactionResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='header', full_name='wallets.TransactionResponse.header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1088,
+  serialized_end=1150,
 )
 
 _RESPONSEHEADER.fields_by_name['status'].enum_type = _RESPONSESTATUS
 _HEALTHZRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _MONITORINGREQUEST.fields_by_name['wallet'].message_type = _WALLET
-_WALLETREQUEST.fields_by_name['wallet'].message_type = _WALLET
-_WALLETRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
+_WALLETBALANCERESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _MONITORINGRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _CHECKBALANCERESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
+_TRANSACTION.fields_by_name['transfer_status'].enum_type = _TRANSFERSTATUS
+_TRANSACTIONREQUEST.fields_by_name['transaction'].message_type = _TRANSACTION
+_TRANSACTIONRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 DESCRIPTOR.message_types_by_name['ResponseHeader'] = _RESPONSEHEADER
 DESCRIPTOR.message_types_by_name['HealthzRequest'] = _HEALTHZREQUEST
 DESCRIPTOR.message_types_by_name['HealthzResponse'] = _HEALTHZRESPONSE
 DESCRIPTOR.message_types_by_name['Wallet'] = _WALLET
 DESCRIPTOR.message_types_by_name['MonitoringRequest'] = _MONITORINGREQUEST
-DESCRIPTOR.message_types_by_name['WalletRequest'] = _WALLETREQUEST
-DESCRIPTOR.message_types_by_name['WalletResponse'] = _WALLETRESPONSE
+DESCRIPTOR.message_types_by_name['WalletBalanceRequest'] = _WALLETBALANCEREQUEST
+DESCRIPTOR.message_types_by_name['WalletBalanceResponse'] = _WALLETBALANCERESPONSE
 DESCRIPTOR.message_types_by_name['MonitoringResponse'] = _MONITORINGRESPONSE
 DESCRIPTOR.message_types_by_name['CheckBalanceRequest'] = _CHECKBALANCEREQUEST
 DESCRIPTOR.message_types_by_name['CheckBalanceResponse'] = _CHECKBALANCERESPONSE
+DESCRIPTOR.message_types_by_name['Transaction'] = _TRANSACTION
+DESCRIPTOR.message_types_by_name['TransactionRequest'] = _TRANSACTIONREQUEST
+DESCRIPTOR.message_types_by_name['TransactionResponse'] = _TRANSACTIONRESPONSE
 DESCRIPTOR.enum_types_by_name['ResponseStatus'] = _RESPONSESTATUS
+DESCRIPTOR.enum_types_by_name['TransferStatus'] = _TRANSFERSTATUS
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 ResponseHeader = _reflection.GeneratedProtocolMessageType('ResponseHeader', (_message.Message,), dict(
@@ -465,19 +669,19 @@ MonitoringRequest = _reflection.GeneratedProtocolMessageType('MonitoringRequest'
   ))
 _sym_db.RegisterMessage(MonitoringRequest)
 
-WalletRequest = _reflection.GeneratedProtocolMessageType('WalletRequest', (_message.Message,), dict(
-  DESCRIPTOR = _WALLETREQUEST,
+WalletBalanceRequest = _reflection.GeneratedProtocolMessageType('WalletBalanceRequest', (_message.Message,), dict(
+  DESCRIPTOR = _WALLETBALANCEREQUEST,
   __module__ = 'wallets_pb2'
-  # @@protoc_insertion_point(class_scope:wallets.WalletRequest)
+  # @@protoc_insertion_point(class_scope:wallets.WalletBalanceRequest)
   ))
-_sym_db.RegisterMessage(WalletRequest)
+_sym_db.RegisterMessage(WalletBalanceRequest)
 
-WalletResponse = _reflection.GeneratedProtocolMessageType('WalletResponse', (_message.Message,), dict(
-  DESCRIPTOR = _WALLETRESPONSE,
+WalletBalanceResponse = _reflection.GeneratedProtocolMessageType('WalletBalanceResponse', (_message.Message,), dict(
+  DESCRIPTOR = _WALLETBALANCERESPONSE,
   __module__ = 'wallets_pb2'
-  # @@protoc_insertion_point(class_scope:wallets.WalletResponse)
+  # @@protoc_insertion_point(class_scope:wallets.WalletBalanceResponse)
   ))
-_sym_db.RegisterMessage(WalletResponse)
+_sym_db.RegisterMessage(WalletBalanceResponse)
 
 MonitoringResponse = _reflection.GeneratedProtocolMessageType('MonitoringResponse', (_message.Message,), dict(
   DESCRIPTOR = _MONITORINGRESPONSE,
@@ -500,6 +704,27 @@ CheckBalanceResponse = _reflection.GeneratedProtocolMessageType('CheckBalanceRes
   ))
 _sym_db.RegisterMessage(CheckBalanceResponse)
 
+Transaction = _reflection.GeneratedProtocolMessageType('Transaction', (_message.Message,), dict(
+  DESCRIPTOR = _TRANSACTION,
+  __module__ = 'wallets_pb2'
+  # @@protoc_insertion_point(class_scope:wallets.Transaction)
+  ))
+_sym_db.RegisterMessage(Transaction)
+
+TransactionRequest = _reflection.GeneratedProtocolMessageType('TransactionRequest', (_message.Message,), dict(
+  DESCRIPTOR = _TRANSACTIONREQUEST,
+  __module__ = 'wallets_pb2'
+  # @@protoc_insertion_point(class_scope:wallets.TransactionRequest)
+  ))
+_sym_db.RegisterMessage(TransactionRequest)
+
+TransactionResponse = _reflection.GeneratedProtocolMessageType('TransactionResponse', (_message.Message,), dict(
+  DESCRIPTOR = _TRANSACTIONRESPONSE,
+  __module__ = 'wallets_pb2'
+  # @@protoc_insertion_point(class_scope:wallets.TransactionResponse)
+  ))
+_sym_db.RegisterMessage(TransactionResponse)
+
 
 DESCRIPTOR._options = None
 
@@ -509,8 +734,8 @@ _WALLETS = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=864,
-  serialized_end=1235,
+  serialized_start=1301,
+  serialized_end=1767,
   methods=[
   _descriptor.MethodDescriptor(
     name='Healthz',
@@ -522,12 +747,12 @@ _WALLETS = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='GetWallet',
-    full_name='wallets.Wallets.GetWallet',
+    name='GetWalletBalance',
+    full_name='wallets.Wallets.GetWalletBalance',
     index=1,
     containing_service=None,
-    input_type=_WALLETREQUEST,
-    output_type=_WALLETRESPONSE,
+    input_type=_WALLETBALANCEREQUEST,
+    output_type=_WALLETBALANCERESPONSE,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
@@ -555,6 +780,15 @@ _WALLETS = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_CHECKBALANCEREQUEST,
     output_type=_CHECKBALANCERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='UpdateTrx',
+    full_name='wallets.Wallets.UpdateTrx',
+    index=5,
+    containing_service=None,
+    input_type=_TRANSACTIONREQUEST,
+    output_type=_TRANSACTIONRESPONSE,
     serialized_options=None,
   ),
 ])

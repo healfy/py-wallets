@@ -11,7 +11,7 @@ from wallets import logger
 from wallets.common import TransactionSchema
 from .exceptions import BlockchainBadResponseException
 from .serializers import (
-    WalletSchema,
+    WalletBalanceSchema,
     GetBalanceResponseSchema,
 )
 
@@ -56,7 +56,7 @@ class BlockChainServiceGateWay:
                 bad_response_msg=f"Could not get balance for platform wallets."
             )
 
-        return [WalletSchema().load(elem) for elem in response_data['wallets']]
+        return [WalletBalanceSchema().load(elem) for elem in response_data['wallets']]
 
     def get_transactions_list(self, external_id: int = None,
                               wallet_address: str = None) -> typing.List:
