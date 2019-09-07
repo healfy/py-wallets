@@ -7,7 +7,7 @@ from threading import Thread
 from marshmallow import fields
 from google.protobuf import timestamp_pb2
 from wallets.settings.config import conf
-from wallets.common import models
+
 
 
 def threaded(fn):
@@ -69,7 +69,9 @@ def simple_generator(iterable_object):
 
 
 def get_existing_wallet(_id: int = None, address: str = None
-                        ) -> typing.Optional[models.Wallet]:
+                        ) -> typing.Any:
+    from wallets.common import models
+
     if _id is not None:
         return models.Wallet.query.get(_id)
     if address is not None:

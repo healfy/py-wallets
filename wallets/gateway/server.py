@@ -36,4 +36,7 @@ class WalletsService(wallets_grpc.WalletsBase):
         ))
 
     async def UpdateTrx(self, stream):
-        pass
+        request = await stream.recv_message()
+        await stream.send_message(method_classes.UpdateTrxMethod.process(
+            request, db.session
+        ))

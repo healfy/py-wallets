@@ -83,15 +83,7 @@ class BaseMonitoringRequest(BaseRequestObject,
                             metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def dict(self) -> dict:
-        """
-        Description
-        ===========
-        Returns request data as dict. Fields are:
-        * external_id
-        * currency_slug
-        * address
-        * is_platform
-        """
+        raise NotImplementedError('Base class dont have any methods')
 
 
 class MonitoringRequestObject(BaseMonitoringRequest):
@@ -140,6 +132,82 @@ class WalletBalanceRequestObject(BaseRequestObject):
         return True
 
 
-class TransactionRequestObject(BaseRequestObject):
-    pass
+class TransactionMessage(BaseRequestObject):
+    id: int
+    fromAddr: str  # be carefull! This name is different from proto-file
+    to: str
+    currencySlug: str
+    value: str
+    hash: str
+    isOutput: str
+    transfer_status: int
+    is_fee_trx: str
 
+    @classmethod
+    def from_dict(cls, d: dict):
+        """
+        we should override this method for field with name 'from'
+        due to python reserved words
+        """
+        fromAddr = d.pop('from', None)
+        if fromAddr:
+            d['fromAddr'] = fromAddr
+        return cls(**d)
+
+    def is_valid(self) -> bool:
+        if getattr(self, 'fromAddr', None) and \
+                getattr(self, 'hash', None) and \
+                getattr(self, 'to', None) and \
+                getattr(self, 'value', None) and \
+                getattr(self, 'currencySlug', None):
+            return True
+        self._errors.add(ValueError('Not enough transaction params to send!'))
+        return False
+
+    def dict(self) -> typing.Dict:
+        return self.clean_dict({
+            'id': getattr(self, 'id', None),
+            'address_to': self.to,
+            'address_from': self.fromAddr,
+            'is_output': getattr(self, 'is_output', None),
+            'currency_slug': self.currencySlug,
+            'value': self.value,
+            'hash': self.hash,
+            'transfer_status': getattr(self, 'transfer_status', None),
+            'is_fee_trx': getattr(self, 'is_fee_trx', None),
+        })
+
+    @staticmethod
+    def clean_dict(dictionary: typing.Dict) -> typing.Dict:
+        return {
+            key: dictionary[key] for key in dictionary if dictionary.get(key)
+        }
+
+
+class TransactionRequestObject(BaseMonitoringRequest):
+
+    transactions: typing.List[TransactionMessage]
+
+    def __init__(self, transaction: typing.List):
+        self._errors = set()
+        self.transactions = [
+            TransactionMessage.from_dict(trx) for trx in transaction
+        ] if transaction else None
+
+    def is_valid(self) -> bool:
+        validated = []
+
+        if getattr(self, 'transactions'):
+            for trx in self.transactions:
+                if not trx.is_valid():
+                    self._errors.add(trx.error)
+                else:
+                    validated.append(trx)
+            self.transactions = validated
+            return bool(self.transactions)
+
+        self._errors.add(ValueError('Not enough transaction to update!'))
+        return False
+
+    def dict(self) -> dict:
+        return {}

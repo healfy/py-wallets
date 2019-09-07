@@ -9,8 +9,10 @@ from wallets import app
 from wallets import logger
 from wallets import request_objects
 from wallets.utils import send_message
+from wallets.utils import simple_generator
 from wallets.utils import get_existing_wallet
 from wallets.common import Wallet
+from wallets.common import Transaction
 from wallets.gateway import blockchain_service_gw
 from wallets.rpc import wallets_pb2 as w_pb2
 
@@ -211,5 +213,21 @@ class GetWalletBalanceMethod(ServerMethod):
 
 
 class UpdateTrxMethod(ServerMethod):
-    request_obj_cls = request_objects.WalletBalanceRequestObject
+    request_obj_cls = request_objects.TransactionRequestObject
     response_msg_cls = w_pb2.TransactionResponse
+
+    @classmethod
+    def _execute(
+            cls,
+            request_obj: request_objects.TransactionRequestObject,
+            response_msg: w_pb2.TransactionResponse,
+            session
+    ) -> w_pb2.TransactionResponse:
+
+        for trx in simple_generator(request_obj.transactions):
+            session.query(Transaction).filter_by(hash=trx.hash).update(
+                **trx.dict()
+            )
+        session.commit()
+        response_msg.header.status = w_pb2.SUCCESS
+        return response_msg
