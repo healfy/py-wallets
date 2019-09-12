@@ -133,7 +133,6 @@ class WalletBalanceRequestObject(BaseRequestObject):
 
 
 class TransactionMessage(BaseRequestObject):
-    id: int
     fromAddr: str  # be carefull! This name is different from proto-file
     to: str
     currencySlug: str
@@ -203,11 +202,16 @@ class TransactionRequestObject(BaseMonitoringRequest):
                     self._errors.add(trx.error)
                 else:
                     validated.append(trx)
-            self.transactions = validated
-            return bool(self.transactions)
+            is_valid = self.__eq__(validated)
+            if not is_valid:
+                return False
+            return True
 
         self._errors.add(ValueError('Not enough transaction to update!'))
         return False
 
     def dict(self) -> dict:
         return {}
+
+    def __eq__(self, other):
+        return len(self.transactions) == len(other)

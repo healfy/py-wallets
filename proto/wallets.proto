@@ -23,7 +23,6 @@ option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
 // WalletsService server
 service Wallets {
 	rpc Healthz(HealthzRequest) returns (HealthzResponse) {};
-	rpc GetWalletBalance(WalletBalanceRequest) returns (WalletBalanceResponse) {};
 	rpc StartMonitoring(MonitoringRequest) returns (MonitoringResponse) {};
 	rpc StopMonitoring(MonitoringRequest) returns (MonitoringResponse) {};
 	rpc CheckBalance(CheckBalanceRequest) returns (CheckBalanceResponse) {};
@@ -67,16 +66,6 @@ message Wallet {
 
 message MonitoringRequest {
 	Wallet wallet = 1;
-}
-
-message WalletBalanceRequest {
-	int64 external_id = 1;
-	string address = 2;
-}
-
-message WalletBalanceResponse {
-	ResponseHeader header = 1;
-	string balance = 2;
 }
 
 message MonitoringResponse {

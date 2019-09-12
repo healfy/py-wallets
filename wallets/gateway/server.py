@@ -11,12 +11,6 @@ class WalletsService(wallets_grpc.WalletsBase):
             request, db.session
         ))
 
-    async def GetWalletBalance(self, stream):
-        request = await stream.recv_message()
-        await stream.send_message(method_classes.GetWalletBalanceMethod.process(
-            request, db.session
-        ))
-
     async def StartMonitoring(self, stream):
         request = await stream.recv_message()
         await stream.send_message(method_classes.StartMonitoringMethod.process(

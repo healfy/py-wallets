@@ -202,35 +202,6 @@ class Wallet(BaseModel):
             'external_id': self.external_id,
         }
 
-    def get_balance(self, session: Session) -> Decimal:
-
-        sum_trx = row2dict(session.query(
-            coalesce(sum(
-                case(
-                    [Transaction.is_output == True, -1 * Transaction.value],
-                    else_=Transaction.value
-                )
-            ), 0).label('sum_value'),
-        ).join(
-            Transaction.id == Wallet.transaction_id,
-            Transaction.currency_slug == self.currency_slug,
-        ).filter(
-            Transaction.is_fee_trx == False,
-            Transaction.is_deleted == False,
-            Wallet.id == self.id
-        ))['sum_value']
-
-        percents = row2dict(session.query(
-            coalesce(sum(Charges.amount), 0).label('percents_sum')
-        ).join(
-            Charges.wallet_id == Wallet.id
-        ).filter(
-            Charges.is_deleted == False,
-            Wallet.id == self.id
-        ))['percents_sum']
-
-        return percents + sum_trx
-
 
 class Transaction(BaseModel):
     """BlockChain transaction"""
@@ -280,25 +251,3 @@ class Transaction(BaseModel):
             'value': self.value,
             'hash': self.hash,
         }
-
-
-class Charges(BaseModel):
-    """ Daily interest charges"""
-
-    __tablename__ = "charges"
-    __versioned__: dict = {}
-
-    amount = Column(DECIMAL,
-                    comment='Amount of actual charge')
-
-    wallet_id = Column(Integer,
-                       ForeignKey('wallets.id'),
-                       index=True)
-
-    wallet = relationship("Wallet",
-                          foreign_keys='Charges.wallet_id',
-                          cascade='merge',
-                          cascade_backrefs=False,
-                          backref='charges')
-    charged_body = Column(DECIMAL,
-                          comment='Amount on which percents was calculated')

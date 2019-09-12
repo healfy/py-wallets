@@ -19,11 +19,6 @@ class WalletsStub(object):
         request_serializer=wallets__pb2.HealthzRequest.SerializeToString,
         response_deserializer=wallets__pb2.HealthzResponse.FromString,
         )
-    self.GetWalletBalance = channel.unary_unary(
-        '/wallets.Wallets/GetWalletBalance',
-        request_serializer=wallets__pb2.WalletBalanceRequest.SerializeToString,
-        response_deserializer=wallets__pb2.WalletBalanceResponse.FromString,
-        )
     self.StartMonitoring = channel.unary_unary(
         '/wallets.Wallets/StartMonitoring',
         request_serializer=wallets__pb2.MonitoringRequest.SerializeToString,
@@ -51,13 +46,6 @@ class WalletsServicer(object):
   """
 
   def Healthz(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def GetWalletBalance(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -99,11 +87,6 @@ def add_WalletsServicer_to_server(servicer, server):
           servicer.Healthz,
           request_deserializer=wallets__pb2.HealthzRequest.FromString,
           response_serializer=wallets__pb2.HealthzResponse.SerializeToString,
-      ),
-      'GetWalletBalance': grpc.unary_unary_rpc_method_handler(
-          servicer.GetWalletBalance,
-          request_deserializer=wallets__pb2.WalletBalanceRequest.FromString,
-          response_serializer=wallets__pb2.WalletBalanceResponse.SerializeToString,
       ),
       'StartMonitoring': grpc.unary_unary_rpc_method_handler(
           servicer.StartMonitoring,
