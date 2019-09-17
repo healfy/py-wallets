@@ -3,14 +3,13 @@ import traceback
 from abc import ABC
 from decimal import Decimal
 from flask import render_template
-from sqlalchemy.orm.scoping import scoped_session
+from sqlalchemy.orm import Session
 
 from wallets import app
 from wallets import logger
 from wallets import request_objects
 from wallets.utils import send_message
 from wallets.utils import simple_generator
-from wallets.utils import get_existing_wallet
 from wallets.common import Wallet
 from wallets.common import Transaction
 from wallets.gateway import blockchain_service_gw
@@ -34,7 +33,7 @@ class ServerMethod(ABC):
     response_msg_cls = None
 
     @classmethod
-    def process(cls, request, session: scoped_session):
+    def process(cls, request, session: Session):
         """
         The main method, which is called to process the request by the server.
         Must return an object of the message class that is defined individually
@@ -68,7 +67,7 @@ class ServerMethod(ABC):
             response.status.description = str(exc)
             session.rollback()
         finally:
-            session.remove()
+            session.close()
         return response
 
     @classmethod
@@ -88,13 +87,13 @@ class ServerMethod(ABC):
         raise NotImplementedError
 
 
-class SaveWalletMixin:
+class SaveWallet:
 
     @classmethod
     def _save(
             cls,
             request: request_objects.BaseMonitoringRequest,
-            session
+            session: Session
     ):
         if issubclass(request.__class__, request_objects.BaseMonitoringRequest):
             data = request.dict()
@@ -122,7 +121,7 @@ class HeathzMethod(ServerMethod):
             cls,
             request_obj: request_objects.HealthzRequest,
             response_msg: w_pb2.HealthzResponse,
-            session
+            session: Session
     ) -> w_pb2.HealthzResponse:
 
         response_msg.header.status = w_pb2.SUCCESS
@@ -138,7 +137,7 @@ class CheckBalanceMethod(ServerMethod):
             cls,
             request_obj: request_objects.BalanceRequestObject,
             response_msg: w_pb2.CheckBalanceResponse,
-            session
+            session: Session
     ) -> w_pb2.CheckBalanceResponse:
 
         balance = blockchain_service_gw.get_balance_by_slug(
@@ -155,7 +154,8 @@ class CheckBalanceMethod(ServerMethod):
         return response_msg
 
 
-class StartMonitoringMethod(ServerMethod, SaveWalletMixin):
+class StartMonitoringMethod(ServerMethod,
+                            SaveWallet):
 
     request_obj_cls = request_objects.MonitoringRequestObject
     response_msg_cls = w_pb2.MonitoringResponse
@@ -165,7 +165,7 @@ class StartMonitoringMethod(ServerMethod, SaveWalletMixin):
             cls,
             request_obj: request_objects.MonitoringRequestObject,
             response_msg: w_pb2.MonitoringResponse,
-            session
+            session: Session
     ) -> w_pb2.MonitoringResponse:
 
         cls._save(request_obj, session)
@@ -182,7 +182,7 @@ class StopMonitoringMethod(ServerMethod):
             cls,
             request_obj: request_objects.MonitoringRequestObject,
             response_msg: w_pb2.MonitoringResponse,
-            session
+            session: Session
     ) -> w_pb2.MonitoringResponse:
 
         session.query(Wallet).filter(
@@ -202,7 +202,7 @@ class UpdateTrxMethod(ServerMethod):
             cls,
             request_obj: request_objects.TransactionRequestObject,
             response_msg: w_pb2.TransactionResponse,
-            session
+            session: Session
     ) -> w_pb2.TransactionResponse:
 
         for trx in simple_generator(request_obj.transactions):

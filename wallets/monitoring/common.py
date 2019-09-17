@@ -91,7 +91,7 @@ class CompareRemainsMixin:
             send_message(html, msg)
 
 
-class SaveTrxMixin:
+class SaveTrx:
     """
     Mixin Class for save transaction if it necessary
     """
@@ -114,7 +114,7 @@ class SaveTrxMixin:
                 session.close()
 
 
-class ExistsTrxMixin:
+class ValidateTRX:
     """
     Mixin Class to check transaction in base
     """
@@ -124,6 +124,10 @@ class ExistsTrxMixin:
         return bool(
             Transaction.query.filter_by(hash=trx_hash).first()
         )
+
+    @classmethod
+    def is_input_trx(cls, address: str, wallet: Wallet):
+        return wallet.address == address
 
 
 class CheckWalletMonitor(BaseMonitorClass,
@@ -172,8 +176,8 @@ class CheckWalletMonitor(BaseMonitorClass,
 
 
 class CheckTransactionsMonitor(BaseMonitorClass,
-                               SaveTrxMixin,
-                               ExistsTrxMixin):
+                               SaveTrx,
+                               ValidateTRX):
 
     @classmethod
     def get_data(cls):
@@ -188,5 +192,6 @@ class CheckTransactionsMonitor(BaseMonitorClass,
                 wallet_address=wallet.address, external_id=wallet.external_id
             )
             for trx in simple_generator(trx_list):
-                if not cls.exists(trx['hash']):
+                if not cls.exists(trx['hash']) \
+                        and cls.is_input_trx(trx['to'], wallet):
                     cls.save(wallet, trx)
