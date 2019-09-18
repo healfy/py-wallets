@@ -39,8 +39,8 @@ def serve():
     asyncio.ensure_future(watch_config())
     server = Server([WalletsService()], loop=loop)
     loop.run_until_complete(server.start(addr, port))
-    logger.info(f"starting observer server {addr}:{port}")
-    print(f"starting observer server {addr}:{port}")
+    logger.info(f"starting wallets server {addr}:{port}")
+    print(f"starting wallets server {addr}:{port}")
     try:
         loop.run_forever()
         from wallets import tasks

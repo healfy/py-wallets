@@ -1,0 +1,119 @@
+---
+# ingress
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: wallets
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: wallets-api.bonum.credit
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: wallets
+              servicePort: 8080
+
+---
+# service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: wallets
+    track: dev
+    tier: backend
+  name: wallets
+spec:
+  selector:
+    app: wallets
+    track: dev
+    tier: backend
+  ports:
+    - protocol: TCP
+      port: 50051
+      targetPort: 50051
+      name: grpc
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: wallets
+    track: dev
+    tier: backend
+  name: wallets
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: wallets
+      track: dev
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: wallets
+        track: dev
+        tier: backend
+    spec:
+      containers:
+      - image: gcr.io/api-project-206881048866/wallets:dev
+        imagePullPolicy: "Always"
+        name: wallets
+        command: ["python", "/app/wallets/server.py"]
+        env:
+        - name: GRPC_ENABLE_FORK_SUPPORT
+          value: "1"
+        - name: CONSUL
+          value: consul-consul-server
+        - name: CONSUL_PATH
+          value: "dev/wallets.json"
+        - name: VERSION
+          value: "COMMIT_HASH"
+        - name: MAILGUN_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: mailgun-key
+              key: key
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "20m"
+        volumeMounts:
+        - name: config
+          mountPath: "/etc/wallets"
+          readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: wallets-config
+      imagePullSecrets:
+        - name: bonum-gitlab
+
+---
+
+# back config map
+apiVersion: v1
+kind: ConfigMap
+data:
+  config.yaml: |
+    PRINT_TRACEBACK: true
+    LOGGING_LEVEL: "INFO"
+    BLOCKCHAIN_GW_ADDRESS: "blockchain-gateway:50051"
+    CURRENCIES_ADDRESS: "currencies:50051"
+    DEBUG: true
+    RECIPIENTS : ['pavel.jahont@gmail.com']
+metadata:
+  name: wallets-config
+  labels:
+    app: wallets
+    tier: backend
+    track: dev
+

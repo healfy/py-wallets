@@ -2,17 +2,16 @@ ADDRESS: "0.0.0.0"
 PORT: '50051'
 CURRENCY_GRPC_ADDRESS: "localhost:50053"
 BLOCKCHAIN_GW_ADDRESS: "localhost:50051"
-BLOCKCHAIN_GW_TIMEOUT: 10  # seconds
+BLOCKCHAIN_GW_TIMEOUT: 5  # seconds
+CURRENCIES_GW_TIMEOUT: 5 # seconds
 MAIL_DOMAIN: 'mail.bonumchain.com'
 MAIL_USERNAME: 'dev@email.bonumchain.com'
 ENV: 'local'  # for logs
 PROJECT_NAME: 'api-project-206881048866'
 LOGGING_LEVEL: 'WARN'
 PRINT_TRACEBACK: false
-CURRENCIES_GW_TIMEOUT: 5 # seconds
 REMOTE_OPERATION_ATTEMPT_NUMBER : 3
 DEBUG: true
-MIN_BALANCE_USD : '1000'
 CELERY_NAMESPACE: 'local'
 MONITORING_TEMPLATE: 'monitoring_result.html'
 ALARM_TEMPLATE: 'balance_alarm.html'

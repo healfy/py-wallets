@@ -1,5 +1,5 @@
 REGISTRY_BASE_URL=gcr.io
-SERVICE=py_wallets
+SERVICE=wallets
 CURRENT_CONTEXT=`kubectl config current-context`
 BASE_IMAGE=$(SERVICE)-base
 PY_DIR=wallets
@@ -61,9 +61,9 @@ wallets-gw: $(PROTO_PATH) proto
 
 build-base: IMAGE_URL=$(REGISTRY_BASE_URL)/$(PROJECT)/$(BASE_IMAGE):$(IMAGE_TAG)
 build-base: DOCKERFILE=$(DOCKER_BASE_FILE)
-build-base: _build requirements.txt
+build-base: _build req/*.txt
 
-build-base-gw: IMAGE_URL=$(REGISTRY_BASE_URL)/$(PROJECT)/-gw-base:$(IMAGE_TAG)
+build-base-gw: IMAGE_URL=$(REGISTRY_BASE_URL)/$(PROJECT)/wallets-gw-base:$(IMAGE_TAG)
 build-base-gw: DOCKERFILE=Dockerfile-gw-base
 build-base-gw: _build grpc_gw/*
 

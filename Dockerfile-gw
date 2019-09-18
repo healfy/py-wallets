@@ -1,0 +1,11 @@
+FROM gcr.io/api-project-206881048866/wallets-gw-base:dev as build
+
+COPY grpc_gw/ /build
+WORKDIR /build
+RUN go build
+
+FROM gcr.io/distroless/base
+COPY --from=build /build/grpc_gw /
+COPY --from=build /build/wallets.swagger.json /wallets.swagger.json
+EXPOSE 8080
+CMD [ "/grpc_gw", "--swagger", "/wallets.swagger.json" ]

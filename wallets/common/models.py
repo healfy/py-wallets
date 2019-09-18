@@ -2,7 +2,6 @@ import pytz
 import warnings
 import typing
 from copy import deepcopy
-from decimal import Decimal
 from datetime import datetime
 from typing import TYPE_CHECKING
 from google.protobuf.json_format import MessageToDict
@@ -16,12 +15,8 @@ from sqlalchemy import (
     Text,
     func,
     inspect,
-    ForeignKey,
-    case)
-from sqlalchemy.sql.functions import sum
-from sqlalchemy.sql.functions import coalesce
-
-from sqlalchemy.orm import Session
+    ForeignKey
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_continuum import make_versioned
@@ -166,7 +161,7 @@ class Wallet(BaseModel):
                      nullable=False)
 
     external_id = Column(Numeric,
-                         comment='id from blockchain bridge serve for joining',
+                         comment='id from deposits bridge serve for joining',
                          index=True,
                          nullable=False)
 
@@ -180,18 +175,6 @@ class Wallet(BaseModel):
                            default=True,
                            nullable=False,
                            index=True)
-
-    transaction_id = Column(Integer,
-                            ForeignKey('transactions.id'),
-                            nullable=True,
-                            default=None,
-                            index=True)
-
-    transaction = relationship("Transaction",
-                               foreign_keys='Wallet.transaction_id',
-                               cascade='merge',
-                               cascade_backrefs=False,
-                               backref='wallet')
 
     def _as_message_dict(self):
         return {
@@ -240,6 +223,18 @@ class Transaction(BaseModel):
     is_fee_trx = Column(Boolean,
                         comment='Is it transaction to send fee on wallet',
                         default=False)
+
+    wallet_id = Column(Integer,
+                       ForeignKey('wallets.id'),
+                       nullable=True,
+                       default=None,
+                       index=True)
+
+    wallet = relationship("Wallet",
+                          foreign_keys='Transaction.wallet_id',
+                          cascade='merge',
+                          cascade_backrefs=False,
+                          backref='transaction')
 
     def _as_message_dict(self):
         return {

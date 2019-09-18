@@ -1,0 +1,6 @@
+FROM gcr.io/api-project-206881048866/wallets-base:dev
+MAINTAINER Konstantin Zavadski <healfy92@gmail.com>
+
+ADD . /app
+RUN pip install -r req/requirements.txt
+ENTRYPOINT python wallets/server.py

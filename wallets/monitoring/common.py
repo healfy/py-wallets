@@ -49,7 +49,7 @@ class BaseMonitorClass(abc.ABC):
                 f"{e}. {traceback.format_stack()}")
 
 
-class CompareRemainsMixin:
+class CompareRemains:
     """
     Mixin Class for compare remains from platform wallets and
     sending email if it necessary
@@ -101,9 +101,8 @@ class SaveTrx:
         with session_scope() as session:
             try:
                 trx = Transaction.from_dict(request_object)
+                trx.wallet_id = wallet.id
                 session.add(trx)
-                session.commit()
-                wallet.transaction_id = trx.id
                 session.commit()
             except Exception as e:
                 logger.error(
@@ -131,7 +130,7 @@ class ValidateTRX:
 
 
 class CheckWalletMonitor(BaseMonitorClass,
-                         CompareRemainsMixin):
+                         CompareRemains):
     """
     Class for monitoring platform wallets. If balance in USD
     <= MIN_BALANCE_USD, then sending message to owners of wallets
