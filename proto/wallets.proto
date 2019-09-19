@@ -28,6 +28,7 @@ service Wallets {
 				get: "/health"
 			};
 		option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+			summary: "Health checking endpoint"
 			description: "Health checking endpoint. Returns HealthzResponse";
 		  };
 		};
@@ -37,6 +38,7 @@ service Wallets {
 			body: "*"
 		};
 		option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+			summary: "Start monitoring wallet on service endpoint"
 			description: "Send wallet with params to start monitoring on service";
 		};
 	};
@@ -46,13 +48,14 @@ service Wallets {
 			body: "*"
 		};
 		option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+			summary: "Stop monitoring wallet on service endpoint"
 			description: "Send wallet with params to stop monitoring on service";
 		};
 	};
 
 	rpc CheckBalance(CheckBalanceRequest) returns (CheckBalanceResponse) {
 		option (google.api.http) = {
-            get: "/check_balance/{body_currency}/{body_amount}"
+            get: "/check_balance"
         };
         option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
             summary: "Check Balance of platform wallets"
@@ -65,6 +68,7 @@ service Wallets {
 			body: "*"
 		};
 		option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+			summary: "Endpoint to update transaction"
 			description: "Update status transactions from blockchain";
 		};
 	}

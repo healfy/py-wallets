@@ -100,7 +100,7 @@ func Run(address string, opts ...runtime.ServeMuxOption) error {
 		io.Copy(w, strings.NewReader(string(data)))
 	})
 	mainMux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		url := fmt.Sprintf("https://generator.swagger.io/?url=http://localhost:8081/swagger.json")
+		url := fmt.Sprintf("https://generator.swagger.io/?url=http://localhost:8080/swagger.json")
 		http.Redirect(w, req, url, 301)
 	})
 
@@ -128,7 +128,7 @@ func Run(address string, opts ...runtime.ServeMuxOption) error {
 }
 
 func main() {
-	port := "0.0.0.0:8081"
+	port := "0.0.0.0:8080"
 	flag.Parse()
 	logrus.Infof("Starting on port %v", port)
 	defer glog.Flush()

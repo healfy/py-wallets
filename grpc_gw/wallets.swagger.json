@@ -15,7 +15,7 @@
     "application/json"
   ],
   "paths": {
-    "/check_balance/{body_currency}/{body_amount}": {
+    "/check_balance": {
       "get": {
         "summary": "Check Balance of platform wallets",
         "description": "Check balance when we issue loan",
@@ -31,14 +31,14 @@
         "parameters": [
           {
             "name": "body_currency",
-            "in": "path",
-            "required": true,
+            "in": "query",
+            "required": false,
             "type": "string"
           },
           {
             "name": "body_amount",
-            "in": "path",
-            "required": true,
+            "in": "query",
+            "required": false,
             "type": "string"
           }
         ],
@@ -49,6 +49,7 @@
     },
     "/health": {
       "get": {
+        "summary": "Health checking endpoint",
         "description": "Health checking endpoint. Returns HealthzResponse",
         "operationId": "Healthz",
         "responses": {
@@ -66,6 +67,7 @@
     },
     "/start_monitoring": {
       "post": {
+        "summary": "Start monitoring wallet on service endpoint",
         "description": "Send wallet with params to start monitoring on service",
         "operationId": "StartMonitoring",
         "responses": {
@@ -93,6 +95,7 @@
     },
     "/stop_monitoring": {
       "post": {
+        "summary": "Stop monitoring wallet on service endpoint",
         "description": "Send wallet with params to stop monitoring on service",
         "operationId": "StopMonitoring",
         "responses": {
@@ -120,6 +123,7 @@
     },
     "/update_trx": {
       "post": {
+        "summary": "Endpoint to update transaction",
         "description": "Update status transactions from blockchain",
         "operationId": "UpdateTrx",
         "responses": {
