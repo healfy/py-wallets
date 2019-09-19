@@ -1,0 +1,291 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Wallets service",
+    "version": "1.0"
+  },
+  "basePath": "/api",
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/check_balance/{body_currency}/{body_amount}": {
+      "get": {
+        "summary": "Check Balance of platform wallets",
+        "description": "Check balance when we issue loan",
+        "operationId": "CheckBalance",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/walletsCheckBalanceResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body_currency",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body_amount",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Wallets"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "description": "Health checking endpoint. Returns HealthzResponse",
+        "operationId": "Healthz",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/walletsHealthzResponse"
+            }
+          }
+        },
+        "tags": [
+          "Wallets"
+        ]
+      }
+    },
+    "/start_monitoring": {
+      "post": {
+        "description": "Send wallet with params to start monitoring on service",
+        "operationId": "StartMonitoring",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/walletsMonitoringResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/walletsMonitoringRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Wallets"
+        ]
+      }
+    },
+    "/stop_monitoring": {
+      "post": {
+        "description": "Send wallet with params to stop monitoring on service",
+        "operationId": "StopMonitoring",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/walletsMonitoringResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/walletsMonitoringRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Wallets"
+        ]
+      }
+    },
+    "/update_trx": {
+      "post": {
+        "description": "Update status transactions from blockchain",
+        "operationId": "UpdateTrx",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/walletsTransactionResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/walletsTransactionRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Wallets"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "walletsCheckBalanceResponse": {
+      "type": "object",
+      "properties": {
+        "header": {
+          "$ref": "#/definitions/walletsResponseHeader"
+        }
+      }
+    },
+    "walletsHealthzResponse": {
+      "type": "object",
+      "properties": {
+        "header": {
+          "$ref": "#/definitions/walletsResponseHeader"
+        }
+      }
+    },
+    "walletsMonitoringRequest": {
+      "type": "object",
+      "properties": {
+        "wallet": {
+          "$ref": "#/definitions/walletsWallet"
+        }
+      }
+    },
+    "walletsMonitoringResponse": {
+      "type": "object",
+      "properties": {
+        "header": {
+          "$ref": "#/definitions/walletsResponseHeader"
+        }
+      }
+    },
+    "walletsResponseHeader": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/walletsResponseStatus"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "walletsResponseStatus": {
+      "type": "string",
+      "enum": [
+        "NOT_SET",
+        "SUCCESS",
+        "ERROR",
+        "INVALID_REQUEST"
+      ],
+      "default": "NOT_SET"
+    },
+    "walletsTransaction": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "wallet_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "value": {
+          "type": "string"
+        },
+        "isOutput": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "currencySlug": {
+          "type": "string"
+        },
+        "transfer_status": {
+          "$ref": "#/definitions/walletsTransferStatus"
+        },
+        "is_fee_trx": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
+    "walletsTransactionRequest": {
+      "type": "object",
+      "properties": {
+        "transaction": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/walletsTransaction"
+          }
+        }
+      }
+    },
+    "walletsTransactionResponse": {
+      "type": "object",
+      "properties": {
+        "header": {
+          "$ref": "#/definitions/walletsResponseHeader"
+        }
+      }
+    },
+    "walletsTransferStatus": {
+      "type": "string",
+      "enum": [
+        "UNDEFINED",
+        "ACTIVE",
+        "CONFIRMED",
+        "FAILED"
+      ],
+      "default": "UNDEFINED"
+    },
+    "walletsWallet": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "currency_slug": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "is_platform": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "external_id": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    }
+  }
+}

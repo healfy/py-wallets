@@ -16,7 +16,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	wlt-go "gitlab.com/bonum/py-wallets/grpc_gw/proto"
+	wallets_gw "gitlab.com/bonum/py-wallets/grpc_gw/proto"
 )
 
 var (
