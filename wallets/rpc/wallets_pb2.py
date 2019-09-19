@@ -23,8 +23,8 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='wallets.proto',
   package='wallets',
   syntax='proto3',
-  serialized_options=_b('\222AE\022\026\n\017Wallets service2\0031.0\"\004/api*\001\0012\020application/json:\020application/json'),
-  serialized_pb=_b('\n\rwallets.proto\x12\x07wallets\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cgoogle/api/annotations.proto\x1a,protoc-gen-swagger/options/annotations.proto\"N\n\x0eResponseHeader\x12\'\n\x06status\x18\x01 \x01(\x0e\x32\x17.wallets.ResponseStatus\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\"\x10\n\x0eHealthzRequest\":\n\x0fHealthzResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"f\n\x06Wallet\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x15\n\rcurrency_slug\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\x12\x13\n\x0bis_platform\x18\x04 \x01(\x08\x12\x13\n\x0b\x65xternal_id\x18\x05 \x01(\x03\"4\n\x11MonitoringRequest\x12\x1f\n\x06wallet\x18\x01 \x01(\x0b\x32\x0f.wallets.Wallet\"=\n\x12MonitoringResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"A\n\x13\x43heckBalanceRequest\x12\x15\n\rbody_currency\x18\x01 \x01(\t\x12\x13\n\x0b\x62ody_amount\x18\x02 \x01(\t\"?\n\x14\x43heckBalanceResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"\xc5\x01\n\x0bTransaction\x12\x0c\n\x04\x66rom\x18\x01 \x01(\t\x12\n\n\x02to\x18\x02 \x01(\t\x12\x0c\n\x04hash\x18\x03 \x01(\t\x12\x11\n\twallet_id\x18\x04 \x01(\x03\x12\r\n\x05value\x18\x05 \x01(\t\x12\x10\n\x08isOutput\x18\x06 \x01(\x08\x12\x14\n\x0c\x63urrencySlug\x18\x07 \x01(\t\x12\x30\n\x0ftransfer_status\x18\x08 \x01(\x0e\x32\x17.wallets.TransferStatus\x12\x12\n\nis_fee_trx\x18\t \x01(\x08\"?\n\x12TransactionRequest\x12)\n\x0btransaction\x18\x01 \x03(\x0b\x32\x14.wallets.Transaction\">\n\x13TransactionResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader*J\n\x0eResponseStatus\x12\x0b\n\x07NOT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\t\n\x05\x45RROR\x10\x02\x12\x13\n\x0fINVALID_REQUEST\x10\x03*F\n\x0eTransferStatus\x12\r\n\tUNDEFINED\x10\x00\x12\n\n\x06\x41\x43TIVE\x10\x01\x12\r\n\tCONFIRMED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x32\xfd\x02\n\x07Wallets\x12>\n\x07Healthz\x12\x17.wallets.HealthzRequest\x1a\x18.wallets.HealthzResponse\"\x00\x12L\n\x0fStartMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"\x00\x12K\n\x0eStopMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"\x00\x12M\n\x0c\x43heckBalance\x12\x1c.wallets.CheckBalanceRequest\x1a\x1d.wallets.CheckBalanceResponse\"\x00\x12H\n\tUpdateTrx\x12\x1b.wallets.TransactionRequest\x1a\x1c.wallets.TransactionResponse\"\x00\x42H\x92\x41\x45\x12\x16\n\x0fWallets service2\x03\x31.0\"\x04/api*\x01\x01\x32\x10\x61pplication/json:\x10\x61pplication/jsonb\x06proto3')
+  serialized_options=_b('Z\006wlt-go\222AE\022\026\n\017Wallets service2\0031.0\"\004/api*\001\0012\020application/json:\020application/json'),
+  serialized_pb=_b('\n\rwallets.proto\x12\x07wallets\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cgoogle/api/annotations.proto\x1a,protoc-gen-swagger/options/annotations.proto\"N\n\x0eResponseHeader\x12\'\n\x06status\x18\x01 \x01(\x0e\x32\x17.wallets.ResponseStatus\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\"\x10\n\x0eHealthzRequest\":\n\x0fHealthzResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"f\n\x06Wallet\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x15\n\rcurrency_slug\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\x12\x13\n\x0bis_platform\x18\x04 \x01(\x08\x12\x13\n\x0b\x65xternal_id\x18\x05 \x01(\x03\"4\n\x11MonitoringRequest\x12\x1f\n\x06wallet\x18\x01 \x01(\x0b\x32\x0f.wallets.Wallet\"=\n\x12MonitoringResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"A\n\x13\x43heckBalanceRequest\x12\x15\n\rbody_currency\x18\x01 \x01(\t\x12\x13\n\x0b\x62ody_amount\x18\x02 \x01(\t\"?\n\x14\x43heckBalanceResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"\xc5\x01\n\x0bTransaction\x12\x0c\n\x04\x66rom\x18\x01 \x01(\t\x12\n\n\x02to\x18\x02 \x01(\t\x12\x0c\n\x04hash\x18\x03 \x01(\t\x12\x11\n\twallet_id\x18\x04 \x01(\x03\x12\r\n\x05value\x18\x05 \x01(\t\x12\x10\n\x08isOutput\x18\x06 \x01(\x08\x12\x14\n\x0c\x63urrencySlug\x18\x07 \x01(\t\x12\x30\n\x0ftransfer_status\x18\x08 \x01(\x0e\x32\x17.wallets.TransferStatus\x12\x12\n\nis_fee_trx\x18\t \x01(\x08\"?\n\x12TransactionRequest\x12)\n\x0btransaction\x18\x01 \x03(\x0b\x32\x14.wallets.Transaction\">\n\x13TransactionResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader*J\n\x0eResponseStatus\x12\x0b\n\x07NOT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\t\n\x05\x45RROR\x10\x02\x12\x13\n\x0fINVALID_REQUEST\x10\x03*F\n\x0eTransferStatus\x12\r\n\tUNDEFINED\x10\x00\x12\n\n\x06\x41\x43TIVE\x10\x01\x12\r\n\tCONFIRMED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x32\xb4\x06\n\x07Wallets\x12\x83\x01\n\x07Healthz\x12\x17.wallets.HealthzRequest\x1a\x18.wallets.HealthzResponse\"E\x82\xd3\xe4\x93\x02\t\x12\x07/health\x92\x41\x33\x1a\x31Health checking endpoint. Returns HealthzResponse\x12\xa3\x01\n\x0fStartMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"W\x82\xd3\xe4\x93\x02\x16\"\x11/start_monitoring:\x01*\x92\x41\x38\x1a\x36Send wallet with params to start monitoring on service\x12\xa0\x01\n\x0eStopMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"U\x82\xd3\xe4\x93\x02\x15\"\x10/stop_monitoring:\x01*\x92\x41\x37\x1a\x35Send wallet with params to stop monitoring on service\x12\xc9\x01\n\x0c\x43heckBalance\x12\x1c.wallets.CheckBalanceRequest\x1a\x1d.wallets.CheckBalanceResponse\"|\x82\xd3\xe4\x93\x02.\x12,/check_balance/{body_currency}/{body_amount}\x92\x41\x45\x12!Check Balance of platform wallets\x1a Check balance when we issue loan\x12\x8d\x01\n\tUpdateTrx\x12\x1b.wallets.TransactionRequest\x1a\x1c.wallets.TransactionResponse\"E\x82\xd3\xe4\x93\x02\x10\"\x0b/update_trx:\x01*\x92\x41,\x1a*Update status transactions from blockchainBPZ\x06wlt-go\x92\x41\x45\x12\x16\n\x0fWallets service2\x03\x31.0\"\x04/api*\x01\x01\x32\x10\x61pplication/json:\x10\x61pplication/jsonb\x06proto3')
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,google_dot_protobuf_dot_duration__pb2.DESCRIPTOR,google_dot_api_dot_annotations__pb2.DESCRIPTOR,protoc__gen__swagger_dot_options_dot_annotations__pb2.DESCRIPTOR,])
 
@@ -642,7 +642,7 @@ _WALLETS = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   serialized_start=1156,
-  serialized_end=1537,
+  serialized_end=1976,
   methods=[
   _descriptor.MethodDescriptor(
     name='Healthz',
@@ -651,7 +651,7 @@ _WALLETS = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_HEALTHZREQUEST,
     output_type=_HEALTHZRESPONSE,
-    serialized_options=None,
+    serialized_options=_b('\202\323\344\223\002\t\022\007/health\222A3\0321Health checking endpoint. Returns HealthzResponse'),
   ),
   _descriptor.MethodDescriptor(
     name='StartMonitoring',
@@ -660,7 +660,7 @@ _WALLETS = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_MONITORINGREQUEST,
     output_type=_MONITORINGRESPONSE,
-    serialized_options=None,
+    serialized_options=_b('\202\323\344\223\002\026\"\021/start_monitoring:\001*\222A8\0326Send wallet with params to start monitoring on service'),
   ),
   _descriptor.MethodDescriptor(
     name='StopMonitoring',
@@ -669,7 +669,7 @@ _WALLETS = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_MONITORINGREQUEST,
     output_type=_MONITORINGRESPONSE,
-    serialized_options=None,
+    serialized_options=_b('\202\323\344\223\002\025\"\020/stop_monitoring:\001*\222A7\0325Send wallet with params to stop monitoring on service'),
   ),
   _descriptor.MethodDescriptor(
     name='CheckBalance',
@@ -678,7 +678,7 @@ _WALLETS = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_CHECKBALANCEREQUEST,
     output_type=_CHECKBALANCERESPONSE,
-    serialized_options=None,
+    serialized_options=_b('\202\323\344\223\002.\022,/check_balance/{body_currency}/{body_amount}\222AE\022!Check Balance of platform wallets\032 Check balance when we issue loan'),
   ),
   _descriptor.MethodDescriptor(
     name='UpdateTrx',
@@ -687,7 +687,7 @@ _WALLETS = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_TRANSACTIONREQUEST,
     output_type=_TRANSACTIONRESPONSE,
-    serialized_options=None,
+    serialized_options=_b('\202\323\344\223\002\020\"\013/update_trx:\001*\222A,\032*Update status transactions from blockchain'),
   ),
 ])
 _sym_db.RegisterServiceDescriptor(_WALLETS)

@@ -63,11 +63,11 @@ build-base: IMAGE_URL=$(REGISTRY_BASE_URL)/$(PROJECT)/$(BASE_IMAGE):$(IMAGE_TAG)
 build-base: DOCKERFILE=$(DOCKER_BASE_FILE)
 build-base: _build req/*.txt
 
-build-base-gw: IMAGE_URL=$(REGISTRY_BASE_URL)/$(PROJECT)/wallets-gw-base:$(IMAGE_TAG)
+build-base-gw: IMAGE_URL=$(REGISTRY_BASE_URL)/$(PROJECT)/$(SERVICE)-gw-base:$(IMAGE_TAG)
 build-base-gw: DOCKERFILE=Dockerfile-gw-base
 build-base-gw: _build grpc_gw/*
 
-build-gw: IMAGE_URL=$(REGISTRY_BASE_URL)/$(PROJECT)/wallets-gw:$(IMAGE_TAG)
+build-gw: IMAGE_URL=$(REGISTRY_BASE_URL)/$(PROJECT)/$(SERVICE)-gw:$(IMAGE_TAG)
 build-gw: DOCKERFILE=Dockerfile-gw
 build-gw: _build grpc_gw/* build-base-gw
 

@@ -7,6 +7,7 @@ import "protoc-gen-swagger/options/annotations.proto";
 
 
 package wallets;
+option go_package = "wlt-go";
 
 option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
   info: {
@@ -22,11 +23,51 @@ option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
 
 // WalletsService server
 service Wallets {
-	rpc Healthz(HealthzRequest) returns (HealthzResponse) {};
-	rpc StartMonitoring(MonitoringRequest) returns (MonitoringResponse) {};
-	rpc StopMonitoring(MonitoringRequest) returns (MonitoringResponse) {};
-	rpc CheckBalance(CheckBalanceRequest) returns (CheckBalanceResponse) {};
-	rpc UpdateTrx(TransactionRequest) returns (TransactionResponse) {};
+	rpc Healthz(HealthzRequest) returns (HealthzResponse) {
+		option (google.api.http) = {
+				get: "/health"
+			};
+		option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+			description: "Health checking endpoint. Returns HealthzResponse";
+		  };
+		};
+	rpc StartMonitoring(MonitoringRequest) returns (MonitoringResponse) {
+		option (google.api.http) = {
+			post: "/start_monitoring"
+			body: "*"
+		};
+		option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+			description: "Send wallet with params to start monitoring on service";
+		};
+	};
+	rpc StopMonitoring(MonitoringRequest) returns (MonitoringResponse) {
+		option (google.api.http) = {
+			post: "/stop_monitoring"
+			body: "*"
+		};
+		option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+			description: "Send wallet with params to stop monitoring on service";
+		};
+	};
+
+	rpc CheckBalance(CheckBalanceRequest) returns (CheckBalanceResponse) {
+		option (google.api.http) = {
+            get: "/check_balance/{body_currency}/{body_amount}"
+        };
+        option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+            summary: "Check Balance of platform wallets"
+            description: "Check balance when we issue loan";
+          };
+    };
+	rpc UpdateTrx(TransactionRequest) returns (TransactionResponse) {
+		option (google.api.http) = {
+			post: "/update_trx"
+			body: "*"
+		};
+		option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+			description: "Update status transactions from blockchain";
+		};
+	}
 }
 
 enum ResponseStatus {
