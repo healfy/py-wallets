@@ -88,4 +88,3 @@ deploy: build
 	kubectl apply -f $(DEPLOYMENT_FILE_TMP)
 	kubectl config use-context $(CURRENT_CONTEXT)
 	rm -rf $(DEPLOYMENT_FILE_TMP)
-
