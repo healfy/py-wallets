@@ -4,10 +4,14 @@ CURRENT_CONTEXT=`kubectl config current-context`
 BASE_IMAGE=$(SERVICE)-base
 PY_DIR=wallets
 
+BC_PROTO = blockchain-gateway/proto
+BC_PROTO_F = blockchain-gateway/proto/blockchain_gateway.proto
+
 PROTO_PATH=proto/wallets.proto
 PROTOC_INCLUDE = \
 	-I=/usr/local/include \
 	-I proto/ \
+	-I $(BC_PROTO) \
 	-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 	-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway
 

@@ -1,0 +1,3 @@
+[submodule "blockchain-gateway"]
+	path = blockchain-gateway
+	url = git@gitlab.com:bonum/blockchain/blockchain-gateway.git
