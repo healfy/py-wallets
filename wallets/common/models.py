@@ -19,7 +19,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy_continuum import make_versioned
 from sqlalchemy_mixins import AllFeaturesMixin
 
 from .seriallizers import WalletSchema
@@ -32,8 +31,6 @@ if TYPE_CHECKING:
     Base = object
 else:
     Base = declarative_base()
-
-make_versioned(options={'native_versioning': True}, user_cls=None)
 
 
 def row2dict(obj, exclude=None) -> dict:
@@ -147,7 +144,6 @@ class Wallet(BaseModel):
     """Wallets of platform and borrowers"""
 
     __tablename__ = "wallets"
-    __versioned__: dict = {}
 
     schema_class = WalletSchema
     message_class = wallets_pb2.Wallet
@@ -190,7 +186,6 @@ class Transaction(BaseModel):
     """BlockChain transaction"""
 
     __tablename__ = "transactions"
-    __versioned__: dict = {}
 
     schema_class = TransactionSchema
     message_class = blockchain_gateway_pb2.Transaction

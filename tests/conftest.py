@@ -1,3 +1,4 @@
+import os
 import pytest
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
@@ -48,6 +49,10 @@ def pytest_configure(config):
 def pytest_addoption(parser):
     parser.addoption("--runslow", action="store_true",
                      default=False, help="run slow tests")
+    parser.addoption("--pg_string",
+                     default='postgresql:///test_wallets?user={}'.format(
+                         os.environ.get('USERNAME', os.environ.get('USER'))),
+                     help="DB connection string")
 
 
 def pytest_collection_modifyitems(config, items):
