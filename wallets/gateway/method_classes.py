@@ -63,8 +63,8 @@ class ServerMethod(ABC):
             logger.error(f"{cls.__name__} failed. "
                          f"Error: {exc.__class__.__name__}: {exc}. {tb}",
                          {'req': request_obj.dict()})
-            response.status.status = w_pb2.ERROR
-            response.status.description = str(exc)
+            response.header.status = w_pb2.ERROR
+            response.header.description = str(exc)
             session.rollback()
         finally:
             session.close()
@@ -92,7 +92,7 @@ class SaveWallet:
     @classmethod
     def _save(
             cls,
-            request: request_objects.BaseMonitoringRequest,
+            request: request_objects.MonitoringRequestObject,
             session: Session
     ):
         if issubclass(request.__class__, request_objects.BaseMonitoringRequest):
@@ -140,18 +140,34 @@ class CheckBalanceMethod(ServerMethod):
             session: Session
     ) -> w_pb2.CheckBalanceResponse:
 
-        balance = blockchain_service_gw.get_balance_by_slug(
-            request_obj.body_currency)
+        balance = cls.get_balance(request_obj.body_currency)
         if balance < Decimal(request_obj.body_amount):
             ctx = dict(
                 currency=request_obj.body_currency,
                 body=request_obj.body_amount,
                 balance=balance,
             )
-            html = render_template(app.config['ALARM_TEMPLATE'], **ctx)
-            send_message(html, 'Warning')
+            html = cls.get_html(ctx)
+            try:
+                send_message(html, 'Warning')
+                desc = 'success with send email'
+            except Exception as exc:
+                logger.error(f"{cls.__name__} failed. "
+                             f"Error: {exc.__class__.__name__}: {exc}.",
+                             'cant send email')
+                desc = 'cant send email'
+            response_msg.header.description = desc
+
         response_msg.header.status = w_pb2.SUCCESS
         return response_msg
+
+    @classmethod
+    def get_balance(cls, slug):
+        return blockchain_service_gw.get_balance_by_slug(slug)
+
+    @classmethod
+    def get_html(cls, context):
+        return render_template(app.config['ALARM_TEMPLATE'], **context)
 
 
 class StartMonitoringMethod(ServerMethod,
@@ -206,8 +222,9 @@ class UpdateTrxMethod(ServerMethod):
     ) -> w_pb2.TransactionResponse:
 
         for trx in simple_generator(request_obj.transactions):
+            print(trx)
             session.query(Transaction).filter_by(hash=trx.hash).update(
-                **trx.dict()
+                {'transfer_status': trx.transfer_status}
             )
         session.commit()
         response_msg.header.status = w_pb2.SUCCESS

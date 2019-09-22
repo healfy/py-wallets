@@ -156,7 +156,7 @@ class Wallet(BaseModel):
                      comment='Wallet address',
                      nullable=False)
 
-    external_id = Column(Numeric,
+    external_id = Column(Integer,
                          comment='id from deposits bridge serve for joining',
                          index=True,
                          nullable=False)
@@ -188,7 +188,7 @@ class Transaction(BaseModel):
     __tablename__ = "transactions"
 
     schema_class = TransactionSchema
-    message_class = blockchain_gateway_pb2.Transaction
+    message_class = wallets_pb2.Transaction
 
     is_output = Column(Boolean,
                        comment='transaction type',
@@ -233,11 +233,11 @@ class Transaction(BaseModel):
 
     def _as_message_dict(self):
         return {
-            'id': self.id,
             'to': self.address_to,
             'from': self.address_from,
             'isOutput': self.is_output,
             'currencySlug': self.currency_slug,
-            'value': self.value,
+            'value': f'{self.value}',
             'hash': self.hash,
+            'wallet_id': self.wallet_id
         }

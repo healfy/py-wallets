@@ -1,7 +1,7 @@
 import abc
 import typing
 from google.protobuf.json_format import MessageToDict
-from wallets.rpc import wallets_pb2 as w_p2
+from wallets.utils.consts import TransferStatus
 
 
 class BaseRequestObject:
@@ -87,24 +87,20 @@ class BaseMonitoringRequest(BaseRequestObject,
 
 
 class MonitoringRequestObject(BaseMonitoringRequest):
-    wallet: WalletMessage
+    wallet: typing.Union[WalletMessage, typing.Dict]
 
     def dict(self):
         return {
             'external_id': self.wallet.id,
-            'is_platform': self.wallet.is_platform,
+            'is_platform': getattr(self.wallet, 'is_platform', False),
             'address': self.wallet.address,
             'currency_slug': self.wallet.currency_slug,
         }
 
-    def __init__(self, wallet: typing.Union[WalletMessage, w_p2.Wallet]):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._errors = set()
-        if isinstance(wallet, w_p2.Wallet):
-            self.wallet = w_p2.Wallet.from_message(wallet)
-        elif isinstance(wallet, WalletMessage):
-            self.wallet = wallet
-        else:
-            self.wallet = None
+        self.wallet = WalletMessage.from_dict(self.wallet)
 
     def is_valid(self) -> bool:
         wlt = getattr(self, 'wallet', None)
@@ -142,6 +138,10 @@ class TransactionMessage(BaseRequestObject):
     transfer_status: int
     is_fee_trx: str
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.transfer_status = self.get_transfer_status(self.transfer_status)
+
     @classmethod
     def from_dict(cls, d: dict):
         """
@@ -172,7 +172,7 @@ class TransactionMessage(BaseRequestObject):
             'currency_slug': self.currencySlug,
             'value': self.value,
             'hash': self.hash,
-            'transfer_status': getattr(self, 'transfer_status', None),
+            'transfer_status': self.transfer_status,
             'is_fee_trx': getattr(self, 'is_fee_trx', None),
         })
 
@@ -181,6 +181,15 @@ class TransactionMessage(BaseRequestObject):
         return {
             key: dictionary[key] for key in dictionary if dictionary.get(key)
         }
+
+    @staticmethod
+    def get_transfer_status(value):
+        _statutes = {
+            'CONFIRMED': TransferStatus.CONFIRMED.value,
+            'ACTIVE': TransferStatus.ACTIVE.value,
+            'IGNORED': TransferStatus.IGNORED.value
+        }
+        return _statutes[value] if value else None
 
 
 class TransactionRequestObject(BaseMonitoringRequest):

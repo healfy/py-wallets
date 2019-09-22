@@ -1,6 +1,7 @@
 import os
+import uuid
 import pytest
-from datetime import datetime
+from decimal import Decimal
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 
@@ -42,7 +43,6 @@ def pytest_configure(config):
     engine.execute('create schema public;')
     Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
-    engine.execute("create extension if not exists hstore;")
     print('*' * 10, 'CONFTEST SETUP FINISHED', '*' * 10)
 
 
@@ -76,5 +76,117 @@ def delete_all():
 
 
 @pytest.fixture
-def current_datetime():
-    return datetime.now()
+def wallet():
+    wallet = Wallet(
+        currency_slug='bitcoin',
+        address=uuid.uuid4(),
+        external_id=223
+    )
+    dbsession.add(wallet)
+    dbsession.commit()
+    yield wallet
+
+
+@pytest.fixture
+def wallet_req_object_dict():
+    return {
+        'external_id': 1,
+        'is_platform': True,
+        'address': str(uuid.uuid4()),
+        'currency_slug': 'bitcoin',
+    }
+
+
+@pytest.fixture
+def get_balance_by_slug_request():
+    return 'bitcoin'
+
+
+@pytest.fixture
+def get_balance_by_slug_response():
+    return {
+        'balance': '12345'
+    }
+
+
+@pytest.fixture
+def get_balance_response_object(get_balance_by_slug_response):
+    return Decimal(get_balance_by_slug_response['balance'])
+
+
+def wallet_msg(slug, value='1234'):
+    return {'currencySlug': slug, 'value': value}
+
+
+def wallet_result_msg(slug, value='1234'):
+    return {'currencySlug': slug, 'value': Decimal(value)}
+
+
+@pytest.fixture
+def platform_balances_response():
+    return {
+        'wallets': [wallet_msg(slug) for slug in ['bitcoin', 'eth', 'binance']]
+    }
+
+
+@pytest.fixture
+def platform_balances_response_object():
+    return [wallet_result_msg(slug) for slug in ['bitcoin', 'eth', 'binance']]
+
+
+@pytest.fixture
+def get_transactions_request():
+    return {
+        'external_id': 233,
+        'wallet_address': str(uuid.uuid4())
+    }
+
+
+def transaction_response_data(value=1):
+    return {
+        'from': 'some_wallet_address',
+        'to': 'some_wallet_address',
+        'currencySlug': 'bitcoin',
+        'value': f'{value}',
+        'hash': f'{value}simple_hash'
+    }
+
+
+@pytest.fixture
+def get_transactions_list_response_data():
+    return {
+        'transactions': [transaction_response_data(value=i) for i in range(1, 3)]
+    }
+
+
+def transaction_response_result(value=1):
+    return {
+        'hash': f'{value}simple_hash',
+        'value': Decimal(f'{value}'),
+        'is_output': False,
+        'address_from': 'some_wallet_address',
+        'currency_slug': 'bitcoin',
+        'address_to': 'some_wallet_address'
+    }
+
+
+@pytest.fixture
+def get_transactions_list_response_list():
+    return [
+        transaction_response_result(i) for i in range(1, 3)
+    ]
+
+
+@pytest.fixture
+def transaction():
+    trx = Transaction(**{
+        'hash': str(uuid.uuid4()),
+        'value': '123',
+        'is_output': False,
+        'address_from': 'some_wallet_address',
+        'currency_slug': 'bitcoin',
+        'address_to': 'some_wallet_address'
+    })
+    dbsession.add(trx)
+    dbsession.commit()
+    yield trx
