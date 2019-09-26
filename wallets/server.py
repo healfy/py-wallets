@@ -33,17 +33,22 @@ def watch_config():
             logger.info("consul read config error")
 
 
+def run_tasks():
+    from wallets import tasks
+    yield tasks.run()
+
+
 def serve():
     addr, port = app.config['ADDRESS'], app.config['PORT']
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(watch_config())
     server = Server([WalletsService()], loop=loop)
-    loop.run_until_complete(server.start(addr, port))
+    loop.create_task(server.start(addr, port))
+    loop.create_task(run_tasks())
     logger.info(f"starting wallets server {addr}:{port}")
     print(f"starting wallets server {addr}:{port}")
     try:
         loop.run_forever()
-        from wallets import tasks
     except KeyboardInterrupt:
         pass
     server.close()

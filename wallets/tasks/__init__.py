@@ -21,6 +21,7 @@ schedule.every(conf['MONITORING_TRANSACTIONS_PERIOD']).minutes.do(
     check_transactions)
 
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+def run():
+    while True:
+        schedule.run_pending()
+        time.sleep(1)

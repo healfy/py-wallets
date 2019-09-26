@@ -63,7 +63,7 @@ class CompareRemains:
         'omisego': Decimal(conf['OmiseGo']),
         'basic-attention-token': Decimal(conf['Basic-Attention-Token']),
         'holo': Decimal(conf['Holo']),
-        'chainlink': Decimal(conf['min_Chainlink']),
+        'chainlink': Decimal(conf['Chainlink']),
         'zilliqa': Decimal(conf['Zilliqa']),
         'usd-coin': Decimal(conf['USD-Coin'])
     }
