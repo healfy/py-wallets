@@ -24,7 +24,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='wallets',
   syntax='proto3',
   serialized_options=_b('Z\006wlt-go\222AE\022\026\n\017Wallets service2\0031.0\"\004/api*\001\0012\020application/json:\020application/json'),
-  serialized_pb=_b('\n\rwallets.proto\x12\x07wallets\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cgoogle/api/annotations.proto\x1a,protoc-gen-swagger/options/annotations.proto\"N\n\x0eResponseHeader\x12\'\n\x06status\x18\x01 \x01(\x0e\x32\x17.wallets.ResponseStatus\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\"\x10\n\x0eHealthzRequest\":\n\x0fHealthzResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"f\n\x06Wallet\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x15\n\rcurrency_slug\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\x12\x13\n\x0bis_platform\x18\x04 \x01(\x08\x12\x13\n\x0b\x65xternal_id\x18\x05 \x01(\x03\"4\n\x11MonitoringRequest\x12\x1f\n\x06wallet\x18\x01 \x01(\x0b\x32\x0f.wallets.Wallet\"=\n\x12MonitoringResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"A\n\x13\x43heckBalanceRequest\x12\x15\n\rbody_currency\x18\x01 \x01(\t\x12\x13\n\x0b\x62ody_amount\x18\x02 \x01(\t\"?\n\x14\x43heckBalanceResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"\xc5\x01\n\x0bTransaction\x12\x0c\n\x04\x66rom\x18\x01 \x01(\t\x12\n\n\x02to\x18\x02 \x01(\t\x12\x0c\n\x04hash\x18\x03 \x01(\t\x12\x11\n\twallet_id\x18\x04 \x01(\x03\x12\r\n\x05value\x18\x05 \x01(\t\x12\x10\n\x08isOutput\x18\x06 \x01(\x08\x12\x14\n\x0c\x63urrencySlug\x18\x07 \x01(\t\x12\x30\n\x0ftransfer_status\x18\x08 \x01(\x0e\x32\x17.wallets.TransferStatus\x12\x12\n\nis_fee_trx\x18\t \x01(\x08\"?\n\x12TransactionRequest\x12)\n\x0btransaction\x18\x01 \x03(\x0b\x32\x14.wallets.Transaction\">\n\x13TransactionResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader*J\n\x0eResponseStatus\x12\x0b\n\x07NOT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\t\n\x05\x45RROR\x10\x02\x12\x13\n\x0fINVALID_REQUEST\x10\x03*F\n\x0eTransferStatus\x12\r\n\tUNDEFINED\x10\x00\x12\n\n\x06\x41\x43TIVE\x10\x01\x12\r\n\tCONFIRMED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x32\xab\x07\n\x07Wallets\x12\x9d\x01\n\x07Healthz\x12\x17.wallets.HealthzRequest\x1a\x18.wallets.HealthzResponse\"_\x82\xd3\xe4\x93\x02\t\x12\x07/health\x92\x41M\x12\x18Health checking endpoint\x1a\x31Health checking endpoint. Returns HealthzResponse\x12\xd1\x01\n\x0fStartMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"\x84\x01\x82\xd3\xe4\x93\x02\x16\"\x11/start_monitoring:\x01*\x92\x41\x65\x12+Start monitoring wallet on service endpoint\x1a\x36Send wallet with params to start monitoring on service\x12\xcd\x01\n\x0eStopMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"\x81\x01\x82\xd3\xe4\x93\x02\x15\"\x10/stop_monitoring:\x01*\x92\x41\x63\x12*Stop monitoring wallet on service endpoint\x1a\x35Send wallet with params to stop monitoring on service\x12\xab\x01\n\x0c\x43heckBalance\x12\x1c.wallets.CheckBalanceRequest\x1a\x1d.wallets.CheckBalanceResponse\"^\x82\xd3\xe4\x93\x02\x10\x12\x0e/check_balance\x92\x41\x45\x12!Check Balance of platform wallets\x1a Check balance when we issue loan\x12\xad\x01\n\tUpdateTrx\x12\x1b.wallets.TransactionRequest\x1a\x1c.wallets.TransactionResponse\"e\x82\xd3\xe4\x93\x02\x10\"\x0b/update_trx:\x01*\x92\x41L\x12\x1e\x45ndpoint to update transaction\x1a*Update status transactions from blockchainBPZ\x06wlt-go\x92\x41\x45\x12\x16\n\x0fWallets service2\x03\x31.0\"\x04/api*\x01\x01\x32\x10\x61pplication/json:\x10\x61pplication/jsonb\x06proto3')
+  serialized_pb=_b('\n\rwallets.proto\x12\x07wallets\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1egoogle/protobuf/duration.proto\x1a\x1cgoogle/api/annotations.proto\x1a,protoc-gen-swagger/options/annotations.proto\"N\n\x0eResponseHeader\x12\'\n\x06status\x18\x01 \x01(\x0e\x32\x17.wallets.ResponseStatus\x12\x13\n\x0b\x64\x65scription\x18\x02 \x01(\t\"\x10\n\x0eHealthzRequest\":\n\x0fHealthzResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"f\n\x06Wallet\x12\n\n\x02id\x18\x01 \x01(\x03\x12\x15\n\rcurrency_slug\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\x12\x13\n\x0bis_platform\x18\x04 \x01(\x08\x12\x13\n\x0b\x65xternal_id\x18\x05 \x01(\x03\"4\n\x11MonitoringRequest\x12\x1f\n\x06wallet\x18\x01 \x01(\x0b\x32\x0f.wallets.Wallet\"=\n\x12MonitoringResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"A\n\x13\x43heckBalanceRequest\x12\x15\n\rbody_currency\x18\x01 \x01(\t\x12\x13\n\x0b\x62ody_amount\x18\x02 \x01(\t\"?\n\x14\x43heckBalanceResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"\xdd\x01\n\x0bTransaction\x12\x0c\n\x04\x66rom\x18\x01 \x01(\t\x12\n\n\x02to\x18\x02 \x01(\t\x12\x0c\n\x04hash\x18\x03 \x01(\t\x12\x11\n\twallet_id\x18\x04 \x01(\x03\x12\r\n\x05value\x18\x05 \x01(\t\x12\x10\n\x08isOutput\x18\x06 \x01(\x08\x12\x14\n\x0c\x63urrencySlug\x18\x07 \x01(\t\x12\x30\n\x0ftransfer_status\x18\x08 \x01(\x0e\x32\x17.wallets.TransferStatus\x12\x12\n\nis_fee_trx\x18\t \x01(\x08\x12\x16\n\x0etime_confirmed\x18\n \x01(\x03\"?\n\x12TransactionRequest\x12)\n\x0btransaction\x18\x01 \x03(\x0b\x32\x14.wallets.Transaction\">\n\x13TransactionResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\"E\n\x18InputTransactionsRequest\x12\x11\n\twallet_id\x18\x01 \x01(\x03\x12\x16\n\x0ewallet_address\x18\x02 \x01(\t\"p\n\x19InputTransactionsResponse\x12\'\n\x06header\x18\x01 \x01(\x0b\x32\x17.wallets.ResponseHeader\x12*\n\x0ctransactions\x18\x02 \x03(\x0b\x32\x14.wallets.Transaction*J\n\x0eResponseStatus\x12\x0b\n\x07NOT_SET\x10\x00\x12\x0b\n\x07SUCCESS\x10\x01\x12\t\n\x05\x45RROR\x10\x02\x12\x13\n\x0fINVALID_REQUEST\x10\x03*F\n\x0eTransferStatus\x12\r\n\tUNDEFINED\x10\x00\x12\n\n\x06\x41\x43TIVE\x10\x01\x12\r\n\tCONFIRMED\x10\x02\x12\n\n\x06\x46\x41ILED\x10\x03\x32\xff\x08\n\x07Wallets\x12\x9d\x01\n\x07Healthz\x12\x17.wallets.HealthzRequest\x1a\x18.wallets.HealthzResponse\"_\x82\xd3\xe4\x93\x02\t\x12\x07/health\x92\x41M\x12\x18Health checking endpoint\x1a\x31Health checking endpoint. Returns HealthzResponse\x12\xd1\x01\n\x0fStartMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"\x84\x01\x82\xd3\xe4\x93\x02\x16\"\x11/start_monitoring:\x01*\x92\x41\x65\x12+Start monitoring wallet on service endpoint\x1a\x36Send wallet with params to start monitoring on service\x12\xcd\x01\n\x0eStopMonitoring\x12\x1a.wallets.MonitoringRequest\x1a\x1b.wallets.MonitoringResponse\"\x81\x01\x82\xd3\xe4\x93\x02\x15\"\x10/stop_monitoring:\x01*\x92\x41\x63\x12*Stop monitoring wallet on service endpoint\x1a\x35Send wallet with params to stop monitoring on service\x12\xab\x01\n\x0c\x43heckBalance\x12\x1c.wallets.CheckBalanceRequest\x1a\x1d.wallets.CheckBalanceResponse\"^\x82\xd3\xe4\x93\x02\x10\x12\x0e/check_balance\x92\x41\x45\x12!Check Balance of platform wallets\x1a Check balance when we issue loan\x12\xad\x01\n\tUpdateTrx\x12\x1b.wallets.TransactionRequest\x1a\x1c.wallets.TransactionResponse\"e\x82\xd3\xe4\x93\x02\x10\"\x0b/update_trx:\x01*\x92\x41L\x12\x1e\x45ndpoint to update transaction\x1a*Update status transactions from blockchain\x12\xd1\x01\n\x14GetInputTransactions\x12!.wallets.InputTransactionsRequest\x1a\".wallets.InputTransactionsResponse\"r\x82\xd3\xe4\x93\x02\x13\"\x0e/get_input_trx:\x01*\x92\x41V\x12)Endpoint to get wallet input transactions\x1a)Endpoint to get wallet input transactionsBPZ\x06wlt-go\x92\x41\x45\x12\x16\n\x0fWallets service2\x03\x31.0\"\x04/api*\x01\x01\x32\x10\x61pplication/json:\x10\x61pplication/jsonb\x06proto3')
   ,
   dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,google_dot_protobuf_dot_duration__pb2.DESCRIPTOR,google_dot_api_dot_annotations__pb2.DESCRIPTOR,protoc__gen__swagger_dot_options_dot_annotations__pb2.DESCRIPTOR,])
 
@@ -53,8 +53,8 @@ _RESPONSESTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1007,
-  serialized_end=1081,
+  serialized_start=1216,
+  serialized_end=1290,
 )
 _sym_db.RegisterEnumDescriptor(_RESPONSESTATUS)
 
@@ -84,8 +84,8 @@ _TRANSFERSTATUS = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1083,
-  serialized_end=1153,
+  serialized_start=1292,
+  serialized_end=1362,
 )
 _sym_db.RegisterEnumDescriptor(_TRANSFERSTATUS)
 
@@ -454,6 +454,13 @@ _TRANSACTION = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='time_confirmed', full_name='wallets.Transaction.time_confirmed', index=9,
+      number=10, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -467,7 +474,7 @@ _TRANSACTION = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=679,
-  serialized_end=876,
+  serialized_end=900,
 )
 
 
@@ -497,8 +504,8 @@ _TRANSACTIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=878,
-  serialized_end=941,
+  serialized_start=902,
+  serialized_end=965,
 )
 
 
@@ -528,8 +535,84 @@ _TRANSACTIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=943,
-  serialized_end=1005,
+  serialized_start=967,
+  serialized_end=1029,
+)
+
+
+_INPUTTRANSACTIONSREQUEST = _descriptor.Descriptor(
+  name='InputTransactionsRequest',
+  full_name='wallets.InputTransactionsRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='wallet_id', full_name='wallets.InputTransactionsRequest.wallet_id', index=0,
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='wallet_address', full_name='wallets.InputTransactionsRequest.wallet_address', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1031,
+  serialized_end=1100,
+)
+
+
+_INPUTTRANSACTIONSRESPONSE = _descriptor.Descriptor(
+  name='InputTransactionsResponse',
+  full_name='wallets.InputTransactionsResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='header', full_name='wallets.InputTransactionsResponse.header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='transactions', full_name='wallets.InputTransactionsResponse.transactions', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1102,
+  serialized_end=1214,
 )
 
 _RESPONSEHEADER.fields_by_name['status'].enum_type = _RESPONSESTATUS
@@ -540,6 +623,8 @@ _CHECKBALANCERESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _TRANSACTION.fields_by_name['transfer_status'].enum_type = _TRANSFERSTATUS
 _TRANSACTIONREQUEST.fields_by_name['transaction'].message_type = _TRANSACTION
 _TRANSACTIONRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
+_INPUTTRANSACTIONSRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
+_INPUTTRANSACTIONSRESPONSE.fields_by_name['transactions'].message_type = _TRANSACTION
 DESCRIPTOR.message_types_by_name['ResponseHeader'] = _RESPONSEHEADER
 DESCRIPTOR.message_types_by_name['HealthzRequest'] = _HEALTHZREQUEST
 DESCRIPTOR.message_types_by_name['HealthzResponse'] = _HEALTHZRESPONSE
@@ -551,6 +636,8 @@ DESCRIPTOR.message_types_by_name['CheckBalanceResponse'] = _CHECKBALANCERESPONSE
 DESCRIPTOR.message_types_by_name['Transaction'] = _TRANSACTION
 DESCRIPTOR.message_types_by_name['TransactionRequest'] = _TRANSACTIONREQUEST
 DESCRIPTOR.message_types_by_name['TransactionResponse'] = _TRANSACTIONRESPONSE
+DESCRIPTOR.message_types_by_name['InputTransactionsRequest'] = _INPUTTRANSACTIONSREQUEST
+DESCRIPTOR.message_types_by_name['InputTransactionsResponse'] = _INPUTTRANSACTIONSRESPONSE
 DESCRIPTOR.enum_types_by_name['ResponseStatus'] = _RESPONSESTATUS
 DESCRIPTOR.enum_types_by_name['TransferStatus'] = _TRANSFERSTATUS
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -632,6 +719,20 @@ TransactionResponse = _reflection.GeneratedProtocolMessageType('TransactionRespo
   ))
 _sym_db.RegisterMessage(TransactionResponse)
 
+InputTransactionsRequest = _reflection.GeneratedProtocolMessageType('InputTransactionsRequest', (_message.Message,), dict(
+  DESCRIPTOR = _INPUTTRANSACTIONSREQUEST,
+  __module__ = 'wallets_pb2'
+  # @@protoc_insertion_point(class_scope:wallets.InputTransactionsRequest)
+  ))
+_sym_db.RegisterMessage(InputTransactionsRequest)
+
+InputTransactionsResponse = _reflection.GeneratedProtocolMessageType('InputTransactionsResponse', (_message.Message,), dict(
+  DESCRIPTOR = _INPUTTRANSACTIONSRESPONSE,
+  __module__ = 'wallets_pb2'
+  # @@protoc_insertion_point(class_scope:wallets.InputTransactionsResponse)
+  ))
+_sym_db.RegisterMessage(InputTransactionsResponse)
+
 
 DESCRIPTOR._options = None
 
@@ -641,8 +742,8 @@ _WALLETS = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=1156,
-  serialized_end=2095,
+  serialized_start=1365,
+  serialized_end=2516,
   methods=[
   _descriptor.MethodDescriptor(
     name='Healthz',
@@ -688,6 +789,15 @@ _WALLETS = _descriptor.ServiceDescriptor(
     input_type=_TRANSACTIONREQUEST,
     output_type=_TRANSACTIONRESPONSE,
     serialized_options=_b('\202\323\344\223\002\020\"\013/update_trx:\001*\222AL\022\036Endpoint to update transaction\032*Update status transactions from blockchain'),
+  ),
+  _descriptor.MethodDescriptor(
+    name='GetInputTransactions',
+    full_name='wallets.Wallets.GetInputTransactions',
+    index=5,
+    containing_service=None,
+    input_type=_INPUTTRANSACTIONSREQUEST,
+    output_type=_INPUTTRANSACTIONSRESPONSE,
+    serialized_options=_b('\202\323\344\223\002\023\"\016/get_input_trx:\001*\222AV\022)Endpoint to get wallet input transactions\032)Endpoint to get wallet input transactions'),
   ),
 ])
 _sym_db.RegisterServiceDescriptor(_WALLETS)

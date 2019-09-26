@@ -224,3 +224,17 @@ class TransactionRequestObject(BaseMonitoringRequest):
 
     def __eq__(self, other):
         return len(self.transactions) == len(other)
+
+
+class GetInputTrxRequestObject(BaseRequestObject):
+
+    wallet_id: int
+    wallet_address: str
+    currencySlug: str
+
+    def is_valid(self):
+        if not self.wallet_id or self.wallet_address:
+            self._errors.add(
+                ValueError('wallet_id or wallet_address is required'))
+            return False
+        return True

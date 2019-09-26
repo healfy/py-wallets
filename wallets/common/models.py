@@ -10,13 +10,13 @@ from sqlalchemy import (
     Column,
     DateTime,
     Integer,
-    Numeric,
     DECIMAL,
     Text,
     func,
     inspect,
     ForeignKey
 )
+from sqlalchemy.orm import Session
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_mixins import AllFeaturesMixin
@@ -24,7 +24,6 @@ from sqlalchemy_mixins import AllFeaturesMixin
 from .seriallizers import WalletSchema
 from .seriallizers import TransactionSchema
 from wallets.utils.consts import TransferStatus
-from wallets.rpc import blockchain_gateway_pb2
 from wallets.rpc import wallets_pb2
 
 if TYPE_CHECKING:
@@ -172,7 +171,7 @@ class Wallet(BaseModel):
                            nullable=False,
                            index=True)
 
-    def _as_message_dict(self):
+    def _as_message_dict(self) -> typing.Dict:
         return {
             'id': self.id,
             'address': self.address,
@@ -231,7 +230,13 @@ class Transaction(BaseModel):
                           cascade_backrefs=False,
                           backref='transaction')
 
-    def _as_message_dict(self):
+    confirmed_at = Column(DateTime,
+                          nullable=True,
+                          default=None,
+                          comment='time in that transaction confirmed'
+                          )
+
+    def _as_message_dict(self) -> typing.Dict:
         return {
             'to': self.address_to,
             'from': self.address_from,
@@ -241,3 +246,13 @@ class Transaction(BaseModel):
             'hash': self.hash,
             'wallet_id': self.wallet_id
         }
+
+    def set_confirmed(self,
+                      status: TransferStatus,
+                      session: Session
+                      ) -> typing.NoReturn:
+
+        if status == TransferStatus.CONFIRMED.value:
+            self.transfer_status = TransferStatus.CONFIRMED.value
+            self.confirmed_at = datetime.now()
+            session.commit()

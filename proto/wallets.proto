@@ -10,14 +10,14 @@ package wallets;
 option go_package = "wlt-go";
 
 option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
-  info: {
-    title: "Wallets service";
-    version: "1.0";
-  };
-  schemes: HTTP;
-  consumes: "application/json";
-  produces: "application/json";
-  base_path: "/api";
+	info: {
+		title: "Wallets service";
+		version: "1.0";
+	};
+	schemes: HTTP;
+	consumes: "application/json";
+	produces: "application/json";
+	base_path: "/api";
 };
 
 
@@ -55,13 +55,13 @@ service Wallets {
 
 	rpc CheckBalance(CheckBalanceRequest) returns (CheckBalanceResponse) {
 		option (google.api.http) = {
-            get: "/check_balance"
-        };
-        option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
-            summary: "Check Balance of platform wallets"
-            description: "Check balance when we issue loan";
-          };
-    };
+			get: "/check_balance"
+		};
+		option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+			summary: "Check Balance of platform wallets"
+			description: "Check balance when we issue loan";
+		};
+	};
 	rpc UpdateTrx(TransactionRequest) returns (TransactionResponse) {
 		option (google.api.http) = {
 			post: "/update_trx"
@@ -71,14 +71,26 @@ service Wallets {
 			summary: "Endpoint to update transaction"
 			description: "Update status transactions from blockchain";
 		};
+	};
+	rpc GetInputTransactions(InputTransactionsRequest) returns (InputTransactionsResponse) {
+		option (google.api.http) = {
+			post: "/get_input_trx"
+			body: "*"
+		};
+		option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+			summary: "Endpoint to get wallet input transactions"
+			description: "Endpoint to get wallet input transactions";
+		};
 	}
+
+
 }
 
 enum ResponseStatus {
-	NOT_SET = 0;
-	SUCCESS = 1;
-	ERROR = 2;
-	INVALID_REQUEST = 3;
+    NOT_SET = 0;
+    SUCCESS = 1;
+    ERROR = 2;
+    INVALID_REQUEST = 3;
 }
 
 enum TransferStatus {
@@ -89,41 +101,41 @@ enum TransferStatus {
 }
 
 message ResponseHeader {
-	ResponseStatus status = 1;
-	string description = 2;
+    ResponseStatus status = 1;
+    string description = 2;
 }
 
 message HealthzRequest {};
 
 
 message HealthzResponse {
-	ResponseHeader header = 1;
+    ResponseHeader header = 1;
 }
 
 message Wallet {
-	int64 id = 1;
-	string currency_slug = 2;
-	string address = 3;
-	bool is_platform = 4;
-	int64 external_id = 5;
+    int64 id = 1;
+    string currency_slug = 2;
+    string address = 3;
+    bool is_platform = 4;
+    int64 external_id = 5;
 
 }
 
 message MonitoringRequest {
-	Wallet wallet = 1;
+    Wallet wallet = 1;
 }
 
 message MonitoringResponse {
-	ResponseHeader header = 1;
+    ResponseHeader header = 1;
 }
 
 message CheckBalanceRequest {
-	string body_currency = 1;
+    string body_currency = 1;
     string body_amount = 2;
 }
 
 message CheckBalanceResponse {
-	ResponseHeader header = 1;
+    ResponseHeader header = 1;
 }
 
 message Transaction {
@@ -135,13 +147,24 @@ message Transaction {
     bool isOutput = 6;
     string currencySlug = 7;
     TransferStatus transfer_status = 8;
-	bool is_fee_trx = 9;
+    bool is_fee_trx = 9;
+    int64 time_confirmed = 10;
 }
 
 message TransactionRequest {
-	repeated Transaction transaction = 1;
+    repeated Transaction transaction = 1;
 }
 
 message TransactionResponse {
-	ResponseHeader header = 1;
+    ResponseHeader header = 1;
+}
+
+message InputTransactionsRequest{
+    int64 wallet_id = 1;
+    string wallet_address = 2;
+}
+
+message InputTransactionsResponse{
+    ResponseHeader header = 1;
+    repeated Transaction transactions = 2;
 }

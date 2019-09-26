@@ -35,6 +35,10 @@ class WalletsBase(abc.ABC):
     async def UpdateTrx(self, stream):
         pass
 
+    @abc.abstractmethod
+    async def GetInputTransactions(self, stream):
+        pass
+
     def __mapping__(self):
         return {
             '/wallets.Wallets/Healthz': grpclib.const.Handler(
@@ -66,6 +70,12 @@ class WalletsBase(abc.ABC):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 wallets_pb2.TransactionRequest,
                 wallets_pb2.TransactionResponse,
+            ),
+            '/wallets.Wallets/GetInputTransactions': grpclib.const.Handler(
+                self.GetInputTransactions,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                wallets_pb2.InputTransactionsRequest,
+                wallets_pb2.InputTransactionsResponse,
             ),
         }
 
@@ -102,4 +112,10 @@ class WalletsStub:
             '/wallets.Wallets/UpdateTrx',
             wallets_pb2.TransactionRequest,
             wallets_pb2.TransactionResponse,
+        )
+        self.GetInputTransactions = grpclib.client.UnaryUnaryMethod(
+            channel,
+            '/wallets.Wallets/GetInputTransactions',
+            wallets_pb2.InputTransactionsRequest,
+            wallets_pb2.InputTransactionsResponse,
         )
