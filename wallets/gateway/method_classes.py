@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from wallets import app
 from wallets import logger
 from wallets import request_objects
+from wallets.utils.consts import TransferStatus
 from wallets.utils import send_message
 from wallets.utils import simple_generator
 from wallets.common import Wallet
@@ -240,10 +241,13 @@ class GetInputTrxMethod(ServerMethod):
 			response_msg: w_pb2.InputTransactionsResponse,
 			session: Session
 	) -> w_pb2.InputTransactionsResponse:
+
 		query = Transaction.query.filter(
 			wallet_id=request_obj.wallet_id,
-			address_from=request_obj.wallet_address
+			address_from=request_obj.wallet_address,
+			transfer_status=TransferStatus.CONFIRMED.value
 		).all()
+
 		for trx in query:
 			response_msg.transactions.append(
 				w_pb2.Transaction(

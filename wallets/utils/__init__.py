@@ -9,7 +9,6 @@ from google.protobuf import timestamp_pb2
 from wallets.settings.config import conf
 
 
-
 def threaded(fn):
     def wrapper(*args, **kwargs):
         thread = Thread(target=fn, args=args, kwargs=kwargs)

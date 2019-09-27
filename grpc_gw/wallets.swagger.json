@@ -47,6 +47,34 @@
         ]
       }
     },
+    "/get_input_trx": {
+      "post": {
+        "summary": "Endpoint to get wallet input transactions",
+        "description": "Endpoint to get wallet input transactions",
+        "operationId": "GetInputTransactions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/walletsInputTransactionsResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/walletsInputTransactionsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Wallets"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health checking endpoint",
@@ -167,6 +195,32 @@
         }
       }
     },
+    "walletsInputTransactionsRequest": {
+      "type": "object",
+      "properties": {
+        "wallet_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "wallet_address": {
+          "type": "string"
+        }
+      }
+    },
+    "walletsInputTransactionsResponse": {
+      "type": "object",
+      "properties": {
+        "header": {
+          "$ref": "#/definitions/walletsResponseHeader"
+        },
+        "transactions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/walletsTransaction"
+          }
+        }
+      }
+    },
     "walletsMonitoringRequest": {
       "type": "object",
       "properties": {
@@ -236,6 +290,10 @@
         "is_fee_trx": {
           "type": "boolean",
           "format": "boolean"
+        },
+        "time_confirmed": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
