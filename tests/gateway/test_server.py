@@ -100,3 +100,17 @@ class TestWalletServer(BaseDB):
         trx = self.session.query(Transaction).filter_by(hash=transaction.hash).first()
         assert response == expected_res
         assert trx.transfer_status == TransferStatus.CONFIRMED.value
+        assert trx.confirmed_at is not None
+
+    def test_get_input_trx_method(self, transactions, wallet):
+        request = wallets_pb2.InputTransactionsRequest(
+            wallet_id=wallet.id,
+            wallet_address=wallet.address
+        )
+        response = method_classes.GetInputTrxMethod.process(request,
+                                                            self.session)
+
+        assert wallets_pb2.SUCCESS == response.header.status
+        assert len(transactions) == len(response.transactions)
+        hashes = [t.hash for t in transactions]
+        assert hashes == [t.hash for t in response.transactions]

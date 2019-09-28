@@ -223,8 +223,9 @@ class UpdateTrxMethod(ServerMethod):
 	) -> w_pb2.TransactionResponse:
 
 		for trx in simple_generator(request_obj.transactions):
-			trx_in_base = Transaction.query.filter_by(hash=trx.hash).first()
-			trx_in_base.set_confirmed(trx.transfer_status)
+			trx_in_base = session.query(
+				Transaction).filter_by(hash=trx.hash).first()
+			trx_in_base.set_confirmed(trx.transfer_status, session)
 		response_msg.header.status = w_pb2.SUCCESS
 		return response_msg
 
@@ -242,9 +243,8 @@ class GetInputTrxMethod(ServerMethod):
 			session: Session
 	) -> w_pb2.InputTransactionsResponse:
 
-		query = Transaction.query.filter(
+		query = Transaction.query.filter_by(
 			wallet_id=request_obj.wallet_id,
-			address_from=request_obj.wallet_address,
 			transfer_status=TransferStatus.CONFIRMED.value
 		).all()
 
@@ -254,7 +254,7 @@ class GetInputTrxMethod(ServerMethod):
 					hash=trx.hash,
 					wallet_id=trx.wallet_id,
 					value=str(trx.value),
-					time_confirmed=trx.confirmed_at.timestamp()
+					time_confirmed=int(trx.confirmed_at.timestamp())
 				)
 			)
 		response_msg.header.status = w_pb2.SUCCESS

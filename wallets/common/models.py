@@ -200,7 +200,8 @@ class Transaction(BaseModel):
                              comment='current transfer status')
     hash = Column(Text,
                   nullable=False,
-                  comment='transaction hash')
+                  comment='transaction hash',
+                  unique=True)
 
     address_from = Column(Text,
                           comment='initiator of transaction')
@@ -256,3 +257,4 @@ class Transaction(BaseModel):
             self.transfer_status = TransferStatus.CONFIRMED.value
             self.confirmed_at = datetime.now()
             session.commit()
+            session.refresh(self)

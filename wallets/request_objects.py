@@ -233,8 +233,8 @@ class GetInputTrxRequestObject(BaseRequestObject):
     currencySlug: str
 
     def is_valid(self):
-        if not self.wallet_id or self.wallet_address:
+        if not self.wallet_id:
             self._errors.add(
-                ValueError('wallet_id or wallet_address is required'))
+                ValueError('wallet_id is required'))
             return False
         return True
