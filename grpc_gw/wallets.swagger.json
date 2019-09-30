@@ -270,22 +270,18 @@
         "hash": {
           "type": "string"
         },
+        "value": {
+          "type": "string"
+        },
         "wallet_id": {
           "type": "string",
           "format": "int64"
         },
-        "value": {
-          "type": "string"
-        },
-        "isOutput": {
-          "type": "boolean",
-          "format": "boolean"
-        },
         "currencySlug": {
           "type": "string"
         },
-        "transfer_status": {
-          "$ref": "#/definitions/walletsTransferStatus"
+        "status": {
+          "$ref": "#/definitions/walletsTransactionStatus"
         },
         "is_fee_trx": {
           "type": "boolean",
@@ -316,13 +312,16 @@
         }
       }
     },
-    "walletsTransferStatus": {
+    "walletsTransactionStatus": {
       "type": "string",
       "enum": [
         "UNDEFINED",
-        "ACTIVE",
-        "CONFIRMED",
-        "FAILED"
+        "NEW",
+        "NOT_FOUND",
+        "SUCCESSFUL",
+        "FAILED",
+        "PENDING",
+        "CONFIRMED"
       ],
       "default": "UNDEFINED"
     },

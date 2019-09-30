@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from wallets import app
 from wallets import logger
 from wallets import request_objects
-from wallets.utils.consts import TransferStatus
+from wallets.utils.consts import TransactionStatus
 from wallets.utils import send_message
 from wallets.utils import simple_generator
 from wallets.common import Wallet
@@ -96,21 +96,20 @@ class SaveWallet:
 			request: request_objects.MonitoringRequestObject,
 			session: Session
 	):
-		if issubclass(request.__class__, request_objects.BaseMonitoringRequest):
-			data = request.dict()
-			if Wallet.query.filter_by(external_id=data['external_id']).first():
-				raise ValueError(f'Wallet with params: '
-								 f'currency:{data["currency_slug"]} '
-								 f'id:{data["external_id"]} '
-								 f'address: {data["address"]} '
-								 f'is already exists')
-			wallet = Wallet(**data)
-			try:
-				session.add(wallet)
-				session.commit()
-			except Exception as e:
-				session.rollback()
-				raise e
+		data = request.dict()
+		if Wallet.query.filter_by(external_id=data['external_id']).first():
+			raise ValueError(f'Wallet with params: '
+							 f'currency:{data["currency_slug"]} '
+							 f'id:{data["external_id"]} '
+							 f'address: {data["address"]} '
+							 f'is already exists')
+		wallet = Wallet(**data)
+		try:
+			session.add(wallet)
+			session.commit()
+		except Exception as e:
+			session.rollback()
+			raise e
 
 
 class HeathzMethod(ServerMethod):
@@ -225,7 +224,7 @@ class UpdateTrxMethod(ServerMethod):
 		for trx in simple_generator(request_obj.transactions):
 			trx_in_base = session.query(
 				Transaction).filter_by(hash=trx.hash).first()
-			trx_in_base.set_confirmed(trx.transfer_status, session)
+			trx_in_base.set_confirmed(trx.status, session)
 		response_msg.header.status = w_pb2.SUCCESS
 		return response_msg
 
@@ -245,9 +244,8 @@ class GetInputTrxMethod(ServerMethod):
 
 		query = Transaction.query.filter_by(
 			wallet_id=request_obj.wallet_id,
-			transfer_status=TransferStatus.CONFIRMED.value
+			status=TransactionStatus.CONFIRMED.value
 		).all()
-
 		for trx in query:
 			response_msg.transactions.append(
 				w_pb2.Transaction(

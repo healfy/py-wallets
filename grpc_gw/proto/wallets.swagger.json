@@ -47,6 +47,34 @@
         ]
       }
     },
+    "/get_input_trx": {
+      "post": {
+        "summary": "Endpoint to get wallet input transactions",
+        "description": "Endpoint to get wallet input transactions",
+        "operationId": "GetInputTransactions",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/walletsInputTransactionsResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/walletsInputTransactionsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Wallets"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health checking endpoint",
@@ -167,6 +195,32 @@
         }
       }
     },
+    "walletsInputTransactionsRequest": {
+      "type": "object",
+      "properties": {
+        "wallet_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "wallet_address": {
+          "type": "string"
+        }
+      }
+    },
+    "walletsInputTransactionsResponse": {
+      "type": "object",
+      "properties": {
+        "header": {
+          "$ref": "#/definitions/walletsResponseHeader"
+        },
+        "transactions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/walletsTransaction"
+          }
+        }
+      }
+    },
     "walletsMonitoringRequest": {
       "type": "object",
       "properties": {
@@ -216,26 +270,22 @@
         "hash": {
           "type": "string"
         },
-        "wallet_id": {
-          "type": "string",
-          "format": "int64"
-        },
         "value": {
           "type": "string"
-        },
-        "isOutput": {
-          "type": "boolean",
-          "format": "boolean"
         },
         "currencySlug": {
           "type": "string"
         },
-        "transfer_status": {
-          "$ref": "#/definitions/walletsTransferStatus"
+        "status": {
+          "$ref": "#/definitions/walletsTransactionStatus"
         },
         "is_fee_trx": {
           "type": "boolean",
           "format": "boolean"
+        },
+        "time_confirmed": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -258,13 +308,16 @@
         }
       }
     },
-    "walletsTransferStatus": {
+    "walletsTransactionStatus": {
       "type": "string",
       "enum": [
         "UNDEFINED",
-        "ACTIVE",
-        "CONFIRMED",
-        "FAILED"
+        "NEW",
+        "NOT_FOUND",
+        "SUCCESSFUL",
+        "FAILED",
+        "PENDING",
+        "CONFIRMED"
       ],
       "default": "UNDEFINED"
     },

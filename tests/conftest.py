@@ -12,6 +12,7 @@ from wallets import start_engine
 from wallets.common import Wallet
 from wallets.common import Transaction
 from wallets.common.models import Base
+from wallets.utils.consts import TransactionStatus
 from wallets.settings.config import conf
 from wallets.shared.logging import init_logger
 
@@ -166,7 +167,6 @@ def transaction_response_result(value=1):
 	return {
 		'hash': f'{value}simple_hash',
 		'value': Decimal(f'{value}'),
-		'is_output': False,
 		'address_from': 'some_wallet_address',
 		'currency_slug': 'bitcoin',
 		'address_to': 'some_wallet_address'
@@ -185,7 +185,6 @@ def transaction():
 	trx = Transaction(**{
 		'hash': str(uuid.uuid4()),
 		'value': '123',
-		'is_output': False,
 		'address_from': 'some_wallet_address',
 		'currency_slug': 'bitcoin',
 		'address_to': 'some_wallet_address'
@@ -200,24 +199,22 @@ def transactions(wallet):
 	trx = Transaction(**{
 		'hash': str(uuid.uuid4()),
 		'value': '123',
-		'is_output': False,
 		'address_from': 'some_wallet_address',
 		'currency_slug': 'bitcoin',
 		'address_to': 'some_wallet_address',
 		'wallet_id': wallet.id,
-		'transfer_status': 2,
+		'status': TransactionStatus.CONFIRMED.value,
 		'confirmed_at': datetime.now()
 	})
 
 	trx_2 = Transaction(**{
 		'hash': str(uuid.uuid4()),
 		'value': '123',
-		'is_output': False,
 		'address_from': 'some_wallet_address',
 		'currency_slug': 'bitcoin',
 		'address_to': 'some_wallet_address',
 		'wallet_id': wallet.id,
-		'transfer_status': 2,
+		'status': TransactionStatus.CONFIRMED.value,
 		'confirmed_at': datetime.now()
 	})
 	dbsession.add_all([trx, trx_2])

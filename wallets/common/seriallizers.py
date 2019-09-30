@@ -16,7 +16,6 @@ class TransactionSchema(Schema):
     id = fields.Integer()
     address_from = fields.String(data_key='from', required=True)
     address_to = fields.String(data_key='to')
-    is_output = fields.Bool(data_key='isOutput', required=False, missing=False)
     currency_slug = fields.String(data_key='currencySlug', required=True)
     value = DecimalStringField(data_key='value', required=True)
     hash = fields.String(required=True)

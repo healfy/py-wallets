@@ -1,7 +1,8 @@
 import abc
 import typing
 from google.protobuf.json_format import MessageToDict
-from wallets.utils.consts import TransferStatus
+from wallets.utils.consts import TransactionStatus
+from wallets.rpc import wallets_pb2 as w_p2
 
 
 class BaseRequestObject:
@@ -134,13 +135,12 @@ class TransactionMessage(BaseRequestObject):
     currencySlug: str
     value: str
     hash: str
-    isOutput: str
-    transfer_status: int
-    is_fee_trx: str
+    status: int
+    is_fee_trx: bool
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.transfer_status = self.get_transfer_status(self.transfer_status)
+        self.status = self.get_status(self.status)
 
     @classmethod
     def from_dict(cls, d: dict):
@@ -168,11 +168,10 @@ class TransactionMessage(BaseRequestObject):
             'id': getattr(self, 'id', None),
             'address_to': self.to,
             'address_from': self.fromAddr,
-            'is_output': getattr(self, 'is_output', None),
             'currency_slug': self.currencySlug,
             'value': self.value,
             'hash': self.hash,
-            'transfer_status': self.transfer_status,
+            'status': self.status,
             'is_fee_trx': getattr(self, 'is_fee_trx', None),
         })
 
@@ -183,13 +182,17 @@ class TransactionMessage(BaseRequestObject):
         }
 
     @staticmethod
-    def get_transfer_status(value):
-        _statutes = {
-            'CONFIRMED': TransferStatus.CONFIRMED.value,
-            'ACTIVE': TransferStatus.ACTIVE.value,
-            'IGNORED': TransferStatus.IGNORED.value
+    def get_status(value):
+        _TO_TRX_STATUS_ = {
+            w_p2.TransactionStatus.Name(w_p2.NEW): TransactionStatus.NEW.value,
+            w_p2.TransactionStatus.Name(w_p2.CONFIRMED): TransactionStatus.CONFIRMED.value,
+            w_p2.TransactionStatus.Name(w_p2.FAILED): TransactionStatus.FAILED.value,
+            w_p2.TransactionStatus.Name(w_p2.PENDING): TransactionStatus.PENDING.value,
+            w_p2.TransactionStatus.Name(w_p2.NOT_FOUND): TransactionStatus.NOT_FOUND.value,
+            w_p2.TransactionStatus.Name(w_p2.SUCCESSFUL): TransactionStatus.SUCCESSFUL.value,
+            w_p2.TransactionStatus.Name(w_p2.UNDEFINED): TransactionStatus.UNDEFINED.value,
         }
-        return _statutes[value] if value else None
+        return _TO_TRX_STATUS_[value] if value else None
 
 
 class TransactionRequestObject(BaseMonitoringRequest):

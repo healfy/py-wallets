@@ -115,7 +115,7 @@ class SaveTrx:
 
 class ValidateTRX:
     """
-    Mixin Class to check transaction in base
+    Class to check transaction in base
     """
 
     @classmethod

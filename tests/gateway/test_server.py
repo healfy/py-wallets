@@ -7,7 +7,7 @@ from wallets.rpc import wallets_pb2
 from wallets.gateway import method_classes
 from wallets.common import Wallet
 from wallets.common import Transaction
-from wallets.utils.consts import TransferStatus
+from wallets.utils.consts import TransactionStatus
 resp = Response()
 resp.status_code = 200
 
@@ -89,7 +89,7 @@ class TestWalletServer(BaseDB):
     def test_update_trx_method(self, transaction):
         request = wallets_pb2.TransactionRequest()
         message = transaction.to_message()
-        message.transfer_status = TransferStatus.CONFIRMED.value
+        message.status = TransactionStatus.CONFIRMED.value
         request.transaction.append(message)
 
         response = method_classes.UpdateTrxMethod.process(request,
@@ -99,7 +99,7 @@ class TestWalletServer(BaseDB):
         expected_res.header.status = wallets_pb2.SUCCESS
         trx = self.session.query(Transaction).filter_by(hash=transaction.hash).first()
         assert response == expected_res
-        assert trx.transfer_status == TransferStatus.CONFIRMED.value
+        assert trx.status == TransactionStatus.CONFIRMED.value
         assert trx.confirmed_at is not None
 
     def test_get_input_trx_method(self, transactions, wallet):

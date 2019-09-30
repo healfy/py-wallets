@@ -23,7 +23,7 @@ from sqlalchemy_mixins import AllFeaturesMixin
 
 from .seriallizers import WalletSchema
 from .seriallizers import TransactionSchema
-from wallets.utils.consts import TransferStatus
+from wallets.utils.consts import TransactionStatus
 from wallets.rpc import wallets_pb2
 
 if TYPE_CHECKING:
@@ -189,15 +189,11 @@ class Transaction(BaseModel):
     schema_class = TransactionSchema
     message_class = wallets_pb2.Transaction
 
-    is_output = Column(Boolean,
-                       comment='transaction type',
-                       default=False)
-
-    transfer_status = Column(Integer,
-                             index=True,
-                             default=TransferStatus.ACTIVE.value,
-                             nullable=False,
-                             comment='current transfer status')
+    status = Column(Integer,
+                    index=True,
+                    default=TransactionStatus.NEW.value,
+                    nullable=False,
+                    comment='current transaction status')
     hash = Column(Text,
                   nullable=False,
                   comment='transaction hash',
@@ -241,20 +237,18 @@ class Transaction(BaseModel):
         return {
             'to': self.address_to,
             'from': self.address_from,
-            'isOutput': self.is_output,
             'currencySlug': self.currency_slug,
             'value': f'{self.value}',
             'hash': self.hash,
-            'wallet_id': self.wallet_id
         }
 
     def set_confirmed(self,
-                      status: TransferStatus,
+                      status: TransactionStatus,
                       session: Session
                       ) -> typing.NoReturn:
 
-        if status == TransferStatus.CONFIRMED.value:
-            self.transfer_status = TransferStatus.CONFIRMED.value
-            self.confirmed_at = datetime.now()
+        if status == TransactionStatus.CONFIRMED.value:
+            self.status = TransactionStatus.CONFIRMED.value
+            self.confirmed_at = datetime.now().replace(tzinfo=pytz.utc)
             session.commit()
             session.refresh(self)
