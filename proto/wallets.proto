@@ -164,6 +164,8 @@ message TransactionResponse {
 message InputTransactionsRequest{
     int64 wallet_id = 1;
     string wallet_address = 2;
+    int64 time_from = 3;
+    int64 time_to = 4;
 }
 
 message InputTransactionsResponse{

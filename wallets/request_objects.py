@@ -234,6 +234,8 @@ class GetInputTrxRequestObject(BaseRequestObject):
     wallet_id: int
     wallet_address: str
     currencySlug: str
+    time_from: int
+    time_to: int
 
     def is_valid(self):
         if not self.wallet_id:
