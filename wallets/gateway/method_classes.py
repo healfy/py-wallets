@@ -23,27 +23,27 @@ from wallets.rpc import wallets_pb2 as w_pb2
 
 class ServerMethod(ABC):
     """Base class for abstracting server-side logic.
-	The main method is "process", it must be called to process the request.
-	To describe the new server method, you need to create a sub class and
-	implement method "_execute" in it,
-	which contains the logic for processing the request.
+    The main method is "process", it must be called to process the request.
+    To describe the new server method, you need to create a sub class and
+    implement method "_execute" in it,
+    which contains the logic for processing the request.
 
-	Attributes:
-		request_obj_cls: request object class(BaseRequestObject sub class ) for
-		 this server method.
-		response_msg_cls: class of the message that this server method
-		should return.
-	"""
+    Attributes:
+    request_obj_cls: request object class(BaseRequestObject sub class ) for
+    this server method.
+    response_msg_cls: class of the message that this server method
+    should return.
+    """
     request_obj_cls = None
     response_msg_cls = None
 
     @classmethod
     def process(cls, request, session: Session):
         """
-		The main method, which is called to process the request by the server.
-		Must return an object of the message class that is defined individually
-		for each method using
-		response_msg_cls attribute.
+        The main method, which is called to process the request by the server.
+        Must return an object of the message class that is defined individually
+        for each method using
+        response_msg_cls attribute.
         """
         response = cls._get_response_msg()
         request_obj = None
@@ -82,13 +82,13 @@ class ServerMethod(ABC):
     @classmethod
     def _execute(cls, request_obj, response_msg, session):
         """Contains the individual logic for processing a request specific to
-		the server method.
-		Must return a message class object (response_msg_cls instance) with a
-		filled status.
-		:param request_obj - request_obj_cls instance with request data.
-		:param response_msg - response_msg_cls instance.
-		:return response_msg_cls instance.
-		"""
+        the server method.
+        Must return a message class object (response_msg_cls instance) with a
+        filled status.
+        :param request_obj - request_obj_cls instance with request data.
+        :param response_msg - response_msg_cls instance.
+        :return response_msg_cls instance.
+        """
         raise NotImplementedError
 
 
