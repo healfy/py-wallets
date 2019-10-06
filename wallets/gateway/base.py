@@ -21,6 +21,7 @@ class BaseGateway(ABC):
     ServiceStub: object
     LOGGER: logging.Logger
     EXC_CLASS: typing.Callable
+    response_attr: str = 'status'
 
     @retry(stop_max_attempt_number=conf['REMOTE_OPERATION_ATTEMPT_NUMBER'])
     def _base_request(self, request_message, request_method,
@@ -38,7 +39,8 @@ class BaseGateway(ABC):
             self.ALLOWED_STATUTES += extend_statutes
         try:
             response = request_method(request_message, timeout=self.TIMEOUT)
-            status = response.status.status
+            header = getattr(response, self.response_attr)
+            status = header.status
             if status in self.ALLOWED_STATUTES:
                 if status != self.MODULE.SUCCESS:
                     self.LOGGER.warning(
