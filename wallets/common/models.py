@@ -63,31 +63,25 @@ class BaseModel(Base, AllFeaturesMixin):
         primary_key=True,
         autoincrement=True)
 
-    __created_at = Column(
-        'created_at',
-        DateTime(timezone=True),
-        nullable=False,
-        default=func.now())
+    created_at = Column('created_at',
+                        DateTime(timezone=True),
+                        nullable=False,
+                        default=datetime.utcnow())
 
-    __updated_at = Column('updated_at',
-                          DateTime(timezone=True),
-                          nullable=False,
-                          default=func.now(),
-                          onupdate=func.now())
-    __deleted_at = Column('deleted_at',
-                          DateTime(timezone=True),
-                          default=None)
+    updated_at = Column('updated_at',
+                        DateTime(timezone=True),
+                        nullable=False,
+                        default=datetime.utcnow(),
+                        onupdate=datetime.utcnow())
+    deleted_at = Column('deleted_at',
+                        DateTime(timezone=True),
+                        default=None)
 
     is_deleted = Column(Boolean,
                         comment='Is deleted row',
                         nullable=False,
                         default=False,
                         index=True)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.created_at = func.now()
-        self.updated_at = func.now()
 
     def _as_message_dict(self):
         raise NotImplementedError('NotImplemented')
@@ -116,7 +110,7 @@ class BaseModel(Base, AllFeaturesMixin):
         }
 
     def get_created_at(self):
-        return self.__created_at
+        return self.created_at
 
     def delete(self):
         self.deleted_at = datetime.utcnow().replace(tzinfo=pytz.utc)
@@ -248,7 +242,13 @@ class Transaction(BaseModel):
                       ) -> typing.NoReturn:
 
         if status == TransactionStatus.CONFIRMED.value:
-            self.status = TransactionStatus.CONFIRMED.value
-            self.confirmed_at = datetime.now().replace(tzinfo=pytz.utc)
-            session.commit()
-            session.refresh(self)
+            status = TransactionStatus.CONFIRMED.value
+            confirmed_at = datetime.now().replace(tzinfo=pytz.utc)
+            self.outer_update(session, status=status, confirmed_at=confirmed_at)
+
+    def outer_update(self,
+                     session: Session,
+                     **params: typing.Optional
+                     ) -> typing.NoReturn:
+        session.query(Transaction).filter_by(id=self.id).update(params)
+        session.commit()

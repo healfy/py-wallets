@@ -264,19 +264,20 @@ class GetInputTrxMethod(ServerMethod):
             request_obj: request_objects.GetInputTrxRequestObject,
             query: Query
     ) -> typing.Iterable[Transaction]:
-
-        date_from = datetime.utcnow().replace(tzinfo=pytz.utc) - timedelta(days=1)
         date_to = datetime.utcnow().replace(hour=0, minute=0, tzinfo=pytz.utc)
+        date_from = date_to - timedelta(days=1)
 
-        if getattr(request_obj, 'time_from'):
+        if getattr(request_obj, 'time_from', None):
             date_from = datetime.fromtimestamp(request_obj.time_from).replace(
                 tzinfo=pytz.utc)
-        if getattr(request_obj, 'time_to'):
+        if getattr(request_obj, 'time_to', None):
             date_to = datetime.fromtimestamp(request_obj.time_to).replace(
                 tzinfo=pytz.utc)
+        for q in query.all():
+            print(q.created_at)
         return query.filter(
             and_(
-                Transaction.confirmed_at >= date_from,
-                Transaction.confirmed_at <= date_to
+                Transaction.created_at >= date_from,
+                Transaction.created_at <= date_to
             )
         ).all()
