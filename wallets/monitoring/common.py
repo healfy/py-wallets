@@ -181,7 +181,7 @@ class CheckTransactionsMonitor(BaseMonitorClass,
     @classmethod
     def get_data(cls):
         return simple_generator(
-            Wallet.query.filter_by(on_monitoring=True).all()
+            Wallet.query.filter_by(on_monitoring=True)
         )
 
     @classmethod
@@ -190,7 +190,7 @@ class CheckTransactionsMonitor(BaseMonitorClass,
             trx_list = b_gw.get_transactions_list(
                 wallet_address=wallet.address, external_id=wallet.external_id
             )
-            for trx in simple_generator(trx_list):
+            for trx in trx_list:
                 if not cls.exists(trx['hash']) \
                         and cls.is_input_trx(trx['to'], wallet):
                     cls.save(wallet, trx)

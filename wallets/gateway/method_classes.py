@@ -220,7 +220,7 @@ class UpdateTrxMethod(ServerMethod):
             response_msg: w_pb2.TransactionResponse,
             session: Session
     ) -> w_pb2.TransactionResponse:
-        for trx in simple_generator(request_obj.transactions):
+        for trx in request_obj.transactions:
             trx_in_base = session.query(
                 Transaction).filter_by(hash=trx.hash).first()
             trx_in_base.set_confirmed(trx.status, session)
@@ -246,7 +246,7 @@ class GetInputTrxMethod(ServerMethod):
         )
         query = cls.additional_filter(request_obj, query)
 
-        for trx in query:
+        for trx in query.__iter__():
             response_msg.transactions.append(
                 w_pb2.Transaction(
                     hash=trx.hash,
@@ -278,4 +278,4 @@ class GetInputTrxMethod(ServerMethod):
                 Transaction.created_at >= date_from,
                 Transaction.created_at <= date_to
             )
-        ).all()
+        )
