@@ -273,8 +273,6 @@ class GetInputTrxMethod(ServerMethod):
         if getattr(request_obj, 'time_to', None):
             date_to = datetime.fromtimestamp(request_obj.time_to).replace(
                 tzinfo=pytz.utc)
-        for q in query.all():
-            print(q.created_at)
         return query.filter(
             and_(
                 Transaction.created_at >= date_from,
