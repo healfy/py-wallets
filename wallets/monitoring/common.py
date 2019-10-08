@@ -11,7 +11,6 @@ from wallets import session_scope
 from wallets.common import Wallet
 from wallets.common import Transaction
 from wallets.utils import send_message
-from wallets.utils import simple_generator
 from wallets.gateway import currencies_service_gw as c_gw
 from wallets.gateway import blockchain_service_gw as b_gw
 
@@ -179,18 +178,16 @@ class CheckTransactionsMonitor(BaseMonitorClass,
                                ValidateTRX):
 
     @classmethod
-    def get_data(cls):
-        return simple_generator(
-            Wallet.query.filter_by(on_monitoring=True)
-        )
+    def get_data(cls) -> typing.Generator:
+        return Wallet.query.filter_by(on_monitoring=True).__iter__()
 
     @classmethod
-    def _execute(cls):
+    def _execute(cls) -> typing.NoReturn:
         for wallet in cls.get_data():
             trx_list = b_gw.get_transactions_list(
                 wallet_address=wallet.address, external_id=wallet.external_id
             )
             for trx in trx_list:
                 if not cls.exists(trx['hash']) \
-                        and cls.is_input_trx(trx['to'], wallet):
+                        and cls.is_input_trx(trx['address_to'], wallet):
                     cls.save(wallet, trx)

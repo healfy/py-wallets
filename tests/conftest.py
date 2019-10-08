@@ -1,5 +1,6 @@
 import os
 import uuid
+import pytz
 import pytest
 from decimal import Decimal
 from datetime import datetime
@@ -16,6 +17,7 @@ from wallets.common.models import Base
 from wallets.utils.consts import TransactionStatus
 from wallets.settings.config import conf
 from wallets.shared.logging import init_logger
+from wallets.rpc import blockchain_gateway_pb2
 
 dbsession = None
 
@@ -223,3 +225,64 @@ def transactions(wallet):
     dbsession.add_all([trx, trx_2])
     dbsession.commit()
     yield [trx, trx_2]
+
+
+@pytest.fixture
+def check_input_trxs_objects():
+    time1_ = datetime.utcnow().replace(tzinfo=pytz.utc)
+
+    address1 = f'{uuid.uuid4()}'
+    address2 = f'{uuid.uuid4()}'
+
+    wallet1 = Wallet(
+        currency_slug='bitcoin',
+        address=address1,
+        external_id=223
+    )
+
+    wallet2 = Wallet(
+        currency_slug='etherium',
+        address=address2,
+        external_id=21
+    )
+
+    dbsession.add_all([wallet1, wallet2])
+    dbsession.commit()
+    trx1_response = {
+        'transactions': [{
+            'from': 'address1',
+            'to': address1,
+            'currencySlug': wallet1.currency_slug,
+            'time': int(round(time1_.timestamp())),
+            'value': "0.0001",
+            'hash': f'{uuid.uuid4()}',
+        }],
+        'status': {
+            'status': blockchain_gateway_pb2.ResponseStatus.Name(
+                blockchain_gateway_pb2.PENDING)
+        }
+    }
+
+    trx2_response = {
+        'transactions': [{
+            'from': 'address2',
+            'to': address2,
+            'currencySlug': wallet2.currency_slug,
+            'time': int(round(time1_.timestamp())),
+            'value': '0.021',
+            'hash': f'{uuid.uuid4()}',
+        }],
+        'status': {
+            'status': blockchain_gateway_pb2.ResponseStatus.Name(
+                blockchain_gateway_pb2.SUCCESS)
+        }
+    }
+
+    dct = {
+        'trx1_resp': trx1_response,
+        'trx2_resp': trx2_response,
+        'wallet1': wallet1,
+        'wallet2': wallet2,
+
+    }
+    yield dct

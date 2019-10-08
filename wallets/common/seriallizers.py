@@ -20,3 +20,9 @@ class TransactionSchema(Schema):
     value = DecimalStringField(data_key='value', required=True)
     hash = fields.String(required=True)
     wallet_id = fields.Integer(required=False)
+    time = fields.Integer(required=False)
+
+    def _serialize(self, obj, *, many=False):
+        ret = super()._serialize(obj, many=many)
+        ret.pop('time', None)
+        return ret

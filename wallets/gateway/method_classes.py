@@ -14,7 +14,6 @@ from wallets import logger
 from wallets import request_objects
 from wallets.utils.consts import TransactionStatus
 from wallets.utils import send_message
-from wallets.utils import simple_generator
 from wallets.common import Wallet
 from wallets.common import Transaction
 from wallets.gateway import blockchain_service_gw

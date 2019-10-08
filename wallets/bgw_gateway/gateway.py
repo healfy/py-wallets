@@ -87,5 +87,5 @@ class BlockChainServiceGateWay(BaseGateway):
             )
             resp_data = response_data.get('transactions', [])
         return [
-            TransactionSchema().load(elem, unknown=True) for elem in resp_data
+            TransactionSchema().load(elem) for elem in resp_data
         ]
