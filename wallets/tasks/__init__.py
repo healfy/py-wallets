@@ -1,5 +1,6 @@
 import time
 import schedule
+from wallets import db
 from wallets import conf
 from wallets.monitoring import common
 from wallets.utils import threaded
@@ -7,12 +8,12 @@ from wallets.utils import threaded
 
 @threaded
 def check_wallets():
-    common.CheckWalletMonitor.process()
+    common.CheckWalletMonitor.process(db.session)
 
 
 @threaded
 def check_transactions():
-    common.CheckTransactionsMonitor.process()
+    common.CheckTransactionsMonitor.process(db.session)
 
 
 schedule.every(conf['MONITORING_WALLETS_PERIOD']).hours.do(

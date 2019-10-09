@@ -22,7 +22,7 @@ class TransactionSchema(Schema):
     wallet_id = fields.Integer(required=False)
     time = fields.Integer(required=False)
 
-    def _serialize(self, obj, *, many=False):
-        ret = super()._serialize(obj, many=many)
+    def _deserialize(self, data, *args, **kwargs):
+        ret = super()._deserialize(data, *args, **kwargs)
         ret.pop('time', None)
         return ret

@@ -4,10 +4,10 @@ import traceback
 from decimal import Decimal
 from decimal import ROUND_HALF_UP
 from flask import render_template
+from sqlalchemy.orm import Session
 
 from wallets.settings.config import conf
 from wallets import logger
-from wallets import session_scope
 from wallets.common import Wallet
 from wallets.common import Transaction
 from wallets.utils import send_message
@@ -28,24 +28,27 @@ class BaseMonitorClass(abc.ABC):
         raise NotImplementedError('Method not implemented!')
 
     @classmethod
-    def _execute(cls):
+    def _execute(cls, session: Session):
         """
         Main method that contains all logic
         """
         raise NotImplementedError('Method not implemented!')
 
     @classmethod
-    def process(cls):
+    def process(cls, session: Session):
         """
         Method to release logic
         """
         logger.info(f"{cls.__name__} group task started.")
         try:
-            cls._execute()
+            cls._execute(session)
         except Exception as e:
             logger.error(
                 f"Class {cls.__name__} failed with {e.__class__.__name__}: "
                 f"{e}. {traceback.format_stack()}")
+            session.rollback()
+        finally:
+            session.close()
 
 
 class CompareRemains:
@@ -96,20 +99,17 @@ class SaveTrx:
     """
 
     @classmethod
-    def save(cls, wallet: Wallet, request_object: typing.Dict):
-        with session_scope() as session:
-            try:
-                trx = Transaction.from_dict(request_object)
-                trx.wallet_id = wallet.id
-                session.add(trx)
-                session.commit()
-            except Exception as e:
-                logger.error(
-                    f"Class {cls.__name__} failed with {e.__class__.__name__}: "
-                    f"{e}. {traceback.format_stack()}")
-                session.rollback()
-            finally:
-                session.close()
+    def save(
+            cls,
+            wallet: Wallet,
+            request_object:
+            typing.Dict,
+            session: Session
+    ) -> typing.NoReturn:
+        trx = Transaction.from_dict(request_object)
+        trx.wallet_id = wallet.id
+        session.add(trx)
+        session.commit()
 
 
 class ValidateTRX:
@@ -149,7 +149,7 @@ class CheckWalletMonitor(BaseMonitorClass,
         return balances, rates
 
     @classmethod
-    def _execute(cls):
+    def _execute(cls, session):
         wallets, rates = cls.get_data()
 
         if not rates:
@@ -182,7 +182,7 @@ class CheckTransactionsMonitor(BaseMonitorClass,
         return Wallet.query.filter_by(on_monitoring=True).__iter__()
 
     @classmethod
-    def _execute(cls) -> typing.NoReturn:
+    def _execute(cls, session) -> typing.NoReturn:
         for wallet in cls.get_data():
             trx_list = b_gw.get_transactions_list(
                 wallet_address=wallet.address, external_id=wallet.external_id
@@ -190,4 +190,4 @@ class CheckTransactionsMonitor(BaseMonitorClass,
             for trx in trx_list:
                 if not cls.exists(trx['hash']) \
                         and cls.is_input_trx(trx['address_to'], wallet):
-                    cls.save(wallet, trx)
+                    cls.save(wallet, trx, session)

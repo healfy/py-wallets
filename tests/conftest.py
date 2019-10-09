@@ -251,7 +251,7 @@ def check_input_trxs_objects():
     trx1_response = {
         'transactions': [{
             'from': 'address1',
-            'to': address1,
+            'to': wallet1.address,
             'currencySlug': wallet1.currency_slug,
             'time': int(round(time1_.timestamp())),
             'value': "0.0001",
@@ -266,7 +266,7 @@ def check_input_trxs_objects():
     trx2_response = {
         'transactions': [{
             'from': 'address2',
-            'to': address2,
+            'to': wallet2.address,
             'currencySlug': wallet2.currency_slug,
             'time': int(round(time1_.timestamp())),
             'value': '0.021',
