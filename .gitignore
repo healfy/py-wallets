@@ -44,8 +44,8 @@ Session.vim
 *~
 # Auto-generated tag files
 tags
-
-
+wallets/.hypothesis
+.hypothesis
 # For stringer
 *_string.go
 
@@ -170,3 +170,4 @@ pkg
 
 /wallets/settings/local_config.yaml
 wallets/rpc/wallets_grpc.pye
+.log
