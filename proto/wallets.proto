@@ -83,6 +83,17 @@ service Wallets {
 		};
 	}
 
+    rpc StartMonitoringPlatformWallet(PlatformWLTMonitoringRequest) returns (PlatformWLTMonitoringResponse) {
+		option (google.api.http) = {
+			post: "/start_monitoring/platform"
+			body: "*"
+		};
+		option (grpc.gateway.protoc_gen_swagger.options.openapiv2_operation) = {
+			summary: "Endpoint to start monitoring platform wallet"
+			description: "Endpoint to start monitoring platform wallet";
+		};
+	}
+
 
 }
 
@@ -171,4 +182,13 @@ message InputTransactionsRequest{
 message InputTransactionsResponse{
     ResponseHeader header = 1;
     repeated Transaction transactions = 2;
+}
+
+message PlatformWLTMonitoringRequest {
+    Wallet wallet = 1;
+    string expected_address = 2;
+}
+
+message PlatformWLTMonitoringResponse {
+    ResponseHeader header = 1;
 }

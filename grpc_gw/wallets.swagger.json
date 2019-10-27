@@ -121,6 +121,34 @@
         ]
       }
     },
+    "/start_monitoring/platform": {
+      "post": {
+        "summary": "Endpoint to start monitoring platform wallet",
+        "description": "Endpoint to start monitoring platform wallet",
+        "operationId": "StartMonitoringPlatformWallet",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/walletsPlatformWLTMonitoringResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/walletsPlatformWLTMonitoringRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Wallets"
+        ]
+      }
+    },
     "/stop_monitoring": {
       "post": {
         "summary": "Stop monitoring wallet on service endpoint",
@@ -204,6 +232,14 @@
         },
         "wallet_address": {
           "type": "string"
+        },
+        "time_from": {
+          "type": "string",
+          "format": "int64"
+        },
+        "time_to": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -230,6 +266,25 @@
       }
     },
     "walletsMonitoringResponse": {
+      "type": "object",
+      "properties": {
+        "header": {
+          "$ref": "#/definitions/walletsResponseHeader"
+        }
+      }
+    },
+    "walletsPlatformWLTMonitoringRequest": {
+      "type": "object",
+      "properties": {
+        "wallet": {
+          "$ref": "#/definitions/walletsWallet"
+        },
+        "expected_address": {
+          "type": "string"
+        }
+      }
+    },
+    "walletsPlatformWLTMonitoringResponse": {
       "type": "object",
       "properties": {
         "header": {

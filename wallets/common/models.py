@@ -189,7 +189,7 @@ class Transaction(BaseModel):
                     nullable=False,
                     comment='current transaction status')
     hash = Column(Text,
-                  nullable=False,
+                  nullable=True,
                   comment='transaction hash',
                   unique=True)
 

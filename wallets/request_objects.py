@@ -70,6 +70,11 @@ class WalletMessage(BaseRequestObject):
     currency_slug: str
     address: str
     is_platform: bool
+    external_id: int
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.external_id = self.id
 
     def is_valid(self):
         if not any([self.id, self.address, self.currency_slug]):
@@ -243,3 +248,34 @@ class GetInputTrxRequestObject(BaseRequestObject):
                 ValueError('wallet_id is required'))
             return False
         return True
+
+
+class PlatformWLTMonitoringRequestObject(BaseMonitoringRequest):
+    wallet: typing.Union[WalletMessage, typing.Dict]
+    expected_address: str
+
+    def dict(self):
+        return {
+            'external_id': self.wallet.id,
+            'is_platform': getattr(self.wallet, 'is_platform', False),
+            'address': self.wallet.address,
+            'currency_slug': self.wallet.currency_slug,
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._errors = set()
+        self.wallet = WalletMessage.from_dict(self.wallet)
+
+    def is_valid(self) -> bool:
+        wlt = getattr(self, 'wallet', None)
+        expected_address = getattr(self, 'expected_address', None)
+        if wlt and expected_address:
+            if wlt.is_valid():
+                return True
+            else:
+                self._errors.add(wlt.error)
+                return False
+        self._errors.add(ValueError('need expected_address, wallet message to '
+                                    'send'))
+        return False

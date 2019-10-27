@@ -40,3 +40,10 @@ class WalletsService(wallets_grpc.WalletsBase):
         await stream.send_message(method_classes.GetInputTrxMethod.process(
             request, db.session
         ))
+
+    async def StartMonitoringPlatformWallet(self, stream):
+        request = await stream.recv_message()
+        await stream.send_message(
+            method_classes.StartMonitoringPlatformWLTMethod.process(
+                request, db.session
+            ))

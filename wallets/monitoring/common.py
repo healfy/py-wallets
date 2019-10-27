@@ -128,6 +128,13 @@ class ValidateTRX:
         return wallet.address == address
 
 
+class HandleTransactions:
+
+    @classmethod
+    def handle(cls, wallet: Wallet, trx_list: list):
+        pass
+
+
 class CheckWalletMonitor(BaseMonitorClass,
                          CompareRemains):
     """
@@ -179,7 +186,7 @@ class CheckTransactionsMonitor(BaseMonitorClass,
 
     @classmethod
     def get_data(cls) -> typing.Generator:
-        return Wallet.query.filter_by(on_monitoring=True).__iter__()
+        return Wallet.query.filter_by(on_monitoring=True, is_platform=False)
 
     @classmethod
     def _execute(cls, session) -> typing.NoReturn:
@@ -191,3 +198,21 @@ class CheckTransactionsMonitor(BaseMonitorClass,
                 if not cls.exists(trx['hash']) \
                         and cls.is_input_trx(trx['address_to'], wallet):
                     cls.save(wallet, trx, session)
+
+
+class CheckPlatformWalletsMonitor(CheckTransactionsMonitor):
+
+    @classmethod
+    def get_data(cls) -> typing.Generator:
+        return Wallet.query.filter_by(on_monitoring=True, is_platform=True)
+
+    @classmethod
+    def _execute(cls, session) -> typing.NoReturn:
+        for wallet in cls.get_data():
+            trx_list = b_gw.get_transactions_list(
+                wallet_address=wallet.address, external_id=wallet.external_id
+            )
+            for trx in trx_list:
+                if not cls.exists(trx['hash']) \
+                        and cls.is_input_trx(trx['address_to'], wallet):
+                    pass

@@ -96,7 +96,10 @@ class SaveWallet:
     @classmethod
     def _save(
             cls,
-            request: request_objects.MonitoringRequestObject,
+            request: typing.Union[
+                request_objects.MonitoringRequestObject,
+                request_objects.PlatformWLTMonitoringRequestObject
+            ],
             session: Session
     ):
         data = request.dict()
@@ -245,7 +248,7 @@ class GetInputTrxMethod(ServerMethod):
         )
         query = cls.additional_filter(request_obj, query)
 
-        for trx in query.__iter__():
+        for trx in query:
             response_msg.transactions.append(
                 w_pb2.Transaction(
                     hash=trx.hash,
@@ -278,3 +281,31 @@ class GetInputTrxMethod(ServerMethod):
                 Transaction.created_at <= date_to
             )
         )
+
+
+class StartMonitoringPlatformWLTMethod(ServerMethod, SaveWallet):
+    request_obj_cls = request_objects.PlatformWLTMonitoringRequestObject
+    response_msg_cls = w_pb2.PlatformWLTMonitoringResponse
+
+    @classmethod
+    def _execute(
+            cls,
+            request_obj: request_objects.PlatformWLTMonitoringRequestObject,
+            response_msg: w_pb2.PlatformWLTMonitoringResponse,
+            session: Session
+    ) -> w_pb2.PlatformWLTMonitoringResponse:
+        try:
+            cls._save(request_obj, session)
+        except ValueError as e:
+            logger.info(e)
+
+        trx = Transaction(
+                address_to=request_obj.wallet.address,
+                currency_slug=request_obj.wallet.currency_slug,
+                address_from=request_obj.expected_address,
+                wallet_id=request_obj.wallet.external_id
+            )
+        session.add(trx)
+        session.commit()
+        response_msg.header.status = w_pb2.SUCCESS
+        return response_msg

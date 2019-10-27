@@ -37,15 +37,6 @@ func request_Wallets_Healthz_0(ctx context.Context, marshaler runtime.Marshaler,
 
 }
 
-func local_request_Wallets_Healthz_0(ctx context.Context, marshaler runtime.Marshaler, server WalletsServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq HealthzRequest
-	var metadata runtime.ServerMetadata
-
-	msg, err := server.Healthz(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
 func request_Wallets_StartMonitoring_0(ctx context.Context, marshaler runtime.Marshaler, client WalletsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq MonitoringRequest
 	var metadata runtime.ServerMetadata
@@ -63,23 +54,6 @@ func request_Wallets_StartMonitoring_0(ctx context.Context, marshaler runtime.Ma
 
 }
 
-func local_request_Wallets_StartMonitoring_0(ctx context.Context, marshaler runtime.Marshaler, server WalletsServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq MonitoringRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := server.StartMonitoring(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
 func request_Wallets_StopMonitoring_0(ctx context.Context, marshaler runtime.Marshaler, client WalletsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq MonitoringRequest
 	var metadata runtime.ServerMetadata
@@ -93,23 +67,6 @@ func request_Wallets_StopMonitoring_0(ctx context.Context, marshaler runtime.Mar
 	}
 
 	msg, err := client.StopMonitoring(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_Wallets_StopMonitoring_0(ctx context.Context, marshaler runtime.Marshaler, server WalletsServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq MonitoringRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := server.StopMonitoring(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -134,19 +91,6 @@ func request_Wallets_CheckBalance_0(ctx context.Context, marshaler runtime.Marsh
 
 }
 
-func local_request_Wallets_CheckBalance_0(ctx context.Context, marshaler runtime.Marshaler, server WalletsServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CheckBalanceRequest
-	var metadata runtime.ServerMetadata
-
-	if err := runtime.PopulateQueryParameters(&protoReq, req.URL.Query(), filter_Wallets_CheckBalance_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := server.CheckBalance(ctx, &protoReq)
-	return msg, metadata, err
-
-}
-
 func request_Wallets_UpdateTrx_0(ctx context.Context, marshaler runtime.Marshaler, client WalletsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq TransactionRequest
 	var metadata runtime.ServerMetadata
@@ -160,23 +104,6 @@ func request_Wallets_UpdateTrx_0(ctx context.Context, marshaler runtime.Marshale
 	}
 
 	msg, err := client.UpdateTrx(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-
-}
-
-func local_request_Wallets_UpdateTrx_0(ctx context.Context, marshaler runtime.Marshaler, server WalletsServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq TransactionRequest
-	var metadata runtime.ServerMetadata
-
-	newReader, berr := utilities.IOReaderFactory(req.Body)
-	if berr != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
-	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-
-	msg, err := server.UpdateTrx(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -198,8 +125,8 @@ func request_Wallets_GetInputTransactions_0(ctx context.Context, marshaler runti
 
 }
 
-func local_request_Wallets_GetInputTransactions_0(ctx context.Context, marshaler runtime.Marshaler, server WalletsServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq InputTransactionsRequest
+func request_Wallets_StartMonitoringPlatformWallet_0(ctx context.Context, marshaler runtime.Marshaler, client WalletsClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq PlatformWLTMonitoringRequest
 	var metadata runtime.ServerMetadata
 
 	newReader, berr := utilities.IOReaderFactory(req.Body)
@@ -210,137 +137,9 @@ func local_request_Wallets_GetInputTransactions_0(ctx context.Context, marshaler
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
-	msg, err := server.GetInputTransactions(ctx, &protoReq)
+	msg, err := client.StartMonitoringPlatformWallet(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
-}
-
-// RegisterWalletsHandlerServer registers the http handlers for service Wallets to "mux".
-// UnaryRPC     :call WalletsServer directly.
-// StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-func RegisterWalletsHandlerServer(ctx context.Context, mux *runtime.ServeMux, server WalletsServer) error {
-
-	mux.Handle("GET", pattern_Wallets_Healthz_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Wallets_Healthz_0(rctx, inboundMarshaler, server, req, pathParams)
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Wallets_Healthz_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("POST", pattern_Wallets_StartMonitoring_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Wallets_StartMonitoring_0(rctx, inboundMarshaler, server, req, pathParams)
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Wallets_StartMonitoring_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("POST", pattern_Wallets_StopMonitoring_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Wallets_StopMonitoring_0(rctx, inboundMarshaler, server, req, pathParams)
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Wallets_StopMonitoring_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("GET", pattern_Wallets_CheckBalance_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Wallets_CheckBalance_0(rctx, inboundMarshaler, server, req, pathParams)
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Wallets_CheckBalance_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("POST", pattern_Wallets_UpdateTrx_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Wallets_UpdateTrx_0(rctx, inboundMarshaler, server, req, pathParams)
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Wallets_UpdateTrx_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	mux.Handle("POST", pattern_Wallets_GetInputTransactions_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		rctx, err := runtime.AnnotateIncomingContext(ctx, mux, req)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_Wallets_GetInputTransactions_0(rctx, inboundMarshaler, server, req, pathParams)
-		ctx = runtime.NewServerMetadataContext(ctx, md)
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-
-		forward_Wallets_GetInputTransactions_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-
-	})
-
-	return nil
 }
 
 // RegisterWalletsHandlerFromEndpoint is same as RegisterWalletsHandler but
@@ -501,6 +300,26 @@ func RegisterWalletsHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 
 	})
 
+	mux.Handle("POST", pattern_Wallets_StartMonitoringPlatformWallet_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		rctx, err := runtime.AnnotateContext(ctx, mux, req)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_Wallets_StartMonitoringPlatformWallet_0(rctx, inboundMarshaler, client, req, pathParams)
+		ctx = runtime.NewServerMetadataContext(ctx, md)
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+
+		forward_Wallets_StartMonitoringPlatformWallet_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+
+	})
+
 	return nil
 }
 
@@ -516,6 +335,8 @@ var (
 	pattern_Wallets_UpdateTrx_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"update_trx"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_Wallets_GetInputTransactions_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"get_input_trx"}, "", runtime.AssumeColonVerbOpt(true)))
+
+	pattern_Wallets_StartMonitoringPlatformWallet_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"start_monitoring", "platform"}, "", runtime.AssumeColonVerbOpt(true)))
 )
 
 var (
@@ -530,4 +351,6 @@ var (
 	forward_Wallets_UpdateTrx_0 = runtime.ForwardResponseMessage
 
 	forward_Wallets_GetInputTransactions_0 = runtime.ForwardResponseMessage
+
+	forward_Wallets_StartMonitoringPlatformWallet_0 = runtime.ForwardResponseMessage
 )
