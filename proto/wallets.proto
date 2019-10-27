@@ -187,6 +187,7 @@ message InputTransactionsResponse{
 message PlatformWLTMonitoringRequest {
     Wallet wallet = 1;
     string expected_address = 2;
+    string expected_amount = 3;
 }
 
 message PlatformWLTMonitoringResponse {

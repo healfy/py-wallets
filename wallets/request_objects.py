@@ -253,6 +253,7 @@ class GetInputTrxRequestObject(BaseRequestObject):
 class PlatformWLTMonitoringRequestObject(BaseMonitoringRequest):
     wallet: typing.Union[WalletMessage, typing.Dict]
     expected_address: str
+    expected_amount: str
 
     def dict(self):
         return {
@@ -270,7 +271,8 @@ class PlatformWLTMonitoringRequestObject(BaseMonitoringRequest):
     def is_valid(self) -> bool:
         wlt = getattr(self, 'wallet', None)
         expected_address = getattr(self, 'expected_address', None)
-        if wlt and expected_address:
+        expected_amount = getattr(self, 'expected_amount', None)
+        if all([wlt, expected_address, expected_amount]):
             if wlt.is_valid():
                 return True
             else:

@@ -294,15 +294,12 @@ class StartMonitoringPlatformWLTMethod(ServerMethod, SaveWallet):
             response_msg: w_pb2.PlatformWLTMonitoringResponse,
             session: Session
     ) -> w_pb2.PlatformWLTMonitoringResponse:
-        try:
-            cls._save(request_obj, session)
-        except ValueError as e:
-            logger.info(e)
 
         trx = Transaction(
                 address_to=request_obj.wallet.address,
                 currency_slug=request_obj.wallet.currency_slug,
                 address_from=request_obj.expected_address,
+                value=request_obj.expected_amount,
                 wallet_id=request_obj.wallet.external_id
             )
         session.add(trx)
