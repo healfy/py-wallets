@@ -2,8 +2,10 @@ ADDRESS: "0.0.0.0"
 PORT: '50051'
 CURRENCY_GRPC_ADDRESS: "localhost:50053"
 BLOCKCHAIN_GW_ADDRESS: "localhost:50051"
+TRANSACTIONS_GW_ADDRESS: "localhost:50055"
 BLOCKCHAIN_GW_TIMEOUT: 5  # seconds
 CURRENCIES_GW_TIMEOUT: 5 # seconds
+TRANSACTIONS_GW_TIMEOUT: 5 # seconds
 MAIL_DOMAIN: 'mail.bonumchain.com'
 MAIL_USERNAME: 'dev@email.bonumchain.com'
 ENV: 'local'  # for logs

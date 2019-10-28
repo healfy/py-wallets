@@ -4,11 +4,15 @@ PY_DIR=wallets
 BC_PROTO = blockchain-gateway/proto
 BC_PROTO_F = blockchain-gateway/proto/blockchain_gateway.proto
 
+TRX_PROTO = transactions/proto
+TRX_PROTO_F =  transactions/proto/transactions.proto
+
 PROTO_PATH=proto/wallets.proto
 PROTOC_INCLUDE = \
 	-I=/usr/local/include \
 	-I proto/ \
 	-I $(BC_PROTO) \
+	-I $(TRX_PROTO) \
 	-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 	-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway
 
@@ -35,3 +39,10 @@ wallets-gw: $(PROTO_PATH) proto
 		--grpc-gateway_out=logtostderr=true:grpc_gw/proto \
 		--swagger_out=logtostderr=true:grpc_gw $(PROTO_PATH)
 	protoc $(PROTOC_INCLUDE) --go_out=plugins=grpc:grpc_gw/proto $(PROTO_PATH)  # for GOLANG client
+
+
+bgw-proto:
+	$(PROTOC) $(PROTOC_INCLUDE) $(BC_PROTO_F) --grpc_python_out=$(PY_DIR)/rpc --python_out=grpc:$(PY_DIR)/rpc
+
+transactions-proto:
+	$(PROTOC) $(PROTOC_INCLUDE) $(TRX_PROTO_F) --grpc_python_out=$(PY_DIR)/rpc --python_out=grpc:$(PY_DIR)/rpc

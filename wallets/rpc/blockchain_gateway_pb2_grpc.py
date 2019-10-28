@@ -69,6 +69,11 @@ class BlockchainGatewayServiceStub(object):
         request_serializer=blockchain__gateway__pb2.SendToColdWalletRequest.SerializeToString,
         response_deserializer=blockchain__gateway__pb2.SendToColdWalletResponse.FromString,
         )
+    self.CheckAddress = channel.unary_unary(
+        '/blockchain_gateway.BlockchainGatewayService/CheckAddress',
+        request_serializer=blockchain__gateway__pb2.CheckAddressRequest.SerializeToString,
+        response_deserializer=blockchain__gateway__pb2.CheckAddressResponse.FromString,
+        )
 
 
 class BlockchainGatewayServiceServicer(object):
@@ -153,6 +158,13 @@ class BlockchainGatewayServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def CheckAddress(self, request, context):
+    """GetBalance returns balance of wallet from request
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_BlockchainGatewayServiceServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -210,6 +222,11 @@ def add_BlockchainGatewayServiceServicer_to_server(servicer, server):
           servicer.SendToColdWallet,
           request_deserializer=blockchain__gateway__pb2.SendToColdWalletRequest.FromString,
           response_serializer=blockchain__gateway__pb2.SendToColdWalletResponse.SerializeToString,
+      ),
+      'CheckAddress': grpc.unary_unary_rpc_method_handler(
+          servicer.CheckAddress,
+          request_deserializer=blockchain__gateway__pb2.CheckAddressRequest.FromString,
+          response_serializer=blockchain__gateway__pb2.CheckAddressResponse.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
