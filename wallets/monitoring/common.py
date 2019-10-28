@@ -13,6 +13,7 @@ from wallets.common import Transaction
 from wallets.utils import send_message
 from wallets.gateway import currencies_service_gw as c_gw
 from wallets.gateway import blockchain_service_gw as b_gw
+from wallets.utils.consts import TransactionStatus
 
 
 class BaseMonitorClass(abc.ABC):
@@ -82,7 +83,7 @@ class CompareRemains:
             )
 
     @classmethod
-    def send_mail(cls, result: typing.List, warning: str = None):
+    def send_mail(cls, result: typing.Union[list, dict], warning: str = None):
         msg = 'Actual balances of platforms'
         if result:
             context = dict(wallets=result)
@@ -102,13 +103,36 @@ class SaveTrx:
     def save(
             cls,
             wallet: Wallet,
-            request_object:
-            typing.Dict,
+            request_object: typing.Dict,
             session: Session
     ) -> typing.NoReturn:
         trx = Transaction.from_dict(request_object)
         trx.wallet_id = wallet.id
         session.add(trx)
+        session.commit()
+
+
+class UpdateTrx:
+    """
+    Mixin Class for update transaction if it necessary
+    """
+    @classmethod
+    def update(
+            cls,
+            wallet: Wallet,
+            trx: typing.Dict,
+            session: Session
+    ) -> typing.NoReturn:
+
+        session.query(Transaction).filter_by(
+            wallet_id=wallet.id,
+            status=TransactionStatus.NEW.value,
+            address_from=trx['address_from'],
+            currency_slug=trx['currency_slug'],
+            value=trx['value'],
+            hash=None,
+        ).update({'hash': trx['hash']})
+
         session.commit()
 
 
@@ -128,13 +152,6 @@ class ValidateTRX:
         return wallet.address == address
 
 
-class HandleTransactions:
-
-    @classmethod
-    def handle(cls, wallet: Wallet, trx_list: list):
-        pass
-
-
 class CheckWalletMonitor(BaseMonitorClass,
                          CompareRemains):
     """
@@ -145,7 +162,7 @@ class CheckWalletMonitor(BaseMonitorClass,
     """
 
     @classmethod
-    def get_data(cls):
+    def get_data(cls) -> typing.Tuple[dict, typing.Optional[dict]]:
         balances = b_gw.get_platform_wallets_balance()
         try:
             currencies = c_gw.get_currencies()
@@ -156,7 +173,7 @@ class CheckWalletMonitor(BaseMonitorClass,
         return balances, rates
 
     @classmethod
-    def _execute(cls, session):
+    def _execute(cls, session) -> typing.NoReturn:
         wallets, rates = cls.get_data()
 
         if not rates:
@@ -200,7 +217,8 @@ class CheckTransactionsMonitor(BaseMonitorClass,
                     cls.save(wallet, trx, session)
 
 
-class CheckPlatformWalletsMonitor(CheckTransactionsMonitor):
+class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
+                                  UpdateTrx):
 
     @classmethod
     def get_data(cls) -> typing.Generator:
@@ -213,6 +231,6 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor):
                 wallet_address=wallet.address, external_id=wallet.external_id
             )
             for trx in trx_list:
-                if not cls.exists(trx['hash']) \
-                        and cls.is_input_trx(trx['address_to'], wallet):
-                    pass
+                if not cls.exists(trx['hash']) and  \
+                        cls.is_input_trx(trx['address_to'], wallet):
+                    cls.update(wallet, trx, session)

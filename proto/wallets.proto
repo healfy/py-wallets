@@ -185,9 +185,12 @@ message InputTransactionsResponse{
 }
 
 message PlatformWLTMonitoringRequest {
-    Wallet wallet = 1;
+    string uuid = 1;
     string expected_address = 2;
     string expected_amount = 3;
+    int64 wallet_id = 4;
+    string wallet_address = 5;
+    string expected_currency = 6;
 }
 
 message PlatformWLTMonitoringResponse {

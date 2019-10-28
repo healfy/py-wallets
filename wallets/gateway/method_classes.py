@@ -8,12 +8,13 @@ from decimal import Decimal
 from flask import render_template
 from sqlalchemy import and_
 from sqlalchemy.orm import Session, Query
+from sqlalchemy.sql.functions import coalesce
 
 from wallets import app
 from wallets import logger
 from wallets import request_objects
 from wallets.utils.consts import TransactionStatus
-from wallets.utils import send_message
+from wallets.utils import send_message, get_existing_wallet
 from wallets.common import Wallet
 from wallets.common import Transaction
 from wallets.gateway import blockchain_service_gw
@@ -283,7 +284,7 @@ class GetInputTrxMethod(ServerMethod):
         )
 
 
-class StartMonitoringPlatformWLTMethod(ServerMethod, SaveWallet):
+class StartMonitoringPlatformWLTMethod(ServerMethod):
     request_obj_cls = request_objects.PlatformWLTMonitoringRequestObject
     response_msg_cls = w_pb2.PlatformWLTMonitoringResponse
 
@@ -295,12 +296,16 @@ class StartMonitoringPlatformWLTMethod(ServerMethod, SaveWallet):
             session: Session
     ) -> w_pb2.PlatformWLTMonitoringResponse:
 
+        wallet = get_existing_wallet(
+            request_obj.wallet_id, request_obj.wallet_address)
+
         trx = Transaction(
-                address_to=request_obj.wallet.address,
-                currency_slug=request_obj.wallet.currency_slug,
+                address_to=wallet.address,
+                currency_slug=wallet.expected_currency,
                 address_from=request_obj.expected_address,
                 value=request_obj.expected_amount,
-                wallet_id=request_obj.wallet.external_id
+                wallet_id=wallet.id,
+                uuid=request_obj.uuid
             )
         session.add(trx)
         session.commit()

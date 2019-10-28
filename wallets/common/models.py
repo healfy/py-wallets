@@ -1,3 +1,4 @@
+import uuid
 import pytz
 import warnings
 import typing
@@ -19,6 +20,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy_mixins import AllFeaturesMixin
 
 from .seriallizers import WalletSchema
@@ -226,6 +228,12 @@ class Transaction(BaseModel):
                           default=None,
                           comment='time in that transaction confirmed'
                           )
+
+    uuid = Column(UUID(as_uuid=True),
+                  unique=True,
+                  nullable=False,
+                  default=uuid.uuid4(),
+                  comment='Additional identification for exchanger service')
 
     def _as_message_dict(self) -> typing.Dict:
         return {
