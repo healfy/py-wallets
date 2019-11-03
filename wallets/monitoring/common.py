@@ -11,8 +11,10 @@ from wallets import logger
 from wallets.common import Wallet
 from wallets.common import Transaction
 from wallets.utils import send_message
+from wallets.gateway.base import BaseGateway
 from wallets.gateway import currencies_service_gw as c_gw
 from wallets.gateway import blockchain_service_gw as b_gw
+from wallets.gateway import transactions_service_gw
 from wallets.utils.consts import TransactionStatus
 
 
@@ -54,7 +56,7 @@ class BaseMonitorClass(abc.ABC):
 
 class CompareRemains:
     """
-    Mixin Class for compare remains from platform wallets and
+    Class for compare remains from platform wallets and
     sending email if it necessary
     """
 
@@ -96,7 +98,7 @@ class CompareRemains:
 
 class SaveTrx:
     """
-    Mixin Class for save transaction if it necessary
+    Class for save transaction if it necessary
     """
 
     @classmethod
@@ -114,7 +116,7 @@ class SaveTrx:
 
 class UpdateTrx:
     """
-    Mixin Class for update transaction if it necessary
+    Class for update transaction if it necessary
     """
     @classmethod
     def update(
@@ -200,6 +202,10 @@ class CheckWalletMonitor(BaseMonitorClass,
 class CheckTransactionsMonitor(BaseMonitorClass,
                                SaveTrx,
                                ValidateTRX):
+    """
+    This method monitors the wallet for input transactions and
+    then stores them in the database
+    """
 
     @classmethod
     def get_data(cls) -> typing.Generator:
@@ -219,6 +225,11 @@ class CheckTransactionsMonitor(BaseMonitorClass,
 
 class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
                                   UpdateTrx):
+    """
+    This method monitors the wallet for input transactions and
+    then stores them in the database. This condition for the exchange service
+    transactions
+    """
 
     @classmethod
     def get_data(cls) -> typing.Generator:
@@ -234,3 +245,36 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
                 if not cls.exists(trx['hash']) and  \
                         cls.is_input_trx(trx['address_to'], wallet):
                     cls.update(wallet, trx, session)
+
+
+class SendToExternalService(BaseMonitorClass, abc.ABC):
+
+    gw: typing.Type['BaseGateway']
+
+    @classmethod
+    def _execute(cls, session) -> typing.NoReturn:
+        cls.send_to_external_service(cls.get_data())
+
+    @classmethod
+    def send_to_external_service(cls, data) -> typing.NoReturn:
+
+        raise NotImplementedError('Method not implemented!')
+
+
+class SendToTransactionService(SendToExternalService):
+    """
+    Put all transactions to the external service "Transactions".
+    Where they will monitor
+    """
+    gw = transactions_service_gw
+
+    @classmethod
+    def get_data(cls) -> typing.Generator:
+        return Transaction.query.filter(
+            Transaction.hash is not None,
+            Transaction.status == TransactionStatus.NEW.value,
+        )
+
+    @classmethod
+    def send_to_external_service(cls, data) -> typing.NoReturn:
+        cls.gw.put_on_monitoring(data)

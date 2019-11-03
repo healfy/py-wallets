@@ -33,6 +33,7 @@ class TransactionsServiceGateway(BaseGateway):
                     'currencySlug': trx.currency_slug,
                     'wallet_id': trx.wallet_id,
                     'value': str(trx.value),
+                    'hash': trx.hash,
                 }
             )
             request_message.transactions.append(transaction)

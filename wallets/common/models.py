@@ -229,10 +229,9 @@ class Transaction(BaseModel):
                           comment='time in that transaction confirmed'
                           )
 
-    uuid = Column(UUID(as_uuid=True),
+    uuid = Column(Text,
                   unique=True,
-                  nullable=False,
-                  default=uuid.uuid4(),
+                  nullable=True,
                   comment='Additional identification for exchanger service')
 
     def _as_message_dict(self) -> typing.Dict:

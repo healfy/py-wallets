@@ -4,3 +4,6 @@
 [submodule "transactions"]
 	path = transactions
 	url = git@gitlab.com:bonum/blockchain/transactions.git
+[submodule "py-exchanger"]
+	path = py-exchanger
+	url = git@gitlab.com:bonum/py-exchanger.git
