@@ -7,12 +7,16 @@ BC_PROTO_F = blockchain-gateway/proto/blockchain_gateway.proto
 TRX_PROTO = transactions/proto
 TRX_PROTO_F =  transactions/proto/transactions.proto
 
+EXC_PROTO = py-exchanger/proto
+EXC_PROTO_F =  py-exchanger/proto/exchanger.proto
+
 PROTO_PATH=proto/wallets.proto
 PROTOC_INCLUDE = \
 	-I=/usr/local/include \
 	-I proto/ \
 	-I $(BC_PROTO) \
 	-I $(TRX_PROTO) \
+	-I $(EXC_PROTO) \
 	-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
 	-I${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway
 
@@ -34,6 +38,8 @@ proto: $(PROTO_PATH)
 		--python_out=plugins=grpc:$(OUT_DIR) $(PROTO_PATH)
 	sed -ie 's/protoc-gen-swagger/protoc_gen_swagger/g' $(OUT_DIR)/wallets_grpc.py
 
+proto: bgw-proto transactions-proto exchanger-proto
+
 wallets-gw: $(PROTO_PATH) proto
 	$(PROTOC) $(PROTOC_INCLUDE) \
 		--grpc-gateway_out=logtostderr=true:grpc_gw/proto \
@@ -46,3 +52,6 @@ bgw-proto:
 
 transactions-proto:
 	$(PROTOC) $(PROTOC_INCLUDE) $(TRX_PROTO_F) --grpc_python_out=$(PY_DIR)/rpc --python_out=grpc:$(PY_DIR)/rpc
+
+exchanger-proto:
+	$(PROTOC) $(PROTOC_INCLUDE) $(EXC_PROTO_F) --grpc_python_out=$(PY_DIR)/rpc --python_out=grpc:$(PY_DIR)/rpc

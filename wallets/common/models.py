@@ -149,12 +149,14 @@ class Wallet(BaseModel):
 
     address = Column(Text,
                      comment='Wallet address',
-                     nullable=False)
+                     nullable=False,
+                     unique=True)
 
     external_id = Column(Integer,
                          comment='id from deposits bridge serve for joining',
                          index=True,
-                         nullable=False)
+                         nullable=False,
+                         unique=True)
 
     is_platform = Column(Boolean,
                          comment='is platform wallet',
@@ -166,6 +168,11 @@ class Wallet(BaseModel):
                            default=True,
                            nullable=False,
                            index=True)
+    is_active = Column(Boolean,
+                       comment='wallet on work',
+                       default=True,
+                       nullable=False,
+                       index=True)
 
     def _as_message_dict(self) -> typing.Dict:
         return {
@@ -196,16 +203,20 @@ class Transaction(BaseModel):
                   unique=True)
 
     address_from = Column(Text,
-                          comment='initiator of transaction')
+                          comment='initiator of transaction',
+                          nullable=False)
 
     address_to = Column(Text,
-                        comment='to whom transfer transaction')
+                        comment='to whom transfer transaction',
+                        nullable=False,)
 
     currency_slug = Column(Text,
-                           comment='transaction currency')
+                           comment='transaction currency',
+                           nullable=False,)
 
     value = Column(DECIMAL,
-                   comment='transactions amount')
+                   comment='transactions amount',
+                   nullable=False,)
 
     is_fee_trx = Column(Boolean,
                         comment='Is it transaction to send fee on wallet',

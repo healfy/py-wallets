@@ -12,3 +12,5 @@ from wallets.rpc.blockchain_gateway_pb2_grpc import blockchain__gateway__pb2 \
 from wallets.rpc.currencies_pb2_grpc import currencies__pb2 as currencies_pb2
 
 from wallets.rpc.transactions_pb2_grpc import transactions__pb2 as transactions_pb2
+
+from wallets.rpc.exchanger_pb2_grpc import exchanger__pb2 as exchanger_pb2

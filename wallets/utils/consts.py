@@ -10,3 +10,5 @@ class TransactionStatus(IntEnum):
     FAILED = 4
     PENDING = 5
     CONFIRMED = 6
+    REPORTED = 7
+

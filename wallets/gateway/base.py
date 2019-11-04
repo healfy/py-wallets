@@ -19,7 +19,7 @@ class BaseGateway(ABC):
     NAME: str
     MODULE: typing.Any
     ServiceStub: object
-    LOGGER: logging.Logger
+    LOGGER: logging.Logger = logger
     EXC_CLASS: typing.Callable
     response_attr: str = 'status'
 
@@ -57,7 +57,7 @@ class BaseGateway(ABC):
                                         f"{self.MODULE.ResponseStatus.Name(status)}: "
                                         f"{response.status.description}.").replace("\n", " "))
         except Exception as exc:
-            logger.warning(f"{self.NAME} error",
+            self.LOGGER.error(f"{self.NAME} error",
                            {
                                "from": self.__class__.__name__,
                                "exc": exc,
