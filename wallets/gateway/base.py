@@ -55,7 +55,7 @@ class BaseGateway(ABC):
             raise self.EXC_CLASS(str(
                 self.bad_response_msg + f" Got status "
                                         f"{self.MODULE.ResponseStatus.Name(status)}: "
-                                        f"{response.status.description}.").replace("\n", " "))
+                                        f"{header.description}.").replace("\n", " "))
         except Exception as exc:
             self.LOGGER.error(f"{self.NAME} error",
                            {

@@ -251,17 +251,18 @@ class GetInputTrxRequestObject(BaseRequestObject):
 
 
 class PlatformWLTMonitoringRequestObject(BaseRequestObject):
-    uuid: str
-    expected_address: str
-    expected_amount: str
-    expected_currency: str
-    wallet_id: int
-    wallet_address: str
+    uuid: str = None
+    expected_address: str = None
+    expected_amount: str = None
+    expected_currency: str = None
+    wallet_id: int = None
+    wallet_address: str = None
 
     def is_valid(self):
-        if not all([self.wallet_id, self.wallet_address]) or\
+        if not all([self.wallet_id, self.wallet_address]) or not\
                 any([self.uuid, self.expected_address, self.expected_currency]):
             self._errors.add(
-                ValueError('wallet_id is required'))
+                ValueError('wallet_id or wallet_address, uuid, '
+                           'expected_address, expected_currency is required'))
             return False
         return True

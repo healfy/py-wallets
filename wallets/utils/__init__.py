@@ -72,7 +72,7 @@ def get_existing_wallet(_id: int = None, address: str = None
     from wallets.common import models
 
     if _id is not None:
-        return models.Wallet.query.get(_id)
+        return models.Wallet.query.filter_by(external_id=_id).first()
     if address is not None:
         return models.Wallet.query.filter(models.Wallet.address == address).first()
     raise ValueError(

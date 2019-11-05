@@ -56,8 +56,8 @@ class ServerMethod(ABC):
                     f"Got invalid request data for {cls.__name__}. "
                     f"Errors: {request_obj.error}.",
                     {'req': request_obj.dict()})
-                response.status.status = w_pb2.INVALID_REQUEST
-                response.status.description = request_obj.error
+                response.header.status = w_pb2.INVALID_REQUEST
+                response.header.description = request_obj.error
             else:
                 response = cls._execute(request_obj, response, session)
         except Exception as exc:
@@ -301,7 +301,7 @@ class StartMonitoringPlatformWLTMethod(ServerMethod):
 
         trx = Transaction(
                 address_to=wallet.address,
-                currency_slug=wallet.expected_currency,
+                currency_slug=request_obj.expected_currency,
                 address_from=request_obj.expected_address,
                 value=request_obj.expected_amount,
                 wallet_id=wallet.id,

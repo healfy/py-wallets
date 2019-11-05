@@ -43,12 +43,12 @@ def serve():
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(watch_config())
     server = Server([WalletsService()], loop=loop)
-    loop.create_task(server.start(addr, port))
+
     loop.create_task(run_tasks())
     logger.info(f"starting wallets server {addr}:{port}")
     print(f"starting wallets server {addr}:{port}")
     try:
-        loop.run_forever()
+        loop.run_until_complete(server.start(addr, port))
     except KeyboardInterrupt:
         pass
     server.close()
