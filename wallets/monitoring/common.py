@@ -1,6 +1,5 @@
 import abc
 import typing
-import traceback
 from decimal import Decimal
 from decimal import ROUND_HALF_UP
 from flask import render_template
@@ -51,14 +50,11 @@ class BaseMonitorClass(abc.ABC):
         """
         Method to release logic
         """
-        logger.info(f"{cls.__name__} task started.")
         try:
             cls._execute(session)
         except Exception as e:
-            logger.error(
-                f"Class {cls.__name__} failed with {e.__class__.__name__}: "
-                f"{e}. {traceback.format_stack()}")
             session.rollback()
+            raise e
         finally:
             session.close()
 
@@ -370,4 +366,5 @@ class SendToExchangerService(SendToExternalService):
 
 
 __TRANSACTIONS_TASKS__ = [SendToExchangerService, SendToTransactionService,
-                          CheckPlatformWalletsMonitor, CheckTransactionsMonitor]
+                          CheckPlatformWalletsMonitor,
+                          CheckTransactionsMonitor, CheckWalletMonitor]

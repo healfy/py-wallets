@@ -1,4 +1,5 @@
 import typing
+import traceback
 import asyncio
 from wallets import db
 from wallets import logger
@@ -19,10 +20,14 @@ def run_monitoring(
         while True:
             yield from asyncio.sleep(task_class.timeout)
             try:
-                yield from task_class.process(db.session)
+                logger.info(f"{task_class.__name__} task started.")
+                task_class.process(db.session)
                 logger.info(f'{task_class.__name__} finished')
             except Exception as e:
-                logger.error(e)
+                logger.error(
+                    f"Class {task_class.__name__} failed with "
+                    f"{e.__class__.__name__}: "
+                    f"{e}. {traceback.format_stack()}")
 
 
 __tasks__ = [
