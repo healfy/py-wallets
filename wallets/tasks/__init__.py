@@ -7,13 +7,6 @@ from wallets.monitoring.common import CheckWalletMonitor
 
 
 @asyncio.coroutine
-def check_wallets():
-    while True:
-        yield from asyncio.sleep(conf['MONITORING_WALLETS_PERIOD'])
-        yield from CheckWalletMonitor.process(db.session)
-
-
-@asyncio.coroutine
 def create_async_task(func, timeout):
     while True:
         yield from asyncio.sleep(timeout)
@@ -27,3 +20,6 @@ futures = [
     create_async_task(task.process, conf['MONITORING_TRANSACTIONS_PERIOD'])
     for task in __TRANSACTIONS_TASKS__
 ]
+futures.append(create_async_task(
+    CheckWalletMonitor.process, conf['MONITORING_WALLETS_PERIOD']
+))
