@@ -23,6 +23,7 @@ class BaseMonitorClass(abc.ABC):
     """
     Base class for monitoring
     """
+    timeout: int = conf['MONITORING_TRANSACTIONS_PERIOD']
 
     @classmethod
     def get_data(cls):
@@ -49,7 +50,7 @@ class BaseMonitorClass(abc.ABC):
         """
         Method to release logic
         """
-        logger.info(f"{cls.__name__} group task started.")
+        logger.info(f"{cls.__name__} task started.")
         try:
             cls._execute(session)
         except Exception as e:
@@ -187,6 +188,7 @@ class CheckWalletMonitor(BaseMonitorClass,
     If service currencies is unavailable, we send balance in wallet currency
     with attention, that currencies dont work correctly
     """
+    timeout = conf['MONITORING_TRANSACTIONS_PERIOD']
 
     @classmethod
     def get_data(cls) -> typing.Tuple[dict, typing.Optional[dict]]:
