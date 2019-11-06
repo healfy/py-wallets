@@ -366,3 +366,7 @@ class SendToExchangerService(SendToExternalService):
         for trx in data:
             trx.outer_update(session,
                              status=TransactionStatus.REPORTED.value)
+
+
+__TRANSACTIONS_TASKS__ = [SendToExchangerService, SendToTransactionService,
+                          CheckPlatformWalletsMonitor, CheckTransactionsMonitor]

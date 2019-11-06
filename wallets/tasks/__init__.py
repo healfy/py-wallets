@@ -1,47 +1,29 @@
-import time
-import schedule
+import asyncio
 from wallets import db
 from wallets import conf
-from wallets.monitoring import common
-from wallets.utils import threaded
+from wallets import logger
+from wallets.monitoring.common import __TRANSACTIONS_TASKS__
+from wallets.monitoring.common import CheckWalletMonitor
 
 
-@threaded
+@asyncio.coroutine
 def check_wallets():
-    common.CheckWalletMonitor.process(db.session)
-
-
-@threaded
-def check_transactions():
-    common.CheckTransactionsMonitor.process(db.session)
-
-
-@threaded
-def check_exchange_transactions():
-    common.CheckPlatformWalletsMonitor.process(db.session)
-
-
-@threaded
-def send_to_transactions_service():
-    common.SendToTransactionService.process(db.session)
-
-
-@threaded
-def send_to_exchanger_service():
-    common.SendToExchangerService.process(db.session)
-
-
-__tasks__ = [check_transactions, check_exchange_transactions,
-             send_to_transactions_service, send_to_exchanger_service]
-
-schedule.every(conf['MONITORING_WALLETS_PERIOD']).hours.do(
-    check_wallets)
-
-for func in __tasks__:
-    schedule.every(conf['MONITORING_TRANSACTIONS_PERIOD']).minutes.do(func)
-
-
-def run():
     while True:
-        schedule.run_pending()
-        time.sleep(1)
+        yield from asyncio.sleep(conf['MONITORING_WALLETS_PERIOD'])
+        yield from CheckWalletMonitor.process(db.session)
+
+
+@asyncio.coroutine
+def create_async_task(func, timeout):
+    while True:
+        yield from asyncio.sleep(timeout)
+        try:
+            yield from func(db.session)
+        except Exception as e:
+            logger.error(e)
+
+
+futures = [
+    create_async_task(task.process, conf['MONITORING_TRANSACTIONS_PERIOD'])
+    for task in __TRANSACTIONS_TASKS__
+]

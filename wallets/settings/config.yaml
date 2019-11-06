@@ -20,8 +20,8 @@ CELERY_NAMESPACE: 'local'
 MONITORING_TEMPLATE: 'monitoring_result.html'
 ALARM_TEMPLATE: 'balance_alarm.html'
 RECIPIENTS : []
-MONITORING_TRANSACTIONS_PERIOD: 5 # minutes
-MONITORING_WALLETS_PERIOD: 12 # hours
+MONITORING_TRANSACTIONS_PERIOD: 5 * 60  # seconds
+MONITORING_WALLETS_PERIOD: 12 * 3600 # seconds
 PGSTRING: 'postgresql:///wallets'
 Ethereum: 1000
 Bitcoin: 1000

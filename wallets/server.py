@@ -8,6 +8,8 @@ sys.path.extend(["../", "./", "../rpc", "./rpc"])
 from grpclib.server import Server
 from wallets import app, logger
 from wallets.gateway.server import WalletsService
+from wallets.tasks import futures
+from wallets.tasks import check_wallets
 
 
 @asyncio.coroutine
@@ -33,22 +35,17 @@ def watch_config():
             logger.info("consul read config error")
 
 
-def run_tasks():
-    from wallets import tasks
-    yield tasks.run()
-
-
 def serve():
     addr, port = app.config['ADDRESS'], app.config['PORT']
     loop = asyncio.get_event_loop()
-    asyncio.ensure_future(watch_config())
+    loop.create_task(check_wallets())
+    loop.create_task(asyncio.gather(*futures))
+    loop.create_task(watch_config())
     server = Server([WalletsService()], loop=loop)
-
-    loop.create_task(run_tasks())
+    loop.run_until_complete(server.start(addr, port))
     logger.info(f"starting wallets server {addr}:{port}")
-    print(f"starting wallets server {addr}:{port}")
     try:
-        loop.run_until_complete(server.start(addr, port))
+        loop.run_forever()
     except KeyboardInterrupt:
         pass
     server.close()
