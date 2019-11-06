@@ -5,6 +5,7 @@ from decimal import Decimal
 from decimal import ROUND_HALF_UP
 from flask import render_template
 from sqlalchemy.orm import Session
+from sqlalchemy.orm import Query
 
 from wallets.settings.config import conf
 from wallets import logger
@@ -188,7 +189,7 @@ class CheckWalletMonitor(BaseMonitorClass,
     If service currencies is unavailable, we send balance in wallet currency
     with attention, that currencies dont work correctly
     """
-    timeout = conf['MONITORING_TRANSACTIONS_PERIOD']
+    timeout = conf['MONITORING_WALLETS_PERIOD']
 
     @classmethod
     def get_data(cls) -> typing.Tuple[dict, typing.Optional[dict]]:
@@ -239,7 +240,7 @@ class CheckTransactionsMonitor(BaseMonitorClass,
     """
 
     @classmethod
-    def get_data(cls) -> typing.Generator:
+    def get_data(cls) -> Query:
         return Wallet.query.filter_by(on_monitoring=True, is_platform=False,
                                       is_active=True)
 
@@ -268,7 +269,7 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
     """
 
     @classmethod
-    def get_data(cls) -> typing.Generator:
+    def get_data(cls) -> Query:
         return Wallet.query.filter_by(on_monitoring=True, is_platform=True,
                                       is_active=True)
 
@@ -298,9 +299,7 @@ class SendToExternalService(BaseMonitorClass, abc.ABC):
             session: Session
     ) -> typing.NoReturn:
 
-        data = cls.get_data()
-
-        if list(data):
+        if cls.get_data().first():
             cls.send_to_external_service(cls.get_data())
 
     @classmethod
@@ -320,7 +319,7 @@ class SendToTransactionService(SendToExternalService):
     gw = transactions_service_gw
 
     @classmethod
-    def get_data(cls) -> typing.Generator:
+    def get_data(cls) -> Query:
 
         return Transaction.query.filter(
             Transaction.hash is not None,
@@ -346,7 +345,7 @@ class SendToExchangerService(SendToExternalService):
     gw = exchanger_service_gw
 
     @classmethod
-    def get_data(cls) -> typing.Generator:
+    def get_data(cls) -> Query:
 
         return Transaction.query.join(
             Wallet, Wallet.id == Transaction.wallet_id
