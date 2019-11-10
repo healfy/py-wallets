@@ -33,7 +33,7 @@ class BaseGateway(ABC):
         :param request_method: client request method
         """
         if bad_response_msg:
-            self.bad_response_msg = bad_response_msg
+            self.BAD_RESPONSE_MSG = bad_response_msg
 
         if extend_statutes:
             self.ALLOWED_STATUTES += extend_statutes
@@ -53,7 +53,7 @@ class BaseGateway(ABC):
                     )
                 return MessageToDict(response, preserving_proto_field_name=True)
             raise self.EXC_CLASS(str(
-                self.bad_response_msg + f" Got status "
+                self.BAD_RESPONSE_MSG + f" Got status "
                                         f"{self.MODULE.ResponseStatus.Name(status)}: "
                                         f"{header.description}.").replace("\n", " "))
         except Exception as exc:

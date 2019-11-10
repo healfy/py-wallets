@@ -325,7 +325,7 @@ class SendToTransactionService(SendToExternalService):
     @classmethod
     def send_to_external_service(
             cls,
-            data,
+            data: typing.Iterable[Transaction],
             session: Session = None
     ) -> typing.NoReturn:
 
@@ -355,7 +355,7 @@ class SendToExchangerService(SendToExternalService):
     @classmethod
     def send_to_external_service(
             cls,
-            data,
+            data: typing.Iterable[Transaction],
             session: Session = None
     ) -> typing.NoReturn:
 

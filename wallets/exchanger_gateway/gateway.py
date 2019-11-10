@@ -19,6 +19,7 @@ class ExchangerServiceGateway(BaseGateway):
     EXC_CLASS = ExchangerBadResponseException
     NAME = 'exchanger'
     BAD_RESPONSE_MSG = 'Bad response from exchanger service'
+    ALLOWED_STATUTES = (exchanger_pb2.SUCCESS,)
 
     def update_transactions(self,
                             transactions: typing.Iterable[Transaction]
@@ -31,7 +32,7 @@ class ExchangerServiceGateway(BaseGateway):
                 **{
                     'uuid': trx.uuid,
                     'value': str(trx.value),
-                    'hash': trx.hash,
+                    'trx_hash': trx.hash,
                 }
             )
             request_message.transactions.append(transaction)
