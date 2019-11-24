@@ -171,3 +171,4 @@ pkg
 /wallets/settings/local_config.yaml
 wallets/rpc/wallets_grpc.pye
 .log
+proto
