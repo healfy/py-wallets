@@ -54,6 +54,16 @@ class BlockchainGatewayServiceStub(object):
         request_serializer=blockchain__gateway__pb2.SendFromColdWalletRequest.SerializeToString,
         response_deserializer=blockchain__gateway__pb2.SendFromColdWalletResponse.FromString,
         )
+    self.GetPlatformWalletsBalance = channel.unary_unary(
+        '/blockchain_gateway.BlockchainGatewayService/GetPlatformWalletsBalance',
+        request_serializer=blockchain__gateway__pb2.EmptyRequest.SerializeToString,
+        response_deserializer=blockchain__gateway__pb2.GetPlatformWalletsBalanceResponse.FromString,
+        )
+    self.GetBalanceBySlug = channel.unary_unary(
+        '/blockchain_gateway.BlockchainGatewayService/GetBalanceBySlug',
+        request_serializer=blockchain__gateway__pb2.GetBalanceBySlugRequest.SerializeToString,
+        response_deserializer=blockchain__gateway__pb2.GetBalanceResponse.FromString,
+        )
     self.SendToColdWallet = channel.unary_unary(
         '/blockchain_gateway.BlockchainGatewayService/SendToColdWallet',
         request_serializer=blockchain__gateway__pb2.SendToColdWalletRequest.SerializeToString,
@@ -127,6 +137,20 @@ class BlockchainGatewayServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def GetPlatformWalletsBalance(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetBalanceBySlug(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def SendToColdWallet(self, request, context):
     """SendToColdWallet grabs amount from pledge wallet to platform's main wallet
     """
@@ -183,6 +207,16 @@ def add_BlockchainGatewayServiceServicer_to_server(servicer, server):
           servicer.SendFromColdWallet,
           request_deserializer=blockchain__gateway__pb2.SendFromColdWalletRequest.FromString,
           response_serializer=blockchain__gateway__pb2.SendFromColdWalletResponse.SerializeToString,
+      ),
+      'GetPlatformWalletsBalance': grpc.unary_unary_rpc_method_handler(
+          servicer.GetPlatformWalletsBalance,
+          request_deserializer=blockchain__gateway__pb2.EmptyRequest.FromString,
+          response_serializer=blockchain__gateway__pb2.GetPlatformWalletsBalanceResponse.SerializeToString,
+      ),
+      'GetBalanceBySlug': grpc.unary_unary_rpc_method_handler(
+          servicer.GetBalanceBySlug,
+          request_deserializer=blockchain__gateway__pb2.GetBalanceBySlugRequest.FromString,
+          response_serializer=blockchain__gateway__pb2.GetBalanceResponse.SerializeToString,
       ),
       'SendToColdWallet': grpc.unary_unary_rpc_method_handler(
           servicer.SendToColdWallet,
