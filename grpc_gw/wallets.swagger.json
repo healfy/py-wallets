@@ -4,7 +4,7 @@
     "title": "Wallets service",
     "version": "1.0"
   },
-  "basePath": "/api",
+  "basePath": "/api/v1",
   "schemes": [
     "http"
   ],
@@ -276,10 +276,23 @@
     "walletsPlatformWLTMonitoringRequest": {
       "type": "object",
       "properties": {
-        "wallet": {
-          "$ref": "#/definitions/walletsWallet"
+        "uuid": {
+          "type": "string"
         },
         "expected_address": {
+          "type": "string"
+        },
+        "expected_amount": {
+          "type": "string"
+        },
+        "wallet_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "wallet_address": {
+          "type": "string"
+        },
+        "expected_currency": {
           "type": "string"
         }
       }
