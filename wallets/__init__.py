@@ -31,7 +31,7 @@ def start_engine(restart=False):
      'PGSTRING'] != 'None' else URL(
       'postgresql',
       username=os.getenv('PGUSER'),
-      host=os.getenv('PGHOSTADDR'),
+      host=os.getenv('PGHOST'),
       password=os.getenv('PGPASSWORD'),
       database=os.getenv('PGDATABASE', 'postgres'),
      )
