@@ -147,9 +147,8 @@ class UpdateTrx:
             status=TransactionStatus.NEW.value,
             address_from=trx['address_from'],
             currency_slug=trx['currency_slug'],
-            value=trx['value'],
             hash=None,
-        ).update({'hash': trx['hash']})
+        ).update({'hash': trx['hash'], 'value': trx['value']})
 
         session.commit()
 
