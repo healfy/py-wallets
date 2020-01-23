@@ -17,7 +17,7 @@
   "paths": {
     "/check_balance": {
       "get": {
-        "summary": "Check Balance of platform wallets",
+        "summary": "Check Balance of platform wallets when issue loan",
         "description": "Check balance when we issue loan",
         "operationId": "CheckBalance",
         "responses": {
@@ -48,7 +48,7 @@
       }
     },
     "/get_input_trx": {
-      "post": {
+      "get": {
         "summary": "Endpoint to get wallet input transactions",
         "description": "Endpoint to get wallet input transactions",
         "operationId": "GetInputTransactions",
@@ -62,12 +62,31 @@
         },
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/walletsInputTransactionsRequest"
-            }
+            "name": "wallet_id",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "wallet_address",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "time_from",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "time_to",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -220,26 +239,6 @@
       "properties": {
         "header": {
           "$ref": "#/definitions/walletsResponseHeader"
-        }
-      }
-    },
-    "walletsInputTransactionsRequest": {
-      "type": "object",
-      "properties": {
-        "wallet_id": {
-          "type": "string",
-          "format": "int64"
-        },
-        "wallet_address": {
-          "type": "string"
-        },
-        "time_from": {
-          "type": "string",
-          "format": "int64"
-        },
-        "time_to": {
-          "type": "string",
-          "format": "int64"
         }
       }
     },
