@@ -2,12 +2,9 @@
 # source: wallets.proto
 # plugin: grpclib.plugin.main
 import abc
-import typing
 
 import grpclib.const
 import grpclib.client
-if typing.TYPE_CHECKING:
-    import grpclib.server
 
 import google.protobuf.timestamp_pb2
 import google.protobuf.duration_pb2
@@ -19,34 +16,34 @@ import wallets_pb2
 class WalletsBase(abc.ABC):
 
     @abc.abstractmethod
-    async def Healthz(self, stream: 'grpclib.server.Stream[wallets_pb2.HealthzRequest, wallets_pb2.HealthzResponse]') -> None:
+    async def Healthz(self, stream):
         pass
 
     @abc.abstractmethod
-    async def StartMonitoring(self, stream: 'grpclib.server.Stream[wallets_pb2.MonitoringRequest, wallets_pb2.MonitoringResponse]') -> None:
+    async def StartMonitoring(self, stream):
         pass
 
     @abc.abstractmethod
-    async def StopMonitoring(self, stream: 'grpclib.server.Stream[wallets_pb2.MonitoringRequest, wallets_pb2.MonitoringResponse]') -> None:
+    async def StopMonitoring(self, stream):
         pass
 
     @abc.abstractmethod
-    async def CheckBalance(self, stream: 'grpclib.server.Stream[wallets_pb2.CheckBalanceRequest, wallets_pb2.CheckBalanceResponse]') -> None:
+    async def CheckBalance(self, stream):
         pass
 
     @abc.abstractmethod
-    async def UpdateTrx(self, stream: 'grpclib.server.Stream[wallets_pb2.TransactionRequest, wallets_pb2.TransactionResponse]') -> None:
+    async def UpdateTrx(self, stream):
         pass
 
     @abc.abstractmethod
-    async def GetInputTransactions(self, stream: 'grpclib.server.Stream[wallets_pb2.InputTransactionsRequest, wallets_pb2.InputTransactionsResponse]') -> None:
+    async def GetInputTransactions(self, stream):
         pass
 
     @abc.abstractmethod
-    async def StartMonitoringPlatformWallet(self, stream: 'grpclib.server.Stream[wallets_pb2.PlatformWLTMonitoringRequest, wallets_pb2.PlatformWLTMonitoringResponse]') -> None:
+    async def StartMonitoringPlatformWallet(self, stream):
         pass
 
-    def __mapping__(self) -> typing.Dict[str, grpclib.const.Handler]:
+    def __mapping__(self):
         return {
             '/wallets.Wallets/Healthz': grpclib.const.Handler(
                 self.Healthz,
