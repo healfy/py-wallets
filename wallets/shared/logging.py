@@ -1,12 +1,14 @@
+import os
 import sys
+import typing
 from wallets.settings.config import conf
 import logging
 import logging.config
 
 
-logger: logging.Logger = None
+logger: typing.Optional[logging.Logger] = None
 
-LOGFILE = f'wallets[{conf.get("ENV")}].log'
+LOGFILE = os.path.join(f'{os.environ.get("LOGFILE", "")}', f'wallets[{conf.get("ENV")}].log')
 dictLogConfig = {
     'version': 1,
     'disable_existing_loggers': True,
