@@ -276,7 +276,7 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
 
         for wallet in cls.get_data():
             trx_list = b_gw.get_transactions_list(
-                wallet_address=wallet.address, external_id=wallet.external_id
+                wallet_address=wallet.address
             )
             for trx in trx_list:
                 if not cls.exists(trx['hash']) and  \

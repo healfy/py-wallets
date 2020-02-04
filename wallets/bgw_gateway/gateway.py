@@ -68,7 +68,7 @@ class BlockChainServiceGateWay(BaseGateway):
 
         """Return transactions list for wallet identifiable by id or address.
         """
-        if not all([external_id, wallet_address]):
+        if not wallet_address:
             raise ValueError(
                 'Expect at least one of external_id, wallet_address'
             )
