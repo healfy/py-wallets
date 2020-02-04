@@ -317,7 +317,7 @@ class SendToTransactionService(SendToExternalService):
     def get_data(cls) -> Query:
 
         return Transaction.query.filter(
-            Transaction.hash is not None,
+            Transaction.hash != None,
             Transaction.status == TransactionStatus.NEW.value,
         )
 
