@@ -19,6 +19,7 @@ class TransactionsServiceGateway(BaseGateway):
     EXC_CLASS = TransactionsBadResponseException
     NAME = 'transactions'
     ALLOWED_STATUTES = (transactions_pb2.SUCCESS,)
+    BAD_RESPONSE_MSG = ''
 
     def put_on_monitoring(self,
                           transactions: typing.Iterable[Transaction]
