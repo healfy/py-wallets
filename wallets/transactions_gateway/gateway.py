@@ -18,6 +18,7 @@ class TransactionsServiceGateway(BaseGateway):
     response_attr: str = 'header'
     EXC_CLASS = TransactionsBadResponseException
     NAME = 'transactions'
+    ALLOWED_STATUTES = (transactions_pb2.SUCCESS,)
 
     def put_on_monitoring(self,
                           transactions: typing.Iterable[Transaction]
