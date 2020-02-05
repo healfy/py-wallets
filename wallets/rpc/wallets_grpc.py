@@ -2,9 +2,12 @@
 # source: wallets.proto
 # plugin: grpclib.plugin.main
 import abc
+import typing
 
 import grpclib.const
 import grpclib.client
+if typing.TYPE_CHECKING:
+    import grpclib.server
 
 import google.protobuf.timestamp_pb2
 import google.protobuf.duration_pb2
@@ -16,34 +19,34 @@ import wallets_pb2
 class WalletsBase(abc.ABC):
 
     @abc.abstractmethod
-    async def Healthz(self, stream):
+    async def Healthz(self, stream: 'grpclib.server.Stream[wallets_pb2.HealthzRequest, wallets_pb2.HealthzResponse]') -> None:
         pass
 
     @abc.abstractmethod
-    async def StartMonitoring(self, stream):
+    async def StartMonitoring(self, stream: 'grpclib.server.Stream[wallets_pb2.MonitoringRequest, wallets_pb2.MonitoringResponse]') -> None:
         pass
 
     @abc.abstractmethod
-    async def StopMonitoring(self, stream):
+    async def StopMonitoring(self, stream: 'grpclib.server.Stream[wallets_pb2.MonitoringRequest, wallets_pb2.MonitoringResponse]') -> None:
         pass
 
     @abc.abstractmethod
-    async def CheckBalance(self, stream):
+    async def CheckBalance(self, stream: 'grpclib.server.Stream[wallets_pb2.CheckBalanceRequest, wallets_pb2.CheckBalanceResponse]') -> None:
         pass
 
     @abc.abstractmethod
-    async def UpdateTrx(self, stream):
+    async def UpdateTrx(self, stream: 'grpclib.server.Stream[wallets_pb2.TransactionRequest, wallets_pb2.TransactionResponse]') -> None:
         pass
 
     @abc.abstractmethod
-    async def GetInputTransactions(self, stream):
+    async def GetInputTransactions(self, stream: 'grpclib.server.Stream[wallets_pb2.InputTransactionsRequest, wallets_pb2.InputTransactionsResponse]') -> None:
         pass
 
     @abc.abstractmethod
-    async def StartMonitoringPlatformWallet(self, stream):
+    async def StartMonitoringPlatformWallet(self, stream: 'grpclib.server.Stream[wallets_pb2.PlatformWLTMonitoringRequest, wallets_pb2.PlatformWLTMonitoringResponse]') -> None:
         pass
 
-    def __mapping__(self):
+    def __mapping__(self) -> typing.Dict[str, grpclib.const.Handler]:
         return {
             '/wallets.Wallets/Healthz': grpclib.const.Handler(
                 self.Healthz,

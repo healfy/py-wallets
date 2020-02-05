@@ -68,7 +68,7 @@ class BlockChainServiceGateWay(BaseGateway):
 
         """Return transactions list for wallet identifiable by id or address.
         """
-        if not wallet_address:
+        if not wallet_address or not external_id:
             raise ValueError(
                 'Expect at least one of external_id, wallet_address'
             )
@@ -86,6 +86,27 @@ class BlockChainServiceGateWay(BaseGateway):
                                  f"list with params {message}."
             )
             resp_data = response_data.get('transactions', [])
+        return [
+            TransactionSchema().load(elem) for elem in resp_data
+        ]
+
+    def get_exchanger_wallet_trx_list(self, slug: str) -> typing.Iterable:
+
+        message = self.MODULE.GetTrxExchangersListRequest(
+            slug=slug
+        )
+
+        with grpc.insecure_channel(self.GW_ADDRESS) as channel:
+            client = self.ServiceStub(channel)
+
+            response_data = self._base_request(
+                message,
+                client.GetTrxListExchangerWallet,
+                bad_response_msg=f"Could not get transaction "
+                                 f"list with params {message}."
+            )
+            resp_data = response_data.get('transactions', [])
+
         return [
             TransactionSchema().load(elem) for elem in resp_data
         ]

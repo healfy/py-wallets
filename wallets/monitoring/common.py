@@ -275,8 +275,8 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
     ) -> typing.NoReturn:
 
         for wallet in cls.get_data():
-            trx_list = b_gw.get_transactions_list(
-                wallet_address=wallet.address
+            trx_list = b_gw.get_exchanger_wallet_trx_list(
+                slug=wallet.currency_slug
             )
             for trx in trx_list:
                 if not cls.exists(trx['hash']) and  \

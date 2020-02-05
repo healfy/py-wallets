@@ -74,6 +74,16 @@ class BlockchainGatewayServiceStub(object):
         request_serializer=blockchain__gateway__pb2.CheckAddressRequest.SerializeToString,
         response_deserializer=blockchain__gateway__pb2.CheckAddressResponse.FromString,
         )
+    self.SendFromExchangerWallet = channel.unary_unary(
+        '/blockchain_gateway.BlockchainGatewayService/SendFromExchangerWallet',
+        request_serializer=blockchain__gateway__pb2.SendFromColdWalletRequest.SerializeToString,
+        response_deserializer=blockchain__gateway__pb2.SendFromColdWalletResponse.FromString,
+        )
+    self.GetTrxListExchangerWallet = channel.unary_unary(
+        '/blockchain_gateway.BlockchainGatewayService/GetTrxListExchangerWallet',
+        request_serializer=blockchain__gateway__pb2.GetTrxExchangersListRequest.SerializeToString,
+        response_deserializer=blockchain__gateway__pb2.GetTransactionsListResponse.FromString,
+        )
 
 
 class BlockchainGatewayServiceServicer(object):
@@ -159,7 +169,21 @@ class BlockchainGatewayServiceServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def CheckAddress(self, request, context):
-    """GetBalance returns balance of wallet from request
+    """CheckAddress returns isinstance of address valid
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def SendFromExchangerWallet(self, request, context):
+    """Send From exchangers wallets
+    """
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetTrxListExchangerWallet(self, request, context):
+    """Get list of transactions of exchanger wallets
     """
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
@@ -227,6 +251,16 @@ def add_BlockchainGatewayServiceServicer_to_server(servicer, server):
           servicer.CheckAddress,
           request_deserializer=blockchain__gateway__pb2.CheckAddressRequest.FromString,
           response_serializer=blockchain__gateway__pb2.CheckAddressResponse.SerializeToString,
+      ),
+      'SendFromExchangerWallet': grpc.unary_unary_rpc_method_handler(
+          servicer.SendFromExchangerWallet,
+          request_deserializer=blockchain__gateway__pb2.SendFromColdWalletRequest.FromString,
+          response_serializer=blockchain__gateway__pb2.SendFromColdWalletResponse.SerializeToString,
+      ),
+      'GetTrxListExchangerWallet': grpc.unary_unary_rpc_method_handler(
+          servicer.GetTrxListExchangerWallet,
+          request_deserializer=blockchain__gateway__pb2.GetTrxExchangersListRequest.FromString,
+          response_serializer=blockchain__gateway__pb2.GetTransactionsListResponse.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
