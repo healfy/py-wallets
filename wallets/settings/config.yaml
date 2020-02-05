@@ -4,10 +4,10 @@ CURRENCY_GRPC_ADDRESS: "localhost:50053"
 BLOCKCHAIN_GW_ADDRESS: "localhost:50052"
 TRANSACTIONS_GW_ADDRESS: "localhost:50055"
 EXCHANGER_GW_ADDRESS: "localhost:50054"
-BLOCKCHAIN_GW_TIMEOUT: 5  # seconds
-CURRENCIES_GW_TIMEOUT: 5 # seconds
-TRANSACTIONS_GW_TIMEOUT: 5 # seconds
-EXCHANGER_GW_TIMEOUT: 5 # seconds
+BLOCKCHAIN_GW_TIMEOUT: 30  # seconds
+CURRENCIES_GW_TIMEOUT: 30 # seconds
+TRANSACTIONS_GW_TIMEOUT: 30 # seconds
+EXCHANGER_GW_TIMEOUT: 30 # seconds
 MAIL_DOMAIN: 'mail.bonumchain.com'
 MAIL_USERNAME: 'dev@email.bonumchain.com'
 ENV: 'local'  # for logs
@@ -20,8 +20,8 @@ CELERY_NAMESPACE: 'local'
 MONITORING_TEMPLATE: 'monitoring_result.html'
 ALARM_TEMPLATE: 'balance_alarm.html'
 RECIPIENTS : []
-MONITORING_TRANSACTIONS_PERIOD: 5 * 60  # seconds
-MONITORING_WALLETS_PERIOD: 12 * 3600 # seconds
+MONITORING_TRANSACTIONS_PERIOD: 300  # seconds
+MONITORING_WALLETS_PERIOD: 43200 # seconds
 PGSTRING: 'postgresql:///wallets'
 Ethereum: 1000
 Bitcoin: 1000
