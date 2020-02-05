@@ -26,3 +26,38 @@ def create_wallets():
     db.session.add(wallet_btc)
     db.session.add(wallet_eth)
     db.session.commit()
+
+
+def create_tokens_main_net():
+    slugs = ['usd-coin'
+             'trueusd',
+             'omisego',
+             'basic-attention-token',
+             'holo',
+             'chainlink',
+             'zilliqa'
+             ]
+    wallets = [
+        Wallet(
+            address=os.environ.get('EXCHANGER_ETH_ADDRESS',
+                                   '0xF6E4709341426Dee13c9e9EaB6e4779b299CE2F7'),
+            external_id=os.environ.get('ETH_ID', 24),
+            is_platform=True,
+            currency_slug=slug
+        ) for slug in slugs
+    ]
+    db.session.add_all(wallets)
+    db.session.commit()
+
+
+def create_test_token():
+
+    wallet = Wallet(
+        address=os.environ.get('EXCHANGER_ETH_ADDRESS',
+                               '0xF6E4709341426Dee13c9e9EaB6e4779b299CE2F7'),
+        external_id=os.environ.get('ETH_ID', 24),
+        is_platform=True,
+        currency_slug='binance-coin'
+    )
+    db.session.add(wallet)
+    db.session.commit()
