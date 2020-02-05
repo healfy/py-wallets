@@ -149,14 +149,12 @@ class Wallet(BaseModel):
 
     address = Column(Text,
                      comment='Wallet address',
-                     nullable=False,
-                     unique=True)
+                     nullable=False)
 
     external_id = Column(Integer,
                          comment='id from deposits bridge serve for joining',
                          index=True,
-                         nullable=False,
-                         unique=True)
+                         nullable=False)
 
     is_platform = Column(Boolean,
                          comment='is platform wallet',
