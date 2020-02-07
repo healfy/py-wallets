@@ -329,6 +329,9 @@ class SendToTransactionService(SendToExternalService):
     ) -> typing.NoReturn:
 
         cls.gw.put_on_monitoring(data)
+        for trx in data:
+            trx.outer_update(session,
+                             status=TransactionStatus.SENT.value)
 
 
 class SendToExchangerService(SendToExternalService):

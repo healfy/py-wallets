@@ -225,8 +225,10 @@ class UpdateTrxMethod(ServerMethod):
     ) -> w_pb2.TransactionResponse:
         for trx in request_obj.transactions:
             trx_in_base = session.query(
-                Transaction).filter_by(hash=trx.hash).first()
-            trx_in_base.set_confirmed(trx.status, session)
+                Transaction).filter_by(hash=trx.hash,
+                                       status=TransactionStatus.SENT.value).first()
+            if trx_in_base:
+                trx_in_base.set_confirmed(trx.status, session)
         response_msg.header.status = w_pb2.SUCCESS
         return response_msg
 

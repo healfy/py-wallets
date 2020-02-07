@@ -11,4 +11,5 @@ class TransactionStatus(IntEnum):
     PENDING = 5
     CONFIRMED = 6
     REPORTED = 7
+    SENT = 8
 
