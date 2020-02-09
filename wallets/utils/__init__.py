@@ -3,19 +3,9 @@ import typing
 import requests
 from decimal import Decimal
 from datetime import datetime
-from threading import Thread
 from marshmallow import fields
 from google.protobuf import timestamp_pb2
 from wallets.settings.config import conf
-
-
-def threaded(fn):
-    def wrapper(*args, **kwargs):
-        thread = Thread(target=fn, args=args, kwargs=kwargs)
-        thread.start()
-        thread.join()
-        return thread
-    return wrapper
 
 
 def get_msg_timestamp_from_datetime(value):
@@ -46,6 +36,15 @@ class DatetimeField(fields.Field):
             return datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ").replace(
                 tzinfo=pytz.utc)
         return value
+
+
+class StringLowerField(fields.String):
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        return super()._serialize(value, attr, obj, **kwargs).lower()
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        return super()._deserialize(value, attr, data, **kwargs).lower()
 
 
 def send_message(html, subject):

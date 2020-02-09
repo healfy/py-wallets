@@ -9,18 +9,18 @@ from wallets.common.models import Wallet
 def create_wallets():
     wallet_btc = Wallet(
         address=os.environ.get('EXCHANGER_BTC_ADDRESS',
-                               'mtQGkRpBVRDdRBwVkCbtGArdCYmiqkQrB1'),
+                               'mtQGkRpBVRDdRBwVkCbtGArdCYmiqkQrB1').lower(),
         external_id=os.environ.get('BTC_ID', 23),
         is_platform=True,
-        currency_slug=os.environ.get('BTC_SLUG', 'bitcoin')
+        currency_slug=os.environ.get('BTC_SLUG', 'bitcoin').lower()
     )
 
     wallet_eth = Wallet(
         address=os.environ.get('EXCHANGER_ETH_ADDRESS',
-                               '0xF6E4709341426Dee13c9e9EaB6e4779b299CE2F7'),
+                               '0xF6E4709341426Dee13c9e9EaB6e4779b299CE2F7').lower(),
         external_id=os.environ.get('ETH_ID', 24),
         is_platform=True,
-        currency_slug=os.environ.get('ETH_SLUG', 'ethereum')
+        currency_slug=os.environ.get('ETH_SLUG', 'ethereum').lower()
     )
 
     db.session.add(wallet_btc)
@@ -40,7 +40,7 @@ def create_tokens_main_net():
     wallets = [
         Wallet(
             address=os.environ.get('EXCHANGER_ETH_ADDRESS',
-                                   '0xF6E4709341426Dee13c9e9EaB6e4779b299CE2F7'),
+                                   '0xF6E4709341426Dee13c9e9EaB6e4779b299CE2F7').lower(),
             external_id=os.environ.get('ETH_ID', 24),
             is_platform=True,
             currency_slug=slug
@@ -54,7 +54,7 @@ def create_test_token():
 
     wallet = Wallet(
         address=os.environ.get('EXCHANGER_ETH_ADDRESS',
-                               '0xF6E4709341426Dee13c9e9EaB6e4779b299CE2F7'),
+                               '0xF6E4709341426Dee13c9e9EaB6e4779b299CE2F7').lower(),
         external_id=os.environ.get('ETH_ID', 24),
         is_platform=True,
         currency_slug='binance-coin'

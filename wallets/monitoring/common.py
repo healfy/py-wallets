@@ -145,8 +145,8 @@ class UpdateTrx:
         session.query(Transaction).filter_by(
             wallet_id=wallet.id,
             status=TransactionStatus.NEW.value,
-            address_from=trx['address_from'],
-            currency_slug=trx['currency_slug'],
+            address_from=trx['address_from'].lower(),
+            currency_slug=trx['currency_slug'].lower(),
             hash=None,
         ).update({'hash': trx['hash'], 'value': trx['value']})
 
@@ -164,7 +164,7 @@ class ValidateTRX:
             trx_hash: str
     ) -> bool:
         return bool(
-            Transaction.query.filter_by(hash=trx_hash).first()
+            Transaction.query.filter_by(hash=trx_hash.lower()).first()
         )
 
     @classmethod
@@ -173,7 +173,7 @@ class ValidateTRX:
             address: str,
             wallet: Wallet
     ) -> bool:
-        return wallet.address == address
+        return wallet.address.lower() == address.lower()
 
 
 class CheckWalletMonitor(BaseMonitorClass,
