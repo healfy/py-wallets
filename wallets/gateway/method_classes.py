@@ -226,11 +226,10 @@ class UpdateTrxMethod(ServerMethod):
     ) -> w_pb2.TransactionResponse:
         counter = 0
         for trx in request_obj.transactions:
-            session.query(Transaction).filter_by(hash=trx.hash).update({
+            counter += session.query(Transaction).filter_by(hash=trx.hash).update({
                 'status': TransactionStatus.CONFIRMED.value,
                 'confirmed_at': datetime.now()
             })
-            counter += 1
         session.commit()
         response_msg.header.status = w_pb2.SUCCESS
         response_msg.header.description = f'Confirmed {counter} Transactions'
