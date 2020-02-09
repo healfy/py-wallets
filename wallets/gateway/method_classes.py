@@ -14,7 +14,8 @@ from wallets import app
 from wallets import logger
 from wallets import request_objects
 from wallets.utils.consts import TransactionStatus
-from wallets.utils import send_message, get_existing_wallet
+from wallets.utils import send_message
+from wallets.utils import get_exchanger_wallet
 from wallets.common import Wallet
 from wallets.common import Transaction
 from wallets.gateway import blockchain_service_gw
@@ -298,8 +299,8 @@ class StartMonitoringPlatformWLTMethod(ServerMethod):
             session: Session
     ) -> w_pb2.PlatformWLTMonitoringResponse:
 
-        wallet = get_existing_wallet(
-            request_obj.wallet_id, request_obj.wallet_address)
+        wallet = get_exchanger_wallet(
+            request_obj.wallet_address, request_obj.expected_currency)
 
         trx = Transaction(
                 address_to=wallet.address,

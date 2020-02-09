@@ -78,3 +78,9 @@ def get_existing_wallet(_id: int = None, address: str = None
     raise ValueError(
         'Get wallet error: expect at least one of id, address parameters.'
     )
+
+
+def get_exchanger_wallet(address: str, slug: str):
+    from wallets.common import models
+    return models.Wallet.query.filter_by(address=address,
+                                         currency_slug=slug).first()
