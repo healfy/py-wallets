@@ -12,4 +12,3 @@ class TransactionStatus(IntEnum):
     CONFIRMED = 6
     REPORTED = 7
     SENT = 8
-
