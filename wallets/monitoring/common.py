@@ -295,12 +295,13 @@ class SendToExternalService(BaseMonitorClass, abc.ABC):
     ) -> typing.NoReturn:
 
         if cls.get_data().first():
-            cls.send_to_external_service(cls.get_data())
+            cls.send_to_external_service(cls.get_data(), session=session)
 
     @classmethod
     def send_to_external_service(
             cls,
-            data, session: Session = None
+            data: Query,
+            session: Session = None
     ) -> typing.NoReturn:
 
         raise NotImplementedError('Method not implemented!')
