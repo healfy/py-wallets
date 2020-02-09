@@ -2,11 +2,13 @@ import abc
 import typing
 from decimal import Decimal
 from decimal import ROUND_HALF_UP
+from datetime import datetime
+from datetime import timedelta
 from flask import render_template
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import Query
 
-from wallets.settings.config import conf
+from wallets import app
 from wallets import logger
 from wallets.common import Wallet
 from wallets.common import Transaction
@@ -17,6 +19,8 @@ from wallets.gateway import blockchain_service_gw as b_gw
 from wallets.gateway import transactions_service_gw
 from wallets.gateway import exchanger_service_gw
 from wallets.utils.consts import TransactionStatus
+
+conf = app.config
 
 
 class BaseMonitorClass(abc.ABC):
@@ -262,6 +266,7 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
     then stores them in the database. This condition for the exchange service
     transactions
     """
+    time_delta_days = conf.get('DELTA_DAYS', 1)
 
     @classmethod
     def get_data(cls) -> Query:
@@ -276,7 +281,8 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
 
         for wallet in cls.get_data():
             trx_list = b_gw.get_exchanger_wallet_trx_list(
-                slug=wallet.currency_slug
+                slug=wallet.currency_slug,
+                from_time=datetime.now() - timedelta(days=cls.time_delta_days)
             )
             for trx in trx_list:
                 if not cls.exists(trx['hash']) and  \

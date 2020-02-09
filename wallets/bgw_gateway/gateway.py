@@ -1,6 +1,7 @@
 import grpc
 import typing
 from decimal import Decimal
+from datetime import datetime
 
 from wallets import logger
 from wallets.settings.config import conf
@@ -90,10 +91,20 @@ class BlockChainServiceGateWay(BaseGateway):
             TransactionSchema().load(elem) for elem in resp_data
         ]
 
-    def get_exchanger_wallet_trx_list(self, slug: str) -> typing.Iterable:
+    def get_exchanger_wallet_trx_list(
+            self,
+            slug: str,
+            from_time: typing.Optional[datetime] = None,
+            to_time: typing.Optional[datetime] = None,
+    ) -> typing.Iterable:
+
+        from_time = datetime.timestamp(from_time) if from_time else None
+        to_time = datetime.timestamp(to_time) if to_time else None
 
         message = self.MODULE.GetTrxExchangersListRequest(
-            slug=slug
+            slug=slug,
+            fromTime=from_time,
+            toTime=to_time
         )
 
         with grpc.insecure_channel(self.GW_ADDRESS) as channel:
