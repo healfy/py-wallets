@@ -98,8 +98,8 @@ class BlockChainServiceGateWay(BaseGateway):
             to_time: typing.Optional[datetime] = None,
     ) -> typing.Iterable:
 
-        from_time = datetime.timestamp(from_time) if from_time else None
-        to_time = datetime.timestamp(to_time) if to_time else None
+        from_time = int(datetime.timestamp(from_time)) if from_time else None
+        to_time = int(datetime.timestamp(to_time)) if to_time else None
 
         message = self.MODULE.GetTrxExchangersListRequest(
             slug=slug,
