@@ -374,6 +374,6 @@ class SendToExchangerService(SendToExternalService):
                              status=TransactionStatus.REPORTED.value)
 
 
-__TRANSACTIONS_TASKS__ = [SendToExchangerService, SendToTransactionService,
-                          CheckPlatformWalletsMonitor,
-                          CheckTransactionsMonitor, CheckWalletMonitor]
+__TRANSACTIONS_TASKS__ = [SendToExchangerService,
+                          SendToTransactionService,
+                          CheckWalletMonitor]
