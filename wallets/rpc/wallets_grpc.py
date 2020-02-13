@@ -46,6 +46,10 @@ class WalletsBase(abc.ABC):
     async def StartMonitoringPlatformWallet(self, stream: 'grpclib.server.Stream[wallets_pb2.PlatformWLTMonitoringRequest, wallets_pb2.PlatformWLTMonitoringResponse]') -> None:
         pass
 
+    @abc.abstractmethod
+    async def AddInputTransaction(self, stream: 'grpclib.server.Stream[wallets_pb2.InputTransactionRequest, wallets_pb2.InputTransactionResponse]') -> None:
+        pass
+
     def __mapping__(self) -> typing.Dict[str, grpclib.const.Handler]:
         return {
             '/wallets.Wallets/Healthz': grpclib.const.Handler(
@@ -89,6 +93,12 @@ class WalletsBase(abc.ABC):
                 grpclib.const.Cardinality.UNARY_UNARY,
                 wallets_pb2.PlatformWLTMonitoringRequest,
                 wallets_pb2.PlatformWLTMonitoringResponse,
+            ),
+            '/wallets.Wallets/AddInputTransaction': grpclib.const.Handler(
+                self.AddInputTransaction,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                wallets_pb2.InputTransactionRequest,
+                wallets_pb2.InputTransactionResponse,
             ),
         }
 
@@ -137,4 +147,10 @@ class WalletsStub:
             '/wallets.Wallets/StartMonitoringPlatformWallet',
             wallets_pb2.PlatformWLTMonitoringRequest,
             wallets_pb2.PlatformWLTMonitoringResponse,
+        )
+        self.AddInputTransaction = grpclib.client.UnaryUnaryMethod(
+            channel,
+            '/wallets.Wallets/AddInputTransaction',
+            wallets_pb2.InputTransactionRequest,
+            wallets_pb2.InputTransactionResponse,
         )

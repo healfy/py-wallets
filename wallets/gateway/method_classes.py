@@ -316,3 +316,48 @@ class StartMonitoringPlatformWLTMethod(ServerMethod):
         session.commit()
         response_msg.header.status = w_pb2.SUCCESS
         return response_msg
+
+
+class AddInputTransactionMethod(ServerMethod):
+    request_obj_cls = request_objects.AddInputTrxRequestObject
+    response_msg_cls = w_pb2.InputTransactionResponse
+
+    @classmethod
+    def _execute(
+            cls,
+            request_obj: request_objects.AddInputTrxRequestObject,
+            response_msg: w_pb2.PlatformWLTMonitoringResponse,
+            session: Session
+    ) -> w_pb2.PlatformWLTMonitoringResponse:
+
+        wallet = get_exchanger_wallet(
+            request_obj.wallet_address, request_obj.currency)
+
+        cls.find_in_base(request_obj)
+
+        trx = Transaction(
+            address_to=wallet.address,
+            currency_slug=request_obj.currency,
+            address_from=request_obj.from_address,
+            value=request_obj.value,
+            wallet_id=wallet.id,
+            uuid=request_obj.uuid,
+            hash=request_obj.hash
+        )
+        session.add(trx)
+        session.commit()
+        response_msg.header.status = w_pb2.SUCCESS
+        response_msg.header.description = f'added Input transaction ' \
+                                          f'hash: {trx.hash}'
+        return response_msg
+
+    @staticmethod
+    def find_in_base(
+            request_obj: request_objects.AddInputTrxRequestObject,
+    ) -> typing.NoReturn:
+
+        if Transaction.query.filter_by(hash=request_obj.hash).first():
+            raise ValueError(
+                f'Get Transaction error: transaction '
+                f'with hash {request_obj.hash} is already in base'
+            )

@@ -266,3 +266,22 @@ class PlatformWLTMonitoringRequestObject(BaseRequestObject):
                            'expected_address, expected_currency is required'))
             return False
         return True
+
+
+class AddInputTrxRequestObject(BaseRequestObject):
+
+    uuid: str = None
+    from_address: str = None
+    hash: str = None
+    currency: str = None
+    wallet_address: str = None
+    value: str = None
+
+    def is_valid(self):
+        if not all([self.value, self.wallet_address,
+                    self.uuid, self.from_address, self.currency, self.hash]):
+            self._errors.add(
+                ValueError('value , wallet_address, uuid, '
+                           'from_address, currency, hash is required'))
+            return False
+        return True

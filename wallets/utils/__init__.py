@@ -81,5 +81,11 @@ def get_existing_wallet(_id: int = None, address: str = None
 
 def get_exchanger_wallet(address: str, slug: str):
     from wallets.common import models
-    return models.Wallet.query.filter_by(address=address,
-                                         currency_slug=slug).first()
+    wallet = models.Wallet.query.filter_by(
+        address=address, currency_slug=slug).first()
+    if not wallet:
+        raise ValueError(
+            f'Get wallet error: the wallet {address} ans slug {slug} is '
+            f'not found.'
+        )
+    return wallet

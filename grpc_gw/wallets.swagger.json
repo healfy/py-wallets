@@ -196,6 +196,34 @@
         ]
       }
     },
+    "/transaction/add": {
+      "post": {
+        "summary": "Endpoint to add input transaction",
+        "description": "Endpoint to add input transaction",
+        "operationId": "AddInputTransaction",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/walletsInputTransactionResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/walletsInputTransactionRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Wallets"
+        ]
+      }
+    },
     "/update_trx": {
       "post": {
         "summary": "Endpoint to update transaction",
@@ -235,6 +263,37 @@
       }
     },
     "walletsHealthzResponse": {
+      "type": "object",
+      "properties": {
+        "header": {
+          "$ref": "#/definitions/walletsResponseHeader"
+        }
+      }
+    },
+    "walletsInputTransactionRequest": {
+      "type": "object",
+      "properties": {
+        "uuid": {
+          "type": "string"
+        },
+        "from_address": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "wallet_address": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    },
+    "walletsInputTransactionResponse": {
       "type": "object",
       "properties": {
         "header": {

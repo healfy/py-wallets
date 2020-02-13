@@ -47,3 +47,10 @@ class WalletsService(wallets_grpc.WalletsBase):
             method_classes.StartMonitoringPlatformWLTMethod.process(
                 request, db.session
             ))
+
+    async def AddInputTransaction(self, stream):
+        request = await stream.recv_message()
+        await stream.send_message(
+            method_classes.AddInputTransactionMethod.process(
+                request, db.session
+            ))
