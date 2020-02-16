@@ -132,3 +132,28 @@ class TestWalletServer(BaseDB):
 
         assert trx
         assert trx.wallet.address == req.wallet_address
+
+    def test_get_exchanger_wallet_error(self, transaction_add_message):
+        trx = transaction_add_message['trx']
+        req = wallets_pb2.InputTransactionRequest(**trx)
+        req.wallet_address = 'another_wallet'
+
+        response = method_classes.AddInputTransactionMethod.process(
+            req, self.session
+        )
+        assert wallets_pb2.ERROR == response.header.status
+        text = "Get wallet error: the wallet another_wallet " \
+               "ans slug bitcoin is not found."
+        assert response.header.description == text
+
+    def test_find_in_base_error(self, transaction_add_message_new):
+        trx = transaction_add_message_new['trx']
+        req = wallets_pb2.InputTransactionRequest(**trx)
+
+        response = method_classes.AddInputTransactionMethod.process(
+            req, self.session
+        )
+        assert wallets_pb2.ERROR == response.header.status
+        text = f'Get Transaction error: transaction '\
+               f'with hash {req.hash} is already in base'
+        assert response.header.description == text

@@ -424,3 +424,39 @@ def check_exch_trxs_objects():
 
     }
     yield dct
+
+
+@pytest.fixture
+def transaction_new():
+    trx = Transaction(**{
+        'hash': str(uuid.uuid4()),
+        'value': '123',
+        'address_from': 'some_wallet_address',
+        'currency_slug': 'bitcoin',
+        'address_to': 'some_wallet_address',
+        'uuid': str(uuid.uuid4()),
+    })
+    dbsession.add(trx)
+    dbsession.commit()
+    yield trx
+
+
+@pytest.fixture
+def transaction_add_message_new(transaction_new):
+    wallet1 = Wallet(
+        currency_slug='bitcoin',
+        address=transaction_new.address_to,
+        external_id=223
+    )
+    dbsession.add_all([wallet1])
+    dbsession.commit()
+
+    yield {'trx': {
+        'hash': transaction_new.hash,
+        'value': '123',
+        'from_address': 'some_wallet_address',
+        'currency': 'bitcoin',
+        'wallet_address': str(wallet1.address),
+        'uuid': str(uuid.uuid4()),
+    },
+        'wallet': wallet}
