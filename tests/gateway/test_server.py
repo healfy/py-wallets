@@ -22,7 +22,8 @@ class TestWalletServer(BaseDB):
         assert response == expected_res
 
     @patch('requests.post', return_value=resp)
-    @patch.object(method_classes.CheckBalanceMethod, 'get_html', return_value='')
+    @patch.object(method_classes.CheckBalanceMethod, 'get_html',
+                  return_value='')
     def test_check_balance_method(self, *args, **kwargs):
         request = wallets_pb2.CheckBalanceRequest(
             body_currency='bitcoin', body_amount='1'
@@ -97,7 +98,9 @@ class TestWalletServer(BaseDB):
 
         expected_res = wallets_pb2.TransactionResponse()
         expected_res.header.status = wallets_pb2.SUCCESS
-        trx = self.session.query(Transaction).filter_by(hash=transaction.hash).first()
+        expected_res.header.description = "Confirmed 1 Transactions"
+        trx = self.session.query(Transaction).filter_by(
+            hash=transaction.hash).first()
         assert response == expected_res
         assert trx.status == TransactionStatus.CONFIRMED.value
         assert trx.confirmed_at is not None
@@ -114,3 +117,18 @@ class TestWalletServer(BaseDB):
         assert len(transactions) == len(response.transactions)
         hashes = [t.hash for t in transactions]
         assert hashes == [t.hash for t in response.transactions]
+
+    def test_add_input_transaction_method(self, transaction_add_message):
+        trx = transaction_add_message['trx']
+        req = wallets_pb2.InputTransactionRequest(**trx)
+
+        response = method_classes.AddInputTransactionMethod.process(
+            req, self.session
+        )
+        assert wallets_pb2.SUCCESS == response.header.status
+        assert f'added Input transaction hash: ' \
+               f'{req.hash}' == response.header.description
+        trx = self.session.query(Transaction).filter_by(hash=req.hash).first()
+
+        assert trx
+        assert trx.wallet.address == req.wallet_address

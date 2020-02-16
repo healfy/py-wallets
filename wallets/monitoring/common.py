@@ -28,6 +28,7 @@ class BaseMonitorClass(abc.ABC):
     Base class for monitoring
     """
     timeout: int = conf['MONITORING_TRANSACTIONS_PERIOD']
+    counter: int = 0  # for logging
 
     @classmethod
     def get_data(cls):
@@ -60,6 +61,7 @@ class BaseMonitorClass(abc.ABC):
             session.rollback()
             raise e
         finally:
+            cls.counter = 0
             session.close()
 
 
@@ -144,9 +146,9 @@ class UpdateTrx:
             wallet: Wallet,
             trx: typing.Dict,
             session: Session
-    ) -> typing.NoReturn:
+    ) -> int:
 
-        session.query(Transaction).filter_by(
+        res = session.query(Transaction).filter_by(
             wallet_id=wallet.id,
             status=TransactionStatus.NEW.value,
             address_from=trx['address_from'].lower(),
@@ -155,6 +157,7 @@ class UpdateTrx:
         ).update({'hash': trx['hash'], 'value': trx['value']})
 
         session.commit()
+        return res
 
 
 class ValidateTRX:
@@ -257,6 +260,9 @@ class CheckTransactionsMonitor(BaseMonitorClass,
                 if not cls.exists(trx['hash']) \
                         and cls.is_input_trx(trx['address_to'], wallet):
                     cls.save(wallet, trx, session)
+                    cls.counter += 1
+            logger.info(f'{cls.__class__.__name__} saved {cls.counter} '
+                        f'transactions')
 
 
 class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
@@ -287,7 +293,9 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
             for trx in trx_list:
                 if not cls.exists(trx['hash']) and  \
                         cls.is_input_trx(trx['address_to'], wallet):
-                    cls.update(wallet, trx, session)
+                    cls.counter += cls.update(wallet, trx, session)
+        logger.info(f'{cls.__class__.__name__} updated {cls.counter} '
+                    f'transactions')
 
 
 class SendToExternalService(BaseMonitorClass, abc.ABC):
@@ -339,6 +347,9 @@ class SendToTransactionService(SendToExternalService):
         for trx in data:
             trx.outer_update(session,
                              status=TransactionStatus.SENT.value)
+            cls.counter += 1
+        logger.info(f'{cls.__class__.__name__} sent {cls.counter} '
+                    f'transactions')
 
 
 class SendToExchangerService(SendToExternalService):
@@ -372,6 +383,9 @@ class SendToExchangerService(SendToExternalService):
         for trx in data:
             trx.outer_update(session,
                              status=TransactionStatus.REPORTED.value)
+            cls.counter += 1
+        logger.info(f'{cls.__class__.__name__} sent {cls.counter} '
+                    f'transactions')
 
 
 __TRANSACTIONS_TASKS__ = [SendToExchangerService,

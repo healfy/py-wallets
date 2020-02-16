@@ -190,7 +190,8 @@ def transaction():
         'value': '123',
         'address_from': 'some_wallet_address',
         'currency_slug': 'bitcoin',
-        'address_to': 'some_wallet_address'
+        'address_to': 'some_wallet_address',
+        'uuid': str(uuid.uuid4()),
     })
     dbsession.add(trx)
     dbsession.commit()
@@ -270,6 +271,143 @@ def check_input_trxs_objects():
             'currencySlug': wallet2.currency_slug,
             'time': int(round(time1_.timestamp())),
             'value': '0.021',
+            'hash': f'{uuid.uuid4()}',
+        }],
+        'status': {
+            'status': blockchain_gateway_pb2.ResponseStatus.Name(
+                blockchain_gateway_pb2.SUCCESS)
+        }
+    }
+
+    dct = {
+        'trx1_resp': trx1_response,
+        'trx2_resp': trx2_response,
+        'wallet1': wallet1,
+        'wallet2': wallet2,
+
+    }
+    yield dct
+
+
+@pytest.fixture
+def transaction_add_message():
+    wallet1 = Wallet(
+        currency_slug='bitcoin',
+        address=str(uuid.uuid4()),
+        external_id=223
+    )
+    dbsession.add_all([wallet1])
+    dbsession.commit()
+
+    yield {'trx': {
+        'hash': str(uuid.uuid4()),
+        'value': '123',
+        'from_address': 'some_wallet_address',
+        'currency': 'bitcoin',
+        'wallet_address': str(wallet1.address),
+        'uuid': str(uuid.uuid4()),
+    },
+        'wallet': wallet}
+
+
+@pytest.fixture
+def e_wallet():
+    wallet = Wallet(
+        currency_slug='bitcoin',
+        address=uuid.uuid4(),
+        external_id=223,
+        is_platform=True,
+    )
+    dbsession.add(wallet)
+    dbsession.commit()
+    dbsession.refresh(wallet)
+    yield wallet
+
+
+@pytest.fixture
+def exchanger_transaction(e_wallet):
+    trx = Transaction(**{
+        'hash': str(uuid.uuid4()),
+        'value': '123',
+        'address_from': 'some_wallet_address',
+        'currency_slug': 'bitcoin',
+        'address_to': e_wallet.address,
+        'uuid': str(uuid.uuid4()),
+        'wallet_id': e_wallet.id,
+        'status': TransactionStatus.CONFIRMED.value,
+    })
+    dbsession.add(trx)
+    dbsession.commit()
+    yield trx
+
+
+@pytest.fixture
+def check_exch_trxs_objects():
+    time1_ = datetime.utcnow().replace(tzinfo=pytz.utc)
+
+    address1 = f'{uuid.uuid4()}'
+    address2 = f'{uuid.uuid4()}'
+
+    wallet1 = Wallet(
+        currency_slug='bitcoin',
+        address=address1,
+        external_id=223,
+        is_platform=True,
+    )
+
+    wallet2 = Wallet(
+        currency_slug='etherium',
+        address=address2,
+        external_id=21,
+        is_platform=True,
+    )
+
+    dbsession.add_all([wallet1, wallet2])
+    dbsession.commit()
+
+    trx1 = Transaction(**{
+        'value': '123',
+        'address_from': 'address1',
+        'currency_slug': wallet1.currency_slug,
+        'address_to': wallet1.address,
+        'uuid': str(uuid.uuid4()),
+        'wallet_id': wallet1.id,
+    })
+
+    trx2 = Transaction(**{
+        'value': '123',
+        'address_from': 'address1',
+        'currency_slug': wallet2.currency_slug,
+        'address_to': wallet2.address,
+        'uuid': str(uuid.uuid4()),
+        'wallet_id': wallet2.id,
+    })
+
+    dbsession.add_all([trx1, trx2])
+    dbsession.commit()
+
+    trx1_response = {
+        'transactions': [{
+            'from': trx1.address_from,
+            'to': trx1.address_to,
+            'currencySlug': trx1.currency_slug,
+            'time': int(round(time1_.timestamp())),
+            'value': trx1.value,
+            'hash': f'{uuid.uuid4()}',
+        }],
+        'status': {
+            'status': blockchain_gateway_pb2.ResponseStatus.Name(
+                blockchain_gateway_pb2.SUCCESS)
+        }
+    }
+
+    trx2_response = {
+        'transactions': [{
+            'from': trx2.address_from,
+            'to': trx2.address_to,
+            'currencySlug': trx2.currency_slug,
+            'time': int(round(time1_.timestamp())),
+            'value': trx2.value,
             'hash': f'{uuid.uuid4()}',
         }],
         'status': {
