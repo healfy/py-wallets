@@ -261,7 +261,7 @@ class CheckTransactionsMonitor(BaseMonitorClass,
                         and cls.is_input_trx(trx['address_to'], wallet):
                     cls.save(wallet, trx, session)
                     cls.counter += 1
-            logger.info(f'{cls.__class__.__name__} saved {cls.counter} '
+            logger.info(f'{cls.__name__} saved {cls.counter} '
                         f'transactions')
 
 
@@ -294,7 +294,7 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
                 if not cls.exists(trx['hash']) and  \
                         cls.is_input_trx(trx['address_to'], wallet):
                     cls.counter += cls.update(wallet, trx, session)
-        logger.info(f'{cls.__class__.__name__} updated {cls.counter} '
+        logger.info(f'{cls.__name__} updated {cls.counter} '
                     f'transactions')
 
 
@@ -348,7 +348,7 @@ class SendToTransactionService(SendToExternalService):
             trx.outer_update(session,
                              status=TransactionStatus.SENT.value)
             cls.counter += 1
-        logger.info(f'{cls.__class__.__name__} sent {cls.counter} '
+        logger.info(f'{cls.__name__} sent {cls.counter} '
                     f'transactions')
 
 
@@ -384,7 +384,7 @@ class SendToExchangerService(SendToExternalService):
             trx.outer_update(session,
                              status=TransactionStatus.REPORTED.value)
             cls.counter += 1
-        logger.info(f'{cls.__class__.__name__} sent {cls.counter} '
+        logger.info(f'{cls.__name__} sent {cls.counter} '
                     f'transactions')
 
 

@@ -21,6 +21,8 @@ class TestTask(BaseDB):
                                        resp1,
                                        resp1,
                                        resp1,
+                                       resp1,
+                                       resp1,
                                        resp1, resp2]) as base_mock:
             common.CheckTransactionsMonitor.process(self.session)
         trx1 = Transaction.query.filter_by(wallet_id=w1.id).first()

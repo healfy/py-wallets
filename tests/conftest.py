@@ -16,7 +16,6 @@ from wallets.common import Transaction
 from wallets.common.models import Base
 from wallets.utils.consts import TransactionStatus
 from wallets.settings.config import conf
-from wallets.shared.logging import init_logger
 from wallets.rpc import blockchain_gateway_pb2
 
 dbsession = None
@@ -29,10 +28,6 @@ def pytest_configure(config):
     conf['USE_BLOCKCHAIN_GW'] = False
     if config.getoption('pg_string', None):
         conf['PGSTRING'] = config.getoption('pg_string')
-
-    init_logger()
-    from wallets.shared.logging import logger
-    logger.handlers = []
     start_engine(restart=True)
 
     engine = create_engine(
