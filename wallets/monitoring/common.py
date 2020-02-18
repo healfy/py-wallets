@@ -343,13 +343,17 @@ class SendToTransactionService(SendToExternalService):
             session: Session = None
     ) -> typing.NoReturn:
 
-        cls.gw.put_on_monitoring(data)
-        for trx in data:
-            trx.outer_update(session,
-                             status=TransactionStatus.SENT.value)
-            cls.counter += 1
-        logger.info(f'{cls.__name__} sent {cls.counter} '
-                    f'transactions')
+        resp = cls.gw.put_on_monitoring(data)
+
+        if resp['status'] in cls.gw.ALLOWED_STATUTES:
+            for trx in data:
+                trx.outer_update(session,
+                                 status=TransactionStatus.SENT.value)
+                cls.counter += 1
+            logger.info(f'{cls.__name__} sent {cls.counter} '
+                        f'transactions')
+        else:
+            logger.info(f'bad response from {cls.gw.__name__}')
 
 
 class SendToExchangerService(SendToExternalService):
@@ -379,13 +383,17 @@ class SendToExchangerService(SendToExternalService):
             session: Session = None
     ) -> typing.NoReturn:
 
-        cls.gw.update_transactions(data)
-        for trx in data:
-            trx.outer_update(session,
-                             status=TransactionStatus.REPORTED.value)
-            cls.counter += 1
-        logger.info(f'{cls.__name__} sent {cls.counter} '
-                    f'transactions')
+        resp = cls.gw.update_transactions(data)
+
+        if resp['status'] in cls.gw.ALLOWED_STATUTES:
+            for trx in data:
+                trx.outer_update(session,
+                                 status=TransactionStatus.REPORTED.value)
+                cls.counter += 1
+            logger.info(f'{cls.__name__} sent {cls.counter} '
+                        f'transactions')
+        else:
+            logger.info(f'bad response from {cls.gw.__name__}')
 
 
 __TRANSACTIONS_TASKS__ = [SendToExchangerService,
