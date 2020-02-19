@@ -189,6 +189,11 @@ class Transaction(BaseModel):
 
     schema_class = TransactionSchema
     message_class = wallets_pb2.Transaction
+    ACTIVE_STATUTES = (
+        TransactionStatus.NEW.value,
+        TransactionStatus.SUCCESSFUL.value,
+        TransactionStatus.PENDING.value,
+    )
 
     status = Column(Integer,
                     index=True,

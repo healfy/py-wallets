@@ -225,7 +225,10 @@ class UpdateTrxMethod(ServerMethod):
     ) -> w_pb2.TransactionResponse:
         counter = 0
         for trx in request_obj.transactions:
-            counter += session.query(Transaction).filter_by(hash=trx.hash).update({
+            counter += session.query(Transaction).filter(
+                Transaction.hash == trx.hash).filter(
+                Transaction.status.in_(Transaction.ACTIVE_STATUTES)
+            ).update({
                 'status': TransactionStatus.CONFIRMED.value,
                 'confirmed_at': datetime.now(),
                 'value': Decimal(trx.value)
@@ -300,18 +303,17 @@ class StartMonitoringPlatformWLTMethod(ServerMethod):
             response_msg: w_pb2.PlatformWLTMonitoringResponse,
             session: Session
     ) -> w_pb2.PlatformWLTMonitoringResponse:
-
         wallet = get_exchanger_wallet(
             request_obj.wallet_address, request_obj.expected_currency)
 
         trx = Transaction(
-                address_to=wallet.address,
-                currency_slug=request_obj.expected_currency,
-                address_from=request_obj.expected_address,
-                value=request_obj.expected_amount,
-                wallet_id=wallet.id,
-                uuid=request_obj.uuid
-            )
+            address_to=wallet.address,
+            currency_slug=request_obj.expected_currency,
+            address_from=request_obj.expected_address,
+            value=request_obj.expected_amount,
+            wallet_id=wallet.id,
+            uuid=request_obj.uuid
+        )
         session.add(trx)
         session.commit()
         response_msg.header.status = w_pb2.SUCCESS
@@ -329,7 +331,6 @@ class AddInputTransactionMethod(ServerMethod):
             response_msg: w_pb2.PlatformWLTMonitoringResponse,
             session: Session
     ) -> w_pb2.PlatformWLTMonitoringResponse:
-
         wallet = get_exchanger_wallet(
             request_obj.wallet_address, request_obj.currency)
 
@@ -355,7 +356,6 @@ class AddInputTransactionMethod(ServerMethod):
     def find_in_base(
             request_obj: request_objects.AddInputTrxRequestObject,
     ) -> typing.NoReturn:
-
         if Transaction.query.filter_by(hash=request_obj.hash).first():
             raise ValueError(
                 f'Get Transaction error: transaction '
