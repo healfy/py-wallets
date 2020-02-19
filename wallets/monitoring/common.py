@@ -345,7 +345,7 @@ class SendToTransactionService(SendToExternalService):
 
         resp = cls.gw.put_on_monitoring(data)
 
-        if resp['status'] in cls.gw.ALLOWED_STATUTES:
+        if resp['header']['status'] in cls.gw.ALLOWED_STATUTES:
             for trx in data:
                 trx.outer_update(session,
                                  status=TransactionStatus.SENT.value)
@@ -385,7 +385,7 @@ class SendToExchangerService(SendToExternalService):
 
         resp = cls.gw.update_transactions(data)
 
-        if resp['status'] in cls.gw.ALLOWED_STATUTES:
+        if resp['header']['status'] in cls.gw.ALLOWED_STATUTES:
             for trx in data:
                 trx.outer_update(session,
                                  status=TransactionStatus.REPORTED.value)
