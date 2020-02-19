@@ -353,7 +353,7 @@ class SendToTransactionService(SendToExternalService):
             logger.info(f'{cls.__name__} sent {cls.counter} '
                         f'transactions')
         else:
-            logger.info(f'bad response from {cls.__name__}')
+            logger.info(f'bad response from TransactionService')
 
 
 class SendToExchangerService(SendToExternalService):
@@ -393,7 +393,7 @@ class SendToExchangerService(SendToExternalService):
             logger.info(f'{cls.__name__} sent {cls.counter} '
                         f'transactions')
         else:
-            logger.info(f'bad response from {cls.gw.__name__}')
+            logger.info(f'bad response from ExchangerService')
 
 
 __TRANSACTIONS_TASKS__ = [SendToExchangerService,
