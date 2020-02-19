@@ -8,7 +8,6 @@ from decimal import Decimal
 from flask import render_template
 from sqlalchemy import and_
 from sqlalchemy.orm import Session, Query
-from sqlalchemy.sql.functions import coalesce
 
 from wallets import app
 from wallets import logger
@@ -228,7 +227,8 @@ class UpdateTrxMethod(ServerMethod):
         for trx in request_obj.transactions:
             counter += session.query(Transaction).filter_by(hash=trx.hash).update({
                 'status': TransactionStatus.CONFIRMED.value,
-                'confirmed_at': datetime.now()
+                'confirmed_at': datetime.now(),
+                'value': Decimal(trx.value)
             })
         session.commit()
         response_msg.header.status = w_pb2.SUCCESS
