@@ -232,7 +232,7 @@ class UpdateTrxMethod(ServerMethod):
                 'status': TransactionStatus.CONFIRMED.value,
                 'confirmed_at': datetime.now(),
                 'value': Decimal(trx.value)
-            })
+            }, synchronize_session=False)
             session.commit()
         response_msg.header.status = w_pb2.SUCCESS
         response_msg.header.description = f'Confirmed {counter} Transactions'
