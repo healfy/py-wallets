@@ -334,7 +334,7 @@ class SendToTransactionService(SendToExternalService):
         return Transaction.query.filter(
             Transaction.hash != None,
             Transaction.status == TransactionStatus.NEW.value,
-        )
+        ).with_for_update(nowait=True, of=Transaction)
 
     @classmethod
     def send_to_external_service(
@@ -374,7 +374,7 @@ class SendToExchangerService(SendToExternalService):
             Transaction.uuid != None,
             Transaction.status == TransactionStatus.CONFIRMED.value,
             Wallet.is_platform == True,
-        )
+        ).with_for_update(nowait=True, of=Transaction)
 
     @classmethod
     def send_to_external_service(
