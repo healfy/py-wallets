@@ -23,7 +23,7 @@ def request_key(*req):
         format key for caching
     """
     return '::'.join(
-        ('transactions_service',) + tuple(str(v) for v in req)) + '::'
+        ('wallets_service',) + tuple(str(v) for v in req)) + '::'
 
 
 class ManualLockGateway:
