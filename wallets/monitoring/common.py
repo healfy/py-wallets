@@ -7,12 +7,15 @@ from datetime import timedelta
 from flask import render_template
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import Query
+from redis import StrictRedis
 
 from wallets import app
 from wallets import logger
 from wallets.common import Wallet
 from wallets.common import Transaction
 from wallets.utils import send_message
+from wallets.utils.locks import nowait_lock
+from wallets.utils.locks import connect_redis
 from wallets.gateway.base import BaseGateway
 from wallets.gateway import currencies_service_gw as c_gw
 from wallets.gateway import blockchain_service_gw as b_gw
@@ -301,21 +304,24 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
 class SendToExternalService(BaseMonitorClass, abc.ABC):
 
     gw: typing.Type['BaseGateway']
+    redis: StrictRedis = connect_redis()
 
     @classmethod
     def _execute(
             cls,
-            session: Session
+            session: Session,
     ) -> typing.NoReturn:
 
         if cls.get_data().first():
-            cls.send_to_external_service(cls.get_data(), session=session)
+            cls.send_to_external_service(cls.get_data(),
+                                         session=session, redis=cls.redis)
 
     @classmethod
     def send_to_external_service(
             cls,
             data: Query,
-            session: Session = None
+            session: Session = None,
+            redis: StrictRedis = None
     ) -> typing.NoReturn:
 
         raise NotImplementedError('Method not implemented!')
@@ -334,26 +340,31 @@ class SendToTransactionService(SendToExternalService):
         return Transaction.query.filter(
             Transaction.hash != None,
             Transaction.status == TransactionStatus.NEW.value,
-        ).with_for_update(nowait=True, skip_locked=True)
+        )
 
     @classmethod
     def send_to_external_service(
             cls,
             data: typing.Iterable[Transaction],
-            session: Session = None
+            session: Session = None,
+            redis: StrictRedis = None,
     ) -> typing.NoReturn:
+        query = []
+        for trx in data:
+            key = Transaction.lock_name_by_id(trx.id)
+            with nowait_lock(redis) as locker:
+                if locker.lock(key, blocking=True):
+                    query.append(trx)
 
-        resp = cls.gw.put_on_monitoring(data)
+        resp = cls.gw.put_on_monitoring(query)
 
         if resp['header']['status'] in cls.gw.ALLOWED_STATUTES:
-            for trx in data:
+            for trx in query:
                 trx.outer_update(session,
                                  status=TransactionStatus.SENT.value)
                 cls.counter += 1
             logger.info(f'{cls.__name__} sent {cls.counter} '
                         f'transactions')
-        else:
-            logger.info(f'bad response from TransactionService')
 
 
 class SendToExchangerService(SendToExternalService):
@@ -374,26 +385,30 @@ class SendToExchangerService(SendToExternalService):
             Transaction.uuid != None,
             Transaction.status == TransactionStatus.CONFIRMED.value,
             Wallet.is_platform == True,
-        ).with_for_update(nowait=True, skip_locked=True)
+        )
 
     @classmethod
     def send_to_external_service(
             cls,
             data: typing.Iterable[Transaction],
-            session: Session = None
+            session: Session = None,
+            redis: StrictRedis = None,
     ) -> typing.NoReturn:
-
-        resp = cls.gw.update_transactions(data)
+        query = []
+        for trx in data:
+            key = Transaction.lock_name_by_id(trx.id)
+            with nowait_lock(redis) as locker:
+                if locker.lock(key, blocking=True):
+                    query.append(trx)
+        resp = cls.gw.update_transactions(query)
 
         if resp['header']['status'] in cls.gw.ALLOWED_STATUTES:
-            for trx in data:
+            for trx in query:
                 trx.outer_update(session,
                                  status=TransactionStatus.REPORTED.value)
                 cls.counter += 1
             logger.info(f'{cls.__name__} sent {cls.counter} '
                         f'transactions')
-        else:
-            logger.info(f'bad response from ExchangerService')
 
 
 __TRANSACTIONS_TASKS__ = [SendToExchangerService,

@@ -33,3 +33,6 @@ Holo: 500
 Chainlink: 500
 Zilliqa: 500
 USD-Coin: 1000
+REDIS_HOST: 'localhost'
+REDIS_NAMESPACE: 'wallets'
+REDIS_PASSWORD: ''

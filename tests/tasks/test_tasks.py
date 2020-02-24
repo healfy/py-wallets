@@ -3,6 +3,8 @@ from tests import BaseDB
 from wallets.common import Transaction
 from wallets.utils.consts import TransactionStatus
 from wallets.monitoring import common
+from wallets.rpc import transactions_pb2
+from wallets.rpc import exchanger_pb2
 
 
 class TestTask(BaseDB):
@@ -57,7 +59,8 @@ class TestTask(BaseDB):
     def test_send_to_trx_service(self, transaction):
         with patch.object(common.transactions_service_gw,
                           '_base_request',
-                          return_value={}) as base_mock:
+                          return_value={'header': {
+                              'status': transactions_pb2.SUCCESS}}) as base_mock:
             common.SendToTransactionService.process(self.session)
 
         trx = Transaction.query.filter_by(id=transaction.id).first()
@@ -66,8 +69,29 @@ class TestTask(BaseDB):
     def test_send_to_exchanger_service(self, exchanger_transaction):
         with patch.object(common.exchanger_service_gw,
                           '_base_request',
-                          return_value={}) as base_mock:
+                          return_value={'header': {
+                              'status': exchanger_pb2.SUCCESS}}) as base_mock:
             common.SendToExchangerService.process(self.session)
 
         trx = Transaction.query.filter_by(id=exchanger_transaction.id).first()
         assert trx.status == TransactionStatus.REPORTED.value
+
+    def test_failed_send_to_trx_service(self, transaction):
+        with patch.object(common.transactions_service_gw,
+                          '_base_request',
+                          return_value={'header': {
+                              'status': transactions_pb2.ERROR}}) as base_mock:
+            common.SendToTransactionService.process(self.session)
+
+        trx = Transaction.query.filter_by(id=transaction.id).first()
+        assert trx.status == TransactionStatus.NEW.value
+
+    def test_failed_send_to_exchanger_service(self, exchanger_transaction):
+        with patch.object(common.exchanger_service_gw,
+                          '_base_request',
+                          return_value={'header': {
+                              'status': exchanger_pb2.ERROR}}) as base_mock:
+            common.SendToExchangerService.process(self.session)
+
+        trx = Transaction.query.filter_by(id=exchanger_transaction.id).first()
+        assert trx.status == TransactionStatus.CONFIRMED.value

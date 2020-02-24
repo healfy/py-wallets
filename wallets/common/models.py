@@ -134,6 +134,11 @@ class BaseModel(Base, AllFeaturesMixin):
     def update(self):
         raise NotImplementedError('Mixing update cannot store versions')
 
+    @classmethod
+    def lock_name_by_id(cls, _id: int) -> str:
+        """Return lock key for model object by id."""
+        return f'{cls.__name__}_id_{_id}'
+
 
 class Wallet(BaseModel):
     """Wallets of platform and borrowers"""
