@@ -336,7 +336,7 @@ class SendToExternalService(BaseMonitorClass, abc.ABC):
 class SendToTransactionService(SendToExternalService):
     """
     Put all transactions to the external service "Transactions".
-    Where they will monitor
+    Where they will monitor and also are sent back
     """
     gw = transactions_service_gw
 
@@ -355,20 +355,17 @@ class SendToTransactionService(SendToExternalService):
             session: Session = None,
             redis: StrictRedis = None,
     ) -> typing.NoReturn:
-        query = []
         for trx in data:
             key = Transaction.lock_name_by_id(trx.id)
             with nowait_lock(redis) as locker:
                 if locker.lock(key, blocking=True):
-                    query.append(trx)
 
-        resp = cls.gw.put_on_monitoring(query)
+                    resp = cls.gw.put_on_monitoring([trx])
 
-        if cls.get_status_from_resp(resp) in cls.gw.ALLOWED_STATUTES:
-            for trx in query:
-                trx.outer_update(session,
-                                 status=TransactionStatus.SENT.value)
-                cls.counter += 1
+                    if cls.get_status_from_resp(resp) in cls.gw.ALLOWED_STATUTES:
+                        trx.outer_update(session,
+                                         status=TransactionStatus.SENT.value)
+                        cls.counter += 1
             logger.info(f'{cls.__name__} sent {cls.counter} '
                         f'transactions')
 
@@ -400,19 +397,15 @@ class SendToExchangerService(SendToExternalService):
             session: Session = None,
             redis: StrictRedis = None,
     ) -> typing.NoReturn:
-        query = []
         for trx in data:
             key = Transaction.lock_name_by_id(trx.id)
             with nowait_lock(redis) as locker:
                 if locker.lock(key, blocking=True):
-                    query.append(trx)
-        resp = cls.gw.update_transactions(query)
-
-        if cls.get_status_from_resp(resp) in cls.gw.ALLOWED_STATUTES:
-            for trx in query:
-                trx.outer_update(session,
-                                 status=TransactionStatus.REPORTED.value)
-                cls.counter += 1
+                    resp = cls.gw.update_transactions([trx])
+                    if cls.get_status_from_resp(resp) in cls.gw.ALLOWED_STATUTES:
+                        trx.outer_update(
+                            session, status=TransactionStatus.REPORTED.value)
+                        cls.counter += 1
             logger.info(f'{cls.__name__} sent {cls.counter} '
                         f'transactions')
 
