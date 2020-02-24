@@ -227,7 +227,7 @@ class UpdateTrxMethod(ServerMethod):
         for trx in request_obj.transactions:
             counter += session.query(Transaction).filter(
                 Transaction.hash == trx.hash).filter(
-                Transaction.status.in_(Transaction.ACTIVE_STATUTES)
+                Transaction.status != TransactionStatus.REPORTED.value
             ).update({
                 'status': TransactionStatus.CONFIRMED.value,
                 'confirmed_at': datetime.now(),
