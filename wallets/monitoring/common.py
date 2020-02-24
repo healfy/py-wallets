@@ -114,10 +114,11 @@ class CompareRemains:
         if result:
             context = dict(wallets=result)
             context['warning'] = warning
-            html = render_template(
-                conf['MONITORING_TEMPLATE'], **context
-            )
-            send_message(html, msg)
+            with app.app_context():
+                html = render_template(
+                    conf['MONITORING_TEMPLATE'], **context
+                )
+                send_message(html, msg)
 
 
 class SaveTrx:
@@ -233,7 +234,7 @@ class CheckWalletMonitor(BaseMonitorClass,
 
                 cls.calc(wallet, usd_balance, result)
 
-            cls.send_mail(wallets)
+            cls.send_mail(result)
 
 
 class CheckTransactionsMonitor(BaseMonitorClass,
