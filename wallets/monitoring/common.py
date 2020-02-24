@@ -327,6 +327,11 @@ class SendToExternalService(BaseMonitorClass, abc.ABC):
 
         raise NotImplementedError('Method not implemented!')
 
+    @classmethod
+    def get_status_from_resp(cls, response: dict):
+        return cls.gw.MODULE.ResponseStatus.Value(
+            response[cls.gw.response_attr]['status'])
+
 
 class SendToTransactionService(SendToExternalService):
     """
@@ -359,7 +364,7 @@ class SendToTransactionService(SendToExternalService):
 
         resp = cls.gw.put_on_monitoring(query)
 
-        if resp['header']['status'] in cls.gw.ALLOWED_STATUTES:
+        if cls.get_status_from_resp(resp) in cls.gw.ALLOWED_STATUTES:
             for trx in query:
                 trx.outer_update(session,
                                  status=TransactionStatus.SENT.value)
@@ -403,7 +408,7 @@ class SendToExchangerService(SendToExternalService):
                     query.append(trx)
         resp = cls.gw.update_transactions(query)
 
-        if resp['header']['status'] in cls.gw.ALLOWED_STATUTES:
+        if cls.get_status_from_resp(resp) in cls.gw.ALLOWED_STATUTES:
             for trx in query:
                 trx.outer_update(session,
                                  status=TransactionStatus.REPORTED.value)
