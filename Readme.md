@@ -1,4 +1,4 @@
-# Transactions Service
+# Wallets Service
 
 ## Main responsibilities:
 
