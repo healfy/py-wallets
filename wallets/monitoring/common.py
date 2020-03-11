@@ -360,7 +360,12 @@ class SendToTransactionService(SendToExternalService):
             with nowait_lock(redis) as locker:
                 if locker.lock(key, blocking=True):
 
-                    resp = cls.gw.put_on_monitoring([trx])
+                    try:
+                        resp = cls.gw.put_on_monitoring([trx])
+                    except cls.gw.EXC_CLASS as exc:
+                        logger.error(f'{cls.__name__} got exc from '
+                                     f'TransactionService {exc}')
+                        continue
 
                     if cls.get_status_from_resp(resp) in cls.gw.ALLOWED_STATUTES:
                         trx.outer_update(session,
@@ -401,7 +406,12 @@ class SendToExchangerService(SendToExternalService):
             key = Transaction.lock_name_by_id(trx.id)
             with nowait_lock(redis) as locker:
                 if locker.lock(key, blocking=True):
-                    resp = cls.gw.update_transactions([trx])
+                    try:
+                        resp = cls.gw.update_transactions([trx])
+                    except cls.gw.EXC_CLASS as exc:
+                        logger.error(f'{cls.__name__} got exc from '
+                                     f'ExchangerService {exc}')
+                        continue
                     if cls.get_status_from_resp(resp) in cls.gw.ALLOWED_STATUTES:
                         trx.outer_update(
                             session, status=TransactionStatus.REPORTED.value)
