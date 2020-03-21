@@ -1,4 +1,4 @@
-image: registry.gitlab.com/bonum/images/cicd-py
+image: registry.gitlab.com/bonum/images/python3-base
 
 stages:
   - test
