@@ -22,4 +22,5 @@ py.test:
   script:
     - "echo REDIS: redis > /config.yaml"
 #    - pip3 install -r req/test.txt
-    - pytest -v tests --pg_string="postgresql://postgres:testing-password@postgres/postgres"
+    - pip freeze
+ #   - pytest -v tests --pg_string="postgresql://postgres:testing-password@postgres/postgres"
