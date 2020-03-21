@@ -1,4 +1,4 @@
-image: python:latest
+image: registry.gitlab.com/bonum/images/cicd-py
 
 stages:
   - test
@@ -21,5 +21,5 @@ py.test:
     - redis
   script:
     - "echo REDIS: redis > /config.yaml"
-    - pip3 install -r req/test.txt
+    - pip3 install -r req/requirements.txt.txt
     - pytest -v --pg_string="postgresql://postgres:testing-password@postgres/postgres"
