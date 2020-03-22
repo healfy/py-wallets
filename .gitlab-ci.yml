@@ -15,10 +15,10 @@ variables:
 py.test:
   stage: test
   variables:
-    REDIS: redis
+    REDIS_HOST: redis
   services:
     - postgres:9.6
     - redis
   script:
-    - "echo REDIS: redis > /config.yaml"
+    - "echo REDIS_HOST: redis > /etc/config.yaml"
     - pytest -v tests --pg_string="postgresql://postgres:testing-password@postgres/postgres"
