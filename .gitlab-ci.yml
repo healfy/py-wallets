@@ -22,3 +22,7 @@ py.test:
   script:
     - "echo REDIS_HOST: redis > /etc/config.yaml"
     - pytest -v tests --pg_string="postgresql://postgres:testing-password@postgres/postgres"
+  only:
+    - master
+    - dev
+    - stage
