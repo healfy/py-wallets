@@ -405,7 +405,7 @@ class SendToExchangerService(SendToExternalService):
         for trx in data:
             key = Transaction.lock_name_by_id(trx.id)
             with nowait_lock(redis) as locker:
-                if locker.lock(key, blocking=True):
+                if locker.lock(key):
                     try:
                         resp = cls.gw.update_transactions([trx])
                     except cls.gw.EXC_CLASS as exc:
