@@ -1,10 +1,14 @@
 import pytz
 import typing
 import requests
+import peewee
+from peewee_async import Manager
+from functools import wraps
 from decimal import Decimal
 from datetime import datetime
 from marshmallow import fields
 from google.protobuf import timestamp_pb2
+from wallets import objects
 from wallets.settings.config import conf
 
 
@@ -89,3 +93,11 @@ def get_exchanger_wallet(address: str, slug: str):
             f'not found.'
         )
     return wallet
+
+
+def nested_commit_on_success(func):
+    @wraps(func)
+    async def _nested_commit_on_success(*args, **kwargs):
+        async with objects.atomic():
+            return await func(*args, **kwargs)
+    return _nested_commit_on_success

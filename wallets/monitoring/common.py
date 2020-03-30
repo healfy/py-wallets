@@ -4,6 +4,7 @@ from decimal import Decimal
 from decimal import ROUND_HALF_UP
 from datetime import datetime
 from datetime import timedelta
+from peewee_async import Manager
 from flask import render_template
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import Query
@@ -11,9 +12,11 @@ from redis import StrictRedis
 
 from wallets import app
 from wallets import logger
+from wallets import objects
 from wallets.common import Wallet
 from wallets.common import Transaction
 from wallets.utils import send_message
+from wallets.utils import nested_commit_on_success
 from wallets.utils.locks import nowait_lock
 from wallets.utils.locks import connect_redis
 from wallets.gateway.base import BaseGateway
@@ -32,18 +35,18 @@ class BaseMonitorClass(abc.ABC):
     """
     timeout: int = conf['MONITORING_TRANSACTIONS_PERIOD']
     counter: int = 0  # for logging
+    manager = objects
 
     @classmethod
-    def get_data(cls):
+    async def get_data(cls):
         """
         Simple method to get data for the processing
         """
         raise NotImplementedError('Method not implemented!')
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
-            session: Session
     ) -> typing.NoReturn:
         """
         Main method that contains all logic
@@ -51,21 +54,19 @@ class BaseMonitorClass(abc.ABC):
         raise NotImplementedError('Method not implemented!')
 
     @classmethod
-    def process(
+    @nested_commit_on_success
+    async def process(
             cls,
-            session: Session
     ) -> typing.NoReturn:
         """
         Method to release logic
         """
         try:
-            cls._execute(session)
+            await cls._execute()
         except Exception as e:
-            session.rollback()
             raise e
         finally:
             cls.counter = 0
-            session.close()
 
 
 class CompareRemains:
@@ -133,7 +134,6 @@ class SaveTrx:
             request_object: typing.Dict,
             session: Session
     ) -> typing.NoReturn:
-
         trx = Transaction.from_dict(request_object)
         trx.wallet_id = wallet.id
         session.add(trx)
@@ -144,6 +144,7 @@ class UpdateTrx:
     """
     Class for update transaction if it necessary
     """
+
     @classmethod
     def update(
             cls,
@@ -151,7 +152,6 @@ class UpdateTrx:
             trx: typing.Dict,
             session: Session
     ) -> int:
-
         res = session.query(Transaction).filter_by(
             wallet_id=wallet.id,
             status=TransactionStatus.NEW.value,
@@ -209,9 +209,8 @@ class CheckWalletMonitor(BaseMonitorClass,
         return balances, rates
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
-            session: Session
     ) -> typing.NoReturn:
 
         wallets, rates = cls.get_data()
@@ -246,17 +245,18 @@ class CheckTransactionsMonitor(BaseMonitorClass,
     """
 
     @classmethod
-    def get_data(cls) -> Query:
-        return Wallet.query.filter_by(on_monitoring=True, is_platform=False,
-                                      is_active=True)
+    async def get_data(cls) -> Query:
+        return await cls.manager.get_all(Wallet,
+                                         on_monitoring=True,
+                                         is_platform=False,
+                                         is_active=True)
 
     @classmethod
     def _execute(
             cls,
-            session: Session
     ) -> typing.NoReturn:
 
-        for wallet in cls.get_data():
+        for wallet in await cls.get_data():
             trx_list = b_gw.get_transactions_list(
                 wallet_address=wallet.address, external_id=wallet.external_id
             )
@@ -280,13 +280,14 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
 
     @classmethod
     def get_data(cls) -> Query:
-        return Wallet.query.filter_by(on_monitoring=True, is_platform=True,
-                                      is_active=True)
+        return cls.manager.get_all(Wallet,
+                                   on_monitoring=True,
+                                   is_platform=True,
+                                   is_active=True)
 
     @classmethod
     def _execute(
             cls,
-            session: Session
     ) -> typing.NoReturn:
 
         for wallet in cls.get_data():
@@ -295,7 +296,7 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
                 from_time=datetime.now() - timedelta(days=cls.time_delta_days)
             )
             for trx in trx_list:
-                if not cls.exists(trx['hash']) and  \
+                if not cls.exists(trx['hash']) and \
                         cls.is_input_trx(trx['address_to'], wallet):
                     cls.counter += cls.update(wallet, trx, session)
         logger.info(f'{cls.__name__} updated {cls.counter} '
@@ -303,7 +304,6 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
 
 
 class SendToExternalService(BaseMonitorClass, abc.ABC):
-
     gw: typing.Type['BaseGateway']
     redis: StrictRedis = connect_redis()
 
@@ -312,7 +312,6 @@ class SendToExternalService(BaseMonitorClass, abc.ABC):
             cls,
             session: Session,
     ) -> typing.NoReturn:
-
         if cls.get_data().first():
             cls.send_to_external_service(cls.get_data(),
                                          session=session, redis=cls.redis)
@@ -324,7 +323,6 @@ class SendToExternalService(BaseMonitorClass, abc.ABC):
             session: Session = None,
             redis: StrictRedis = None
     ) -> typing.NoReturn:
-
         raise NotImplementedError('Method not implemented!')
 
     @classmethod
@@ -367,7 +365,8 @@ class SendToTransactionService(SendToExternalService):
                                      f'TransactionService {exc}')
                         continue
 
-                    if cls.get_status_from_resp(resp) in cls.gw.ALLOWED_STATUTES:
+                    if cls.get_status_from_resp(
+                            resp) in cls.gw.ALLOWED_STATUTES:
                         trx.outer_update(session,
                                          status=TransactionStatus.SENT.value)
                         cls.counter += 1
@@ -412,7 +411,8 @@ class SendToExchangerService(SendToExternalService):
                         logger.error(f'{cls.__name__} got exc from '
                                      f'ExchangerService {exc}')
                         continue
-                    if cls.get_status_from_resp(resp) in cls.gw.ALLOWED_STATUTES:
+                    if cls.get_status_from_resp(
+                            resp) in cls.gw.ALLOWED_STATUTES:
                         trx.outer_update(
                             session, status=TransactionStatus.REPORTED.value)
                         cls.counter += 1
