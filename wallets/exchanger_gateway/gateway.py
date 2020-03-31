@@ -21,9 +21,10 @@ class ExchangerServiceGateway(BaseGateway):
     BAD_RESPONSE_MSG = 'Bad response from exchanger service'
     ALLOWED_STATUTES = (exchanger_pb2.SUCCESS,)
 
-    def update_transactions(self,
-                            transactions: typing.Iterable[Transaction]
-                            ) -> typing.Dict:
+    async def update_transactions(
+            self,
+            transactions: typing.Iterable[Transaction]
+    ) -> typing.Dict:
 
         request_message = self.MODULE.UpdateRequest()
 

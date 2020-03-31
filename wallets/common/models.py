@@ -25,6 +25,11 @@ class BaseModel(peewee.Model):
         self.updated_at = datetime.now()
         return super().save(force_insert=force_insert, only=only)
 
+    @classmethod
+    def lock_name_by_id(cls, _id: int) -> str:
+        """Return lock key for model object by id."""
+        return f'{cls.__name__}_id_{_id}'
+
 
 class Wallet(BaseModel):
 
