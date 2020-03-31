@@ -30,7 +30,12 @@ class MyManager(peewee_async.Manager):
         if conditions:
             query = query.where(*conditions)
 
-        return await self.execute(query)
+        result = await self.execute(query)
+
+        return list(result)
+
+    async def exists(self, source_, *args, **kwargs):
+        return bool(await self.get_all(source_, *args, **kwargs))
 
 
 app = web_app.Application()

@@ -4,8 +4,6 @@ from decimal import Decimal
 from decimal import ROUND_HALF_UP
 from datetime import datetime
 from datetime import timedelta
-from peewee_async import Manager
-from flask import render_template
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import Query
 from redis import StrictRedis
@@ -105,7 +103,7 @@ class CompareRemains:
             )
 
     @classmethod
-    def send_mail(
+    async def send_mail(
             cls,
             result: typing.Union[list, dict],
             warning: str = None
@@ -115,29 +113,24 @@ class CompareRemains:
         if result:
             context = dict(wallets=result)
             context['warning'] = warning
-            with app.app_context():
-                html = render_template(
-                    conf['MONITORING_TEMPLATE'], **context
-                )
-                send_message(html, msg)
+            await send_message('', msg)
 
 
 class SaveTrx:
     """
     Class for save transaction if it necessary
     """
+    manager: objects
 
     @classmethod
-    def save(
+    async def save(
             cls,
             wallet: Wallet,
             request_object: typing.Dict,
-            session: Session
     ) -> typing.NoReturn:
-        trx = Transaction.from_dict(request_object)
+        trx = await cls.manager.create(Transaction, request_object)
         trx.wallet_id = wallet.id
-        session.add(trx)
-        session.commit()
+        await cls.manager.update(trx)
 
 
 class UpdateTrx:
@@ -145,38 +138,40 @@ class UpdateTrx:
     Class for update transaction if it necessary
     """
 
+    manager: objects
+
     @classmethod
-    def update(
+    async def update(
             cls,
-            wallet: Wallet,
+            wallet: typing.Type['Wallet'],
             trx: typing.Dict,
-            session: Session
     ) -> int:
-        res = session.query(Transaction).filter_by(
+
+        trx: Transaction = await cls.manager.get(
+            Transaction,
             wallet_id=wallet.id,
             status=TransactionStatus.NEW.value,
             address_from=trx['address_from'].lower(),
             currency_slug=trx['currency_slug'].lower(),
-            hash=None,
-        ).update({'hash': trx['hash'], 'value': trx['value']})
-
-        session.commit()
-        return res
+            hash=None
+        )
+        trx.hash = trx['hash']
+        trx.value = trx['value']
+        return int(bool(await cls.manager.update(trx)))
 
 
 class ValidateTRX:
     """
     Class to check transaction in base
     """
+    manager: objects
 
     @classmethod
-    def exists(
+    async def exists(
             cls,
             trx_hash: str
     ) -> bool:
-        return bool(
-            Transaction.query.filter_by(hash=trx_hash.lower()).first()
-        )
+        return await cls.manager.exists(Transaction, hash=trx_hash)
 
     @classmethod
     def is_input_trx(
@@ -198,10 +193,10 @@ class CheckWalletMonitor(BaseMonitorClass,
     timeout = conf['MONITORING_WALLETS_PERIOD']
 
     @classmethod
-    def get_data(cls) -> typing.Tuple[dict, typing.Optional[dict]]:
-        balances = b_gw.get_platform_wallets_balance()
+    async def get_data(cls) -> typing.Tuple[dict, typing.Optional[dict]]:
+        balances = await b_gw.get_platform_wallets_balance()
         try:
-            currencies = c_gw.get_currencies()
+            currencies = await c_gw.get_currencies()
             rates = {c['slug']: c['rate'] for c in currencies}
         except Exception as exc:
             logger.warning(f"{cls.__class__.__name__} got {exc}")
@@ -213,14 +208,16 @@ class CheckWalletMonitor(BaseMonitorClass,
             cls,
     ) -> typing.NoReturn:
 
-        wallets, rates = cls.get_data()
+        wallets, rates = await cls.get_data()
 
         if not rates:
             for wallet in wallets:
                 wallet['current'] = wallet['currencySlug']
-            cls.send_mail(wallets,
-                          warning='Attention, service currencies is unavailable'
-                          )
+
+            await cls.send_mail(
+                wallets,
+                warning='Attention, service currencies is unavailable'
+            )
         else:
             result = []
             for wallet in wallets:
@@ -233,7 +230,7 @@ class CheckWalletMonitor(BaseMonitorClass,
 
                 cls.calc(wallet, usd_balance, result)
 
-            cls.send_mail(result)
+            await cls.send_mail(result)
 
 
 class CheckTransactionsMonitor(BaseMonitorClass,
@@ -252,18 +249,18 @@ class CheckTransactionsMonitor(BaseMonitorClass,
                                          is_active=True)
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
     ) -> typing.NoReturn:
 
         for wallet in await cls.get_data():
-            trx_list = b_gw.get_transactions_list(
+            trx_list = await b_gw.get_transactions_list(
                 wallet_address=wallet.address, external_id=wallet.external_id
             )
             for trx in trx_list:
-                if not cls.exists(trx['hash']) \
+                if not await cls.exists(trx['hash']) \
                         and cls.is_input_trx(trx['address_to'], wallet):
-                    cls.save(wallet, trx, session)
+                    await cls.save(wallet, trx)
                     cls.counter += 1
             logger.info(f'{cls.__name__} saved {cls.counter} '
                         f'transactions')
@@ -279,26 +276,27 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
     time_delta_days = conf.get('DELTA_DAYS', 1)
 
     @classmethod
-    def get_data(cls) -> Query:
-        return cls.manager.get_all(Wallet,
-                                   on_monitoring=True,
-                                   is_platform=True,
-                                   is_active=True)
+    async def get_data(cls) -> Query:
+        return await cls.manager.get_all(Wallet,
+                                         on_monitoring=True,
+                                         is_platform=True,
+                                         is_active=True)
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
     ) -> typing.NoReturn:
 
-        for wallet in cls.get_data():
-            trx_list = b_gw.get_exchanger_wallet_trx_list(
+        for wallet in await cls.get_data():
+            trx_list = await b_gw.get_exchanger_wallet_trx_list(
                 slug=wallet.currency_slug,
                 from_time=datetime.now() - timedelta(days=cls.time_delta_days)
             )
             for trx in trx_list:
-                if not cls.exists(trx['hash']) and \
+                if not await cls.exists(trx['hash']) and \
                         cls.is_input_trx(trx['address_to'], wallet):
-                    cls.counter += cls.update(wallet, trx, session)
+                    cls.counter += await cls.update(wallet, trx)
+
         logger.info(f'{cls.__name__} updated {cls.counter} '
                     f'transactions')
 
@@ -308,19 +306,16 @@ class SendToExternalService(BaseMonitorClass, abc.ABC):
     redis: StrictRedis = connect_redis()
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
-            session: Session,
     ) -> typing.NoReturn:
         if cls.get_data().first():
-            cls.send_to_external_service(cls.get_data(),
-                                         session=session, redis=cls.redis)
+            cls.send_to_external_service(cls.get_data(), redis=cls.redis)
 
     @classmethod
     def send_to_external_service(
             cls,
             data: Query,
-            session: Session = None,
             redis: StrictRedis = None
     ) -> typing.NoReturn:
         raise NotImplementedError('Method not implemented!')
@@ -420,6 +415,5 @@ class SendToExchangerService(SendToExternalService):
                         f'transactions')
 
 
-__TRANSACTIONS_TASKS__ = [SendToExchangerService,
-                          SendToTransactionService,
-                          CheckWalletMonitor]
+__TRANSACTIONS_TASKS__ = [CheckPlatformWalletsMonitor,
+                          CheckTransactionsMonitor]

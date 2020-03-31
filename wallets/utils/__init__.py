@@ -1,12 +1,11 @@
 import pytz
 import typing
 import requests
-import peewee
-from peewee_async import Manager
 from functools import wraps
 from decimal import Decimal
 from datetime import datetime
 from marshmallow import fields
+from aiohttp import ClientSession
 from google.protobuf import timestamp_pb2
 from wallets import objects
 from wallets.settings.config import conf
@@ -51,7 +50,7 @@ class StringLowerField(fields.String):
         return super()._deserialize(value, attr, data, **kwargs).lower()
 
 
-def send_message(html, subject):
+async def send_message(html, subject):
 
     url = f'https://api.mailgun.net/v3/{conf["MAIL_DOMAIN"]}/messages'
     auth = ('api', f'{conf["MAIL_PASSWORD"]}')
@@ -61,8 +60,10 @@ def send_message(html, subject):
         'subject': subject,
         'html': html,
     }
-    response = requests.post(url, auth=auth, data=data)
-    response.raise_for_status()
+    async with ClientSession() as session:
+        async with session.post(url, auth=auth, data=data) as resp:
+            response = await resp.json()
+            response.raise_for_status()
 
 
 def simple_generator(iterable_object):

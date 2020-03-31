@@ -1,14 +1,12 @@
 import typing
 import traceback
 import asyncio
-from wallets import db
 from wallets import logger
 from wallets.monitoring.common import __TRANSACTIONS_TASKS__
 from wallets.monitoring.common import BaseMonitorClass
 
 
-@asyncio.coroutine
-def run_monitoring(
+async def run_monitoring(
         task_class: typing.Type['BaseMonitorClass']
 ) -> typing.NoReturn:
     """
@@ -18,10 +16,10 @@ def run_monitoring(
 
     if issubclass(task_class, BaseMonitorClass):
         while True:
-            yield from asyncio.sleep(task_class.timeout)
+            await asyncio.sleep(task_class.timeout)
             try:
                 logger.info(f"{task_class.__name__} task started.")
-                task_class.process(db.session)
+                await task_class.process()
                 logger.info(f'{task_class.__name__} finished')
             except Exception as e:
                 logger.error(
