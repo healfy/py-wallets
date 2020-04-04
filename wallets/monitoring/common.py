@@ -152,7 +152,7 @@ class SaveTrx:
 
         trx = await cls.manager.create(Transaction, **request_object)
         trx.wallet_id = wallet.id
-        trx.save()
+        await cls.manager.update(trx)
 
 
 class UpdateTrx:
@@ -180,7 +180,7 @@ class UpdateTrx:
             )
             trx.hash = trx['hash']
             trx.value = trx['value']
-            trx.save()
+            await cls.manager.update(trx)
             cls.counter += 1
         except Transaction.DoesNotExist:
             pass
@@ -420,16 +420,11 @@ class SendToExchangerService(SendTrxToExternalService):
     @classmethod
     async def get_data(cls) -> typing.Optional[list]:
 
-        query = (
-            Transaction
-            .select()
-            .join(Wallet)
-            .where(
-                (Transaction.hash != None) &
-                (Transaction.uuid != None) &
-                (Wallet.is_platform == True) &
-                (Transaction.status == TransactionStatus.CONFIRMED.value)
-            )
+        query = Transaction.select().join(Wallet).where(
+            (Transaction.hash != None) &
+            (Transaction.uuid != None) &
+            (Wallet.is_platform == True) &
+            (Transaction.status == TransactionStatus.CONFIRMED.value)
         )
 
         return await cls.manager.get_all(query)

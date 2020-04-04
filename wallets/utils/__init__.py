@@ -1,6 +1,4 @@
 import pytz
-import typing
-import requests
 from functools import wraps
 from decimal import Decimal
 from datetime import datetime
@@ -66,33 +64,11 @@ async def send_message(html, subject):
             response.raise_for_status()
 
 
-def simple_generator(iterable_object):
-    for obj in iterable_object:
-        yield obj
-
-
-def get_existing_wallet(_id: int = None, address: str = None
-                        ) -> typing.Any:
+async def get_exchanger_wallet(address: str, slug: str):
     from wallets.common import models
-
-    if _id is not None:
-        return models.Wallet.query.filter_by(external_id=_id).first()
-    if address is not None:
-        return models.Wallet.query.filter(models.Wallet.address == address).first()
-    raise ValueError(
-        'Get wallet error: expect at least one of id, address parameters.'
-    )
-
-
-def get_exchanger_wallet(address: str, slug: str):
-    from wallets.common import models
-    wallet = models.Wallet.query.filter_by(
-        address=address, currency_slug=slug).first()
-    if not wallet:
-        raise ValueError(
-            f'Get wallet error: the wallet {address} ans slug {slug} is '
-            f'not found.'
-        )
+    wallet = await objects.get(models.Wallet,
+                               address=address,
+                               currency_slug=slug)
     return wallet
 
 
