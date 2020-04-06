@@ -1,7 +1,6 @@
 import io
 import typing
 import pytz
-import peewee
 import traceback
 from abc import ABC
 from datetime import datetime, timedelta

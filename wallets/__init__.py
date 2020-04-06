@@ -42,12 +42,12 @@ app = web_app.Application()
 app.config = conf
 
 
-db: peewee_async.PostgresqlDatabase = peewee_async.PostgresqlDatabase(
+database: peewee_async.PostgresqlDatabase = peewee_async.PostgresqlDatabase(
     os.getenv('PGDATABASE', 'wallets'),
     host=os.getenv('PGHOST', 'localhost'),
     user=os.getenv('PGUSER', 'postgres'),
     password=os.getenv('PGPASSWORD')
 )
 
-objects = MyManager(db)
+objects = MyManager(database)
 start_remote_gateways()

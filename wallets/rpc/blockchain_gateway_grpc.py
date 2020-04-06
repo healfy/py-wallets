@@ -46,6 +46,14 @@ class BlockchainGatewayServiceBase(abc.ABC):
         pass
 
     @abc.abstractmethod
+    async def GetPlatformWalletsBalance(self, stream):
+        pass
+
+    @abc.abstractmethod
+    async def GetBalanceBySlug(self, stream):
+        pass
+
+    @abc.abstractmethod
     async def SendToColdWallet(self, stream):
         pass
 
@@ -53,13 +61,21 @@ class BlockchainGatewayServiceBase(abc.ABC):
     async def CheckAddress(self, stream):
         pass
 
+    @abc.abstractmethod
+    async def SendFromExchangerWallet(self, stream):
+        pass
+
+    @abc.abstractmethod
+    async def GetTrxListExchangerWallet(self, stream):
+        pass
+
     def __mapping__(self):
         return {
             '/blockchain_gateway.BlockchainGatewayService/Health': grpclib.const.Handler(
                 self.Health,
                 grpclib.const.Cardinality.UNARY_UNARY,
-                blockchain_gateway_pb2.EmptyRequest,
-                blockchain_gateway_pb2.EmptyRequest,
+                blockchain_gateway_pb2.HealthzRequest,
+                blockchain_gateway_pb2.HealthzResponse,
             ),
             '/blockchain_gateway.BlockchainGatewayService/GetAvailableCurrencies': grpclib.const.Handler(
                 self.GetAvailableCurrencies,
@@ -103,6 +119,18 @@ class BlockchainGatewayServiceBase(abc.ABC):
                 blockchain_gateway_pb2.SendFromColdWalletRequest,
                 blockchain_gateway_pb2.SendFromColdWalletResponse,
             ),
+            '/blockchain_gateway.BlockchainGatewayService/GetPlatformWalletsBalance': grpclib.const.Handler(
+                self.GetPlatformWalletsBalance,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                blockchain_gateway_pb2.EmptyRequest,
+                blockchain_gateway_pb2.GetPlatformWalletsBalanceResponse,
+            ),
+            '/blockchain_gateway.BlockchainGatewayService/GetBalanceBySlug': grpclib.const.Handler(
+                self.GetBalanceBySlug,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                blockchain_gateway_pb2.GetBalanceBySlugRequest,
+                blockchain_gateway_pb2.GetBalanceResponse,
+            ),
             '/blockchain_gateway.BlockchainGatewayService/SendToColdWallet': grpclib.const.Handler(
                 self.SendToColdWallet,
                 grpclib.const.Cardinality.UNARY_UNARY,
@@ -115,6 +143,18 @@ class BlockchainGatewayServiceBase(abc.ABC):
                 blockchain_gateway_pb2.CheckAddressRequest,
                 blockchain_gateway_pb2.CheckAddressResponse,
             ),
+            '/blockchain_gateway.BlockchainGatewayService/SendFromExchangerWallet': grpclib.const.Handler(
+                self.SendFromExchangerWallet,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                blockchain_gateway_pb2.SendFromColdWalletRequest,
+                blockchain_gateway_pb2.SendFromColdWalletResponse,
+            ),
+            '/blockchain_gateway.BlockchainGatewayService/GetTrxListExchangerWallet': grpclib.const.Handler(
+                self.GetTrxListExchangerWallet,
+                grpclib.const.Cardinality.UNARY_UNARY,
+                blockchain_gateway_pb2.GetTrxExchangersListRequest,
+                blockchain_gateway_pb2.GetTransactionsListResponse,
+            ),
         }
 
 
@@ -124,8 +164,8 @@ class BlockchainGatewayServiceStub:
         self.Health = grpclib.client.UnaryUnaryMethod(
             channel,
             '/blockchain_gateway.BlockchainGatewayService/Health',
-            blockchain_gateway_pb2.EmptyRequest,
-            blockchain_gateway_pb2.EmptyRequest,
+            blockchain_gateway_pb2.HealthzRequest,
+            blockchain_gateway_pb2.HealthzResponse,
         )
         self.GetAvailableCurrencies = grpclib.client.UnaryUnaryMethod(
             channel,
@@ -169,6 +209,18 @@ class BlockchainGatewayServiceStub:
             blockchain_gateway_pb2.SendFromColdWalletRequest,
             blockchain_gateway_pb2.SendFromColdWalletResponse,
         )
+        self.GetPlatformWalletsBalance = grpclib.client.UnaryUnaryMethod(
+            channel,
+            '/blockchain_gateway.BlockchainGatewayService/GetPlatformWalletsBalance',
+            blockchain_gateway_pb2.EmptyRequest,
+            blockchain_gateway_pb2.GetPlatformWalletsBalanceResponse,
+        )
+        self.GetBalanceBySlug = grpclib.client.UnaryUnaryMethod(
+            channel,
+            '/blockchain_gateway.BlockchainGatewayService/GetBalanceBySlug',
+            blockchain_gateway_pb2.GetBalanceBySlugRequest,
+            blockchain_gateway_pb2.GetBalanceResponse,
+        )
         self.SendToColdWallet = grpclib.client.UnaryUnaryMethod(
             channel,
             '/blockchain_gateway.BlockchainGatewayService/SendToColdWallet',
@@ -180,4 +232,16 @@ class BlockchainGatewayServiceStub:
             '/blockchain_gateway.BlockchainGatewayService/CheckAddress',
             blockchain_gateway_pb2.CheckAddressRequest,
             blockchain_gateway_pb2.CheckAddressResponse,
+        )
+        self.SendFromExchangerWallet = grpclib.client.UnaryUnaryMethod(
+            channel,
+            '/blockchain_gateway.BlockchainGatewayService/SendFromExchangerWallet',
+            blockchain_gateway_pb2.SendFromColdWalletRequest,
+            blockchain_gateway_pb2.SendFromColdWalletResponse,
+        )
+        self.GetTrxListExchangerWallet = grpclib.client.UnaryUnaryMethod(
+            channel,
+            '/blockchain_gateway.BlockchainGatewayService/GetTrxListExchangerWallet',
+            blockchain_gateway_pb2.GetTrxExchangersListRequest,
+            blockchain_gateway_pb2.GetTransactionsListResponse,
         )

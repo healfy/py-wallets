@@ -2,11 +2,13 @@ import typing
 import peewee
 from datetime import datetime
 
-from wallets import db
+from wallets.rpc import wallets_pb2
+from wallets import database
 from wallets.utils.consts import TransactionStatus
 
 
 class BaseModel(peewee.Model):
+    message_class = None
 
     created_at = peewee.DateTimeField(
         verbose_name='Datetime of creating object',
@@ -19,7 +21,7 @@ class BaseModel(peewee.Model):
     )
 
     class Meta:
-        database = db
+        database = database
 
     def save(self, force_insert=False, only=None):
         self.updated_at = datetime.now()
@@ -30,8 +32,15 @@ class BaseModel(peewee.Model):
         """Return lock key for model object by id."""
         return f'{cls.__name__}_id_{_id}'
 
+    def to_message(self):
+        return self.message_class(**self._as_message_dict())
+
+    def _as_message_dict(self) -> dict:
+        return {}
+
 
 class Wallet(BaseModel):
+    message_class = wallets_pb2.Wallet
 
     currency_slug = peewee.CharField(
         verbose_name='Wallet currency slug'
@@ -62,6 +71,8 @@ class Wallet(BaseModel):
 
 class Transaction(BaseModel):
     """BlockChain transaction"""
+
+    message_class = wallets_pb2.Transaction
 
     ACTIVE_STATUTES = (
         TransactionStatus.NEW.value,
@@ -116,7 +127,8 @@ class Transaction(BaseModel):
     wallet = peewee.ForeignKeyField(
         Wallet,
         verbose_name='wallet',
-        related_name='transactions'
+        related_name='transactions',
+        null=True
     )
 
     uuid = peewee.UUIDField(
