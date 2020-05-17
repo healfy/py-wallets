@@ -41,7 +41,7 @@ from wallets.gateway import (
 conf = app.config
 
 REDIS_HOST = os.environ.get('REDIS_HOST', conf.get('REDIS_HOST'))
-REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD')
+REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', '')
 
 lock_manager = Aioredlock(
     dict(host=REDIS_HOST, password=REDIS_PASSWORD), lock_timeout=120
@@ -434,5 +434,5 @@ __TRANSACTIONS_TASKS__ = [
     SendToExchangerService,
     SendToTransactionService,
     CheckTransactionsMonitor,
-    CheckPlatformWalletsMonitor
+   # CheckPlatformWalletsMonitor
 ]

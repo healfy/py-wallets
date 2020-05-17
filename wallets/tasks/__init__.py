@@ -2,7 +2,6 @@ import typing
 import traceback
 import asyncio
 from wallets import logger
-from wallets.monitoring.common import __TRANSACTIONS_TASKS__
 from wallets.monitoring.common import BaseMonitorClass
 
 
@@ -21,14 +20,11 @@ async def run_monitoring(
                 logger.info(f"{task_class.__name__} task started.")
                 await task_class.process()
                 logger.info(f'{task_class.__name__} finished')
+            except asyncio.CancelledError:
+                logger.info(f"{task_class.__name__} task Cancelled.")
+                return
             except Exception as e:
                 logger.error(
                     f"Class {task_class.__name__} failed with "
                     f"{e.__class__.__name__}: "
                     f"{e}. {traceback.format_stack()}")
-
-
-__tasks__ = [
-    asyncio.ensure_future(
-        run_monitoring(task)) for task in __TRANSACTIONS_TASKS__
-]
