@@ -1,28 +1,29 @@
-import grpc
 import typing
-from google.protobuf.json_format import MessageToDict
-from wallets.gateway.base import BaseGateway
+from wallets.gateway.base import BaseAsyncGateway
 from wallets.rpc import currencies_pb2
-from wallets.rpc import currencies_pb2_grpc
+from wallets.rpc import currencies_grpc
 from wallets.settings.config import conf
 from .serializers import CurrencyRateSchema
+from .exceptions import CurrenciesBadResponseException
 
 
-class CurrenciesServiceGateway(BaseGateway):
+class CurrenciesServiceGateway(BaseAsyncGateway):
     """Hold logic for interacting with remote currencies service."""
 
-    GW_ADDRESS = conf['CURRENCY_GRPC_ADDRESS']
-    TIMEOUT = conf['CURRENCIES_GW_TIMEOUT']
+    NAME = 'currencies'
     MODULE = currencies_pb2
-    ServiceStub = currencies_pb2_grpc.CurrenciesServiceStub
+    response_attr = 'header'
+    TIMEOUT = conf['CURRENCIES_GW_TIMEOUT']
+    GW_ADDRESS = conf['CURRENCY_GRPC_ADDRESS']
+    EXC_CLASS = CurrenciesBadResponseException
+    ALLOWED_STATUTES = (currencies_pb2.SUCCESS,)
+    BAD_RESPONSE_MSG = 'Bad response from currencies.'
+    ServiceStub = currencies_grpc.CurrenciesServiceStub
 
-    def get_currencies(self) -> typing.Dict:
-        with grpc.insecure_channel(self.GW_ADDRESS) as channel:
-            stub = self.ServiceStub(channel)
+    async def get_currencies(self) -> typing.Dict:
+        message = self.MODULE.CurrenciesRequest()
+        response = await self._base_request(message, self.CLIENT.Get)
 
-            response = stub.Get(
-                self.MODULE.CurrenciesRequest(), timeout=self.TIMEOUT)
-
-        message = MessageToDict(response, preserving_proto_field_name=True)
-        message = message['currencies']
-        return CurrencyRateSchema(many=True).load(message)
+        return CurrencyRateSchema(many=True).load(
+            response.get('currencies', [])
+        )

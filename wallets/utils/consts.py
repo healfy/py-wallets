@@ -12,3 +12,7 @@ class TransactionStatus(IntEnum):
     CONFIRMED = 6
     REPORTED = 7
     SENT = 8
+
+    @classmethod
+    def members_items(cls):
+        return cls.__members__.items()

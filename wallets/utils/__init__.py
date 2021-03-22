@@ -1,10 +1,11 @@
 import pytz
-import typing
-import requests
+from functools import wraps
 from decimal import Decimal
 from datetime import datetime
 from marshmallow import fields
+from aiohttp import ClientSession
 from google.protobuf import timestamp_pb2
+from wallets import objects
 from wallets.settings.config import conf
 
 
@@ -47,7 +48,7 @@ class StringLowerField(fields.String):
         return super()._deserialize(value, attr, data, **kwargs).lower()
 
 
-def send_message(html, subject):
+async def send_message(html, subject):
 
     url = f'https://api.mailgun.net/v3/{conf["MAIL_DOMAIN"]}/messages'
     auth = ('api', f'{conf["MAIL_PASSWORD"]}')
@@ -57,35 +58,23 @@ def send_message(html, subject):
         'subject': subject,
         'html': html,
     }
-    response = requests.post(url, auth=auth, data=data)
-    response.raise_for_status()
+    async with ClientSession() as session:
+        async with session.post(url, auth=auth, data=data) as resp:
+            response = await resp.json()
+            response.raise_for_status()
 
 
-def simple_generator(iterable_object):
-    for obj in iterable_object:
-        yield obj
-
-
-def get_existing_wallet(_id: int = None, address: str = None
-                        ) -> typing.Any:
+async def get_exchanger_wallet(address: str, slug: str):
     from wallets.common import models
-
-    if _id is not None:
-        return models.Wallet.query.filter_by(external_id=_id).first()
-    if address is not None:
-        return models.Wallet.query.filter(models.Wallet.address == address).first()
-    raise ValueError(
-        'Get wallet error: expect at least one of id, address parameters.'
-    )
-
-
-def get_exchanger_wallet(address: str, slug: str):
-    from wallets.common import models
-    wallet = models.Wallet.query.filter_by(
-        address=address, currency_slug=slug).first()
-    if not wallet:
-        raise ValueError(
-            f'Get wallet error: the wallet {address} ans slug {slug} is '
-            f'not found.'
-        )
+    wallet = await objects.get(models.Wallet,
+                               address=address,
+                               currency_slug=slug)
     return wallet
+
+
+def nested_commit_on_success(func):
+    @wraps(func)
+    async def _nested_commit_on_success(*args, **kwargs):
+        async with objects.atomic():
+            return await func(*args, **kwargs)
+    return _nested_commit_on_success

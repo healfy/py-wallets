@@ -1,29 +1,51 @@
+import os
 import abc
 import typing
+
 from decimal import Decimal
 from decimal import ROUND_HALF_UP
 from datetime import datetime
 from datetime import timedelta
-from flask import render_template
-from sqlalchemy.orm import Session
-from sqlalchemy.orm import Query
-from redis import StrictRedis
-
-from wallets import app
-from wallets import logger
-from wallets.common import Wallet
-from wallets.common import Transaction
-from wallets.utils import send_message
-from wallets.utils.locks import nowait_lock
-from wallets.utils.locks import connect_redis
-from wallets.gateway.base import BaseGateway
-from wallets.gateway import currencies_service_gw as c_gw
-from wallets.gateway import blockchain_service_gw as b_gw
-from wallets.gateway import transactions_service_gw
-from wallets.gateway import exchanger_service_gw
+from aioredlock import Aioredlock
 from wallets.utils.consts import TransactionStatus
 
+from wallets import (
+    app,
+    logger,
+    objects,
+    MyManager
+)
+
+from wallets.common import (
+    Wallet,
+    Transaction
+)
+from wallets.utils import (
+    send_message,
+    nested_commit_on_success
+)
+
+from wallets.gateway.base import (
+    BaseGateway,
+    BaseAsyncGateway
+)
+
+from wallets.gateway import (
+    exchanger_service_gw,
+    transactions_service_gw,
+    blockchain_service_gw as b_gw,
+    currencies_service_gw as c_gw,
+)
+
+
 conf = app.config
+
+REDIS_HOST = os.environ.get('REDIS_HOST', conf.get('REDIS_HOST'))
+REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', '')
+
+lock_manager = Aioredlock(
+    dict(host=REDIS_HOST, password=REDIS_PASSWORD), lock_timeout=120
+)
 
 
 class BaseMonitorClass(abc.ABC):
@@ -32,18 +54,18 @@ class BaseMonitorClass(abc.ABC):
     """
     timeout: int = conf['MONITORING_TRANSACTIONS_PERIOD']
     counter: int = 0  # for logging
+    manager: MyManager = objects
 
     @classmethod
-    def get_data(cls):
+    async def get_data(cls):
         """
         Simple method to get data for the processing
         """
         raise NotImplementedError('Method not implemented!')
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
-            session: Session
     ) -> typing.NoReturn:
         """
         Main method that contains all logic
@@ -51,21 +73,19 @@ class BaseMonitorClass(abc.ABC):
         raise NotImplementedError('Method not implemented!')
 
     @classmethod
-    def process(
+    @nested_commit_on_success
+    async def process(
             cls,
-            session: Session
     ) -> typing.NoReturn:
         """
         Method to release logic
         """
         try:
-            cls._execute(session)
+            await cls._execute()
         except Exception as e:
-            session.rollback()
             raise e
         finally:
             cls.counter = 0
-            session.close()
 
 
 class CompareRemains:
@@ -104,7 +124,7 @@ class CompareRemains:
             )
 
     @classmethod
-    def send_mail(
+    async def send_mail(
             cls,
             result: typing.Union[list, dict],
             warning: str = None
@@ -114,69 +134,63 @@ class CompareRemains:
         if result:
             context = dict(wallets=result)
             context['warning'] = warning
-            with app.app_context():
-                html = render_template(
-                    conf['MONITORING_TEMPLATE'], **context
-                )
-                send_message(html, msg)
+            await send_message('', msg)
 
 
 class SaveTrx:
     """
     Class for save transaction if it necessary
     """
+    manager: MyManager
 
     @classmethod
-    def save(
+    async def save(
             cls,
             wallet: Wallet,
             request_object: typing.Dict,
-            session: Session
     ) -> typing.NoReturn:
 
-        trx = Transaction.from_dict(request_object)
+        trx = await cls.manager.create(Transaction, **request_object)
         trx.wallet_id = wallet.id
-        session.add(trx)
-        session.commit()
+        await cls.manager.update(trx)
 
 
 class UpdateTrx:
     """
     Class for update transaction if it necessary
     """
+
+    manager: MyManager
+    counter: int
+
     @classmethod
-    def update(
+    async def update(
             cls,
-            wallet: Wallet,
+            wallet: typing.Type['Wallet'],
             trx: typing.Dict,
-            session: Session
-    ) -> int:
-
-        res = session.query(Transaction).filter_by(
-            wallet_id=wallet.id,
-            status=TransactionStatus.NEW.value,
-            address_from=trx['address_from'].lower(),
-            currency_slug=trx['currency_slug'].lower(),
-            hash=None,
-        ).update({'hash': trx['hash'], 'value': trx['value']})
-
-        session.commit()
-        return res
+    ) -> typing.NoReturn:
+        try:
+            trx: Transaction = await cls.manager.get(
+                Transaction,
+                wallet_id=wallet.id,
+                status=TransactionStatus.NEW.value,
+                address_from=trx['address_from'].lower(),
+                currency_slug=trx['currency_slug'].lower(),
+                hash=None
+            )
+            trx.hash = trx['hash']
+            trx.value = trx['value']
+            await cls.manager.update(trx)
+            cls.counter += 1
+        except Transaction.DoesNotExist:
+            pass
 
 
 class ValidateTRX:
     """
     Class to check transaction in base
     """
-
-    @classmethod
-    def exists(
-            cls,
-            trx_hash: str
-    ) -> bool:
-        return bool(
-            Transaction.query.filter_by(hash=trx_hash.lower()).first()
-        )
+    manager: MyManager
 
     @classmethod
     def is_input_trx(
@@ -185,6 +199,13 @@ class ValidateTRX:
             wallet: Wallet
     ) -> bool:
         return wallet.address.lower() == address.lower()
+
+    @classmethod
+    async def is_valid(cls, trx: dict, wallet: Wallet) -> bool:
+        return (
+                not await cls.manager.exists(Transaction, hash=trx['hash'])
+                and cls.is_input_trx(trx['address_to'], wallet)
+        )
 
 
 class CheckWalletMonitor(BaseMonitorClass,
@@ -198,10 +219,10 @@ class CheckWalletMonitor(BaseMonitorClass,
     timeout = conf['MONITORING_WALLETS_PERIOD']
 
     @classmethod
-    def get_data(cls) -> typing.Tuple[dict, typing.Optional[dict]]:
-        balances = b_gw.get_platform_wallets_balance()
+    async def get_data(cls) -> typing.Tuple[dict, typing.Optional[dict]]:
+        balances = await b_gw.get_platform_wallets_balance()
         try:
-            currencies = c_gw.get_currencies()
+            currencies = await c_gw.get_currencies()
             rates = {c['slug']: c['rate'] for c in currencies}
         except Exception as exc:
             logger.warning(f"{cls.__class__.__name__} got {exc}")
@@ -209,19 +230,20 @@ class CheckWalletMonitor(BaseMonitorClass,
         return balances, rates
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
-            session: Session
     ) -> typing.NoReturn:
 
-        wallets, rates = cls.get_data()
+        wallets, rates = await cls.get_data()
 
         if not rates:
             for wallet in wallets:
                 wallet['current'] = wallet['currencySlug']
-            cls.send_mail(wallets,
-                          warning='Attention, service currencies is unavailable'
-                          )
+
+            await cls.send_mail(
+                wallets,
+                warning='Attention, service currencies is unavailable'
+            )
         else:
             result = []
             for wallet in wallets:
@@ -234,7 +256,7 @@ class CheckWalletMonitor(BaseMonitorClass,
 
                 cls.calc(wallet, usd_balance, result)
 
-            cls.send_mail(result)
+            await cls.send_mail(result)
 
 
 class CheckTransactionsMonitor(BaseMonitorClass,
@@ -246,27 +268,37 @@ class CheckTransactionsMonitor(BaseMonitorClass,
     """
 
     @classmethod
-    def get_data(cls) -> Query:
-        return Wallet.query.filter_by(on_monitoring=True, is_platform=False,
-                                      is_active=True)
+    async def get_data(cls) -> typing.Optional[list]:
+        return await cls.manager.get_all(Wallet,
+                                         on_monitoring=True,
+                                         is_platform=False,
+                                         is_active=True)
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
-            session: Session
     ) -> typing.NoReturn:
 
-        for wallet in cls.get_data():
-            trx_list = b_gw.get_transactions_list(
-                wallet_address=wallet.address, external_id=wallet.external_id
-            )
-            for trx in trx_list:
-                if not cls.exists(trx['hash']) \
-                        and cls.is_input_trx(trx['address_to'], wallet):
-                    cls.save(wallet, trx, session)
-                    cls.counter += 1
-            logger.info(f'{cls.__name__} saved {cls.counter} '
-                        f'transactions')
+        for wallet in await cls.get_data():
+            key = Wallet.lock_name_by_id(wallet.id)
+
+            if not await lock_manager.is_locked(key):
+                async with await lock_manager.lock(key) as lock:
+                    assert lock.valid
+
+                    trx_list = await b_gw.get_transactions_list(
+                        wallet_address=wallet.address,
+                        external_id=wallet.external_id
+                    )
+                    for trx in trx_list:
+                        if await cls.is_valid(trx, wallet):
+                            await cls.save(wallet, trx)
+                            cls.counter += 1
+
+                assert lock.valid is False
+
+        logger.info(f'{cls.__name__} saved {cls.counter} '
+                    f'transactions')
 
 
 class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
@@ -279,147 +311,128 @@ class CheckPlatformWalletsMonitor(CheckTransactionsMonitor,
     time_delta_days = conf.get('DELTA_DAYS', 1)
 
     @classmethod
-    def get_data(cls) -> Query:
-        return Wallet.query.filter_by(on_monitoring=True, is_platform=True,
-                                      is_active=True)
+    async def get_data(cls) -> typing.Optional[list]:
+        return await cls.manager.get_all(Wallet,
+                                         on_monitoring=True,
+                                         is_platform=True,
+                                         is_active=True)
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
-            session: Session
     ) -> typing.NoReturn:
 
-        for wallet in cls.get_data():
-            trx_list = b_gw.get_exchanger_wallet_trx_list(
-                slug=wallet.currency_slug,
-                from_time=datetime.now() - timedelta(days=cls.time_delta_days)
-            )
-            for trx in trx_list:
-                if not cls.exists(trx['hash']) and  \
-                        cls.is_input_trx(trx['address_to'], wallet):
-                    cls.counter += cls.update(wallet, trx, session)
+        for wallet in await cls.get_data():
+            key = Wallet.lock_name_by_id(wallet.id)
+
+            if not await lock_manager.is_locked(key):
+                async with await lock_manager.lock(key) as lock:
+                    assert lock.valid
+
+                    trx_list = await b_gw.get_exchanger_wallet_trx_list(
+                        slug=wallet.currency_slug,
+                        from_time=datetime.now() - timedelta(
+                            days=cls.time_delta_days)
+                    )
+                    for trx in trx_list:
+                        if await cls.is_valid(trx, wallet):
+                            await cls.update(wallet, trx)
+                assert lock.valid is False
+
         logger.info(f'{cls.__name__} updated {cls.counter} '
                     f'transactions')
 
 
-class SendToExternalService(BaseMonitorClass, abc.ABC):
-
-    gw: typing.Type['BaseGateway']
-    redis: StrictRedis = connect_redis()
-
-    @classmethod
-    def _execute(
-            cls,
-            session: Session,
-    ) -> typing.NoReturn:
-
-        if cls.get_data().first():
-            cls.send_to_external_service(cls.get_data(),
-                                         session=session, redis=cls.redis)
-
-    @classmethod
-    def send_to_external_service(
-            cls,
-            data: Query,
-            session: Session = None,
-            redis: StrictRedis = None
-    ) -> typing.NoReturn:
-
-        raise NotImplementedError('Method not implemented!')
+class SendTrxToExternalService(BaseMonitorClass, abc.ABC):
+    status: TransactionStatus
+    gw: typing.Union[
+        typing.Type['BaseGateway'], typing.Type['BaseAsyncGateway']
+    ]
+    func = typing.Awaitable[typing.Callable]
 
     @classmethod
     def get_status_from_resp(cls, response: dict):
         return cls.gw.MODULE.ResponseStatus.Value(
             response[cls.gw.response_attr]['status'])
 
-
-class SendToTransactionService(SendToExternalService):
-    """
-    Put all transactions to the external service "Transactions".
-    Where they will monitor and also are sent back
-    """
-    gw = transactions_service_gw
+    @classmethod
+    async def set_status(cls, resp: dict, trx: Transaction):
+        if cls.get_status_from_resp(resp) in cls.gw.ALLOWED_STATUTES:
+            trx.status = cls.status
+            trx.save()
+            cls.counter += 1
 
     @classmethod
-    def get_data(cls) -> Query:
-
-        return Transaction.query.filter(
-            Transaction.hash != None,
-            Transaction.status == TransactionStatus.NEW.value,
-        )
-
-    @classmethod
-    def send_to_external_service(
+    async def _execute(
             cls,
-            data: typing.Iterable[Transaction],
-            session: Session = None,
-            redis: StrictRedis = None,
     ) -> typing.NoReturn:
-        for trx in data:
+
+        for trx in await cls.get_data():
             key = Transaction.lock_name_by_id(trx.id)
-            with nowait_lock(redis) as locker:
-                if locker.lock(key, blocking=True):
+
+            if not await lock_manager.is_locked(key):
+                async with await lock_manager.lock(key) as lock:
+                    assert lock.valid
 
                     try:
-                        resp = cls.gw.put_on_monitoring([trx])
+                        resp = await cls.func([trx])
                     except cls.gw.EXC_CLASS as exc:
                         logger.error(f'{cls.__name__} got exc from '
                                      f'TransactionService {exc}')
                         continue
 
-                    if cls.get_status_from_resp(resp) in cls.gw.ALLOWED_STATUTES:
-                        trx.outer_update(session,
-                                         status=TransactionStatus.SENT.value)
-                        cls.counter += 1
+                    await cls.set_status(resp, trx)
+                assert lock.valid is False
+
             logger.info(f'{cls.__name__} sent {cls.counter} '
                         f'transactions')
 
 
-class SendToExchangerService(SendToExternalService):
+class SendToTransactionService(SendTrxToExternalService):
+    """
+    Put all transactions to the external service "Transactions".
+    Where they will monitor and also are sent back
+    """
+    gw = transactions_service_gw
+    status = TransactionStatus.SENT.value
+    func = transactions_service_gw.put_on_monitoring
+
+    @classmethod
+    async def get_data(cls) -> typing.Optional[list]:
+
+        return await cls.manager.get_all(
+            Transaction,
+            Transaction.hash != None,
+            Transaction.status == TransactionStatus.NEW.value,
+        )
+
+
+class SendToExchangerService(SendTrxToExternalService):
     """
     Put all confirmed input transactions associated with platform wallets to
     the external service "Exchanger"
     """
 
     gw = exchanger_service_gw
+    status = TransactionStatus.REPORTED.value
+    func = exchanger_service_gw.update_transactions
 
     @classmethod
-    def get_data(cls) -> Query:
+    async def get_data(cls) -> typing.Optional[list]:
 
-        return Transaction.query.join(
-            Wallet, Wallet.id == Transaction.wallet_id
-        ).filter(
-            Transaction.hash != None,
-            Transaction.uuid != None,
-            Transaction.status == TransactionStatus.CONFIRMED.value,
-            Wallet.is_platform == True,
+        query = Transaction.select().join(Wallet).where(
+            (Transaction.hash != None) &
+            (Transaction.uuid != None) &
+            (Wallet.is_platform == True) &
+            (Transaction.status == TransactionStatus.CONFIRMED.value)
         )
 
-    @classmethod
-    def send_to_external_service(
-            cls,
-            data: typing.Iterable[Transaction],
-            session: Session = None,
-            redis: StrictRedis = None,
-    ) -> typing.NoReturn:
-        for trx in data:
-            key = Transaction.lock_name_by_id(trx.id)
-            with nowait_lock(redis) as locker:
-                if locker.lock(key):
-                    try:
-                        resp = cls.gw.update_transactions([trx])
-                    except cls.gw.EXC_CLASS as exc:
-                        logger.error(f'{cls.__name__} got exc from '
-                                     f'ExchangerService {exc}')
-                        continue
-                    if cls.get_status_from_resp(resp) in cls.gw.ALLOWED_STATUTES:
-                        trx.outer_update(
-                            session, status=TransactionStatus.REPORTED.value)
-                        cls.counter += 1
-            logger.info(f'{cls.__name__} sent {cls.counter} '
-                        f'transactions')
+        return await cls.manager.get_all(query)
 
 
-__TRANSACTIONS_TASKS__ = [SendToExchangerService,
-                          SendToTransactionService,
-                          CheckWalletMonitor]
+__TRANSACTIONS_TASKS__ = [
+    SendToExchangerService,
+    SendToTransactionService,
+    CheckTransactionsMonitor,
+   # CheckPlatformWalletsMonitor
+]

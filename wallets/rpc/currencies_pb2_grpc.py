@@ -16,8 +16,8 @@ class CurrenciesServiceStub(object):
     """
     self.Health = channel.unary_unary(
         '/currencies.CurrenciesService/Health',
-        request_serializer=currencies__pb2.Empty.SerializeToString,
-        response_deserializer=currencies__pb2.Empty.FromString,
+        request_serializer=currencies__pb2.HealthzRequest.SerializeToString,
+        response_deserializer=currencies__pb2.HealthzResponse.FromString,
         )
     self.Get = channel.unary_unary(
         '/currencies.CurrenciesService/Get',
@@ -49,8 +49,8 @@ def add_CurrenciesServiceServicer_to_server(servicer, server):
   rpc_method_handlers = {
       'Health': grpc.unary_unary_rpc_method_handler(
           servicer.Health,
-          request_deserializer=currencies__pb2.Empty.FromString,
-          response_serializer=currencies__pb2.Empty.SerializeToString,
+          request_deserializer=currencies__pb2.HealthzRequest.FromString,
+          response_serializer=currencies__pb2.HealthzResponse.SerializeToString,
       ),
       'Get': grpc.unary_unary_rpc_method_handler(
           servicer.Get,

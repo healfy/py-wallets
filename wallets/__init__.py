@@ -1,76 +1,53 @@
+import peewee
+import peewee_async
+
 import sys
 import os
-from contextlib import contextmanager
-
-from flask import Flask
-from sqlalchemy.orm import scoped_session
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-from flask_sqlalchemy import SQLAlchemy
+from aiohttp import web_app
 sys.path.extend(['/', '/app', 'wallets', 'wallets/rpc', '/app/rpc', '..', '../rpc', '/etc/wallets'])  # for docker
 
 from wallets.settings.config import conf
 from wallets.shared.logging import logger
 from wallets.gateway import start_remote_gateways
-from wallets.common import BaseModel
-
-DBSession = scoped_session(sessionmaker())
-engine = None
-db = None
-
-app = Flask('wallets')
-app.config.update(conf)
 
 
-def start_engine(restart=False):
-    global engine
-    global db
-    from sqlalchemy.engine.url import URL, make_url
-    connect_url = make_url(
-     conf['PGSTRING']) if conf['PGSTRING'] is not None and conf[
-     'PGSTRING'] != 'None' else URL(
-      'postgresql',
-      username=os.getenv('PGUSER'),
-      host=os.getenv('PGHOST'),
-      password=os.getenv('PGPASSWORD'),
-      database=os.getenv('PGDATABASE', 'postgres'),
-     )
-    app.config['SQLALCHEMY_DATABASE_URI'] = connect_url
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    db = SQLAlchemy(app)
+class MyManager(peewee_async.Manager):
 
-    if engine is None or restart is True:
-        engine = create_engine(
-            connect_url,
-            echo=conf.get('DB_DEBUG'),
-            logging_name=logger.name,
-        )
-    DBSession.remove()
-    DBSession.configure(bind=engine)
-    BaseModel.set_session(DBSession)
-    logger.info('DB connection established')
+    async def get_all(self, source_, *args, **kwargs):
+
+        await self.connect()
+
+        if isinstance(source_, peewee.Query):
+            query = source_
+            model = query.model
+        else:
+            query = source_.select()
+            model = source_
+
+        conditions = list(args) + [(getattr(model, k) == v)
+                                   for k, v in kwargs.items()]
+
+        if conditions:
+            query = query.where(*conditions)
+
+        result = await self.execute(query)
+
+        return list(result)
+
+    async def exists(self, source_, *args, **kwargs):
+        return bool(await self.get_all(source_, *args, **kwargs))
 
 
-def session_maker() -> scoped_session:
-    if not engine:
-        start_engine()
-    return DBSession
+app = web_app.Application()
+app.config = conf
 
 
-start_engine()
-BaseModel.set_session(DBSession)
+database: peewee_async.PostgresqlDatabase = peewee_async.PostgresqlDatabase(
+    os.getenv('PGDATABASE', 'wallets'),
+    host=os.getenv('PGHOST', 'localhost'),
+    user=os.getenv('PGUSER', 'postgres'),
+    password=os.getenv('PGPASSWORD')
+)
+
+objects = MyManager(database)
 start_remote_gateways()
-
-
-@contextmanager
-def session_scope():
-    """Provide a transactional scope around a series of operations."""
-    session = db.session
-    try:
-        yield session
-        session.commit()
-    except:
-        session.rollback()
-        raise
-    finally:
-        session.close()

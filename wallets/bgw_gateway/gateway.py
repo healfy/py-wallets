@@ -1,14 +1,12 @@
-import grpc
 import typing
 from decimal import Decimal
 from datetime import datetime
 
-from wallets import logger
 from wallets.settings.config import conf
 from wallets.common import TransactionSchema
-from wallets.gateway.base import BaseGateway
+from wallets.gateway.base import BaseAsyncGateway
 from wallets.rpc import blockchain_gateway_pb2
-from wallets.rpc import blockchain_gateway_pb2_grpc
+from wallets.rpc import blockchain_gateway_grpc
 
 
 from .exceptions import BlockchainBadResponseException
@@ -18,54 +16,52 @@ from .serializers import (
 )
 
 
-class BlockChainServiceGateWay(BaseGateway):
+class BlockChainServiceGateWay(BaseAsyncGateway):
     """Hold logic for interacting with remote blockchain gateway service."""
 
-    GW_ADDRESS = conf['BLOCKCHAIN_GW_ADDRESS']
-    TIMEOUT = conf['BLOCKCHAIN_GW_TIMEOUT']
-    BAD_RESPONSE_MSG = 'Bad response from blockchain gateway.'
-    ALLOWED_STATUTES = (blockchain_gateway_pb2.SUCCESS,)
     NAME = 'bgw'
+    GW_PORT = 50052
+    response_attr = 'status'
     MODULE = blockchain_gateway_pb2
-    ServiceStub = blockchain_gateway_pb2_grpc.BlockchainGatewayServiceStub
-    LOGGER = logger
+    TIMEOUT = conf['BLOCKCHAIN_GW_TIMEOUT']
+    GW_ADDRESS = conf['BLOCKCHAIN_GW_ADDRESS']
     EXC_CLASS = BlockchainBadResponseException
+    ALLOWED_STATUTES = (blockchain_gateway_pb2.SUCCESS,)
+    BAD_RESPONSE_MSG = 'Bad response from blockchain gateway.'
+    ServiceStub = blockchain_gateway_grpc.BlockchainGatewayServiceStub
 
-    def get_balance_by_slug(self, slug: str) -> Decimal:
+    async def get_balance_by_slug(self, slug: str) -> Decimal:
         """ Get actual balance by wallet slug """
         request_message = self.MODULE.GetBalanceBySlugRequest(slug=slug)
 
-        with grpc.insecure_channel(self.GW_ADDRESS) as channel:
-            client = self.ServiceStub(channel)
-
-            response_data = self._base_request(
-                request_message,
-                client.GetBalanceBySlug,
-                bad_response_msg=f"Could not get balance "
-                                 f"for wallet with slug={slug}."
-            )
+        response_data = await self._base_request(
+            request_message,
+            self.CLIENT.GetBalanceBySlug,
+            bad_response_msg=f"Could not get balance "
+                             f"for wallet with slug={slug}."
+        )
 
         return GetBalanceResponseSchema().load(response_data).get('balance')
 
-    def get_platform_wallets_balance(self) -> typing.List:
+    async def get_platform_wallets_balance(self) -> typing.List:
         """ Get balance of all platform wallets """
         request_message = self.MODULE.EmptyRequest()
 
-        with grpc.insecure_channel(self.GW_ADDRESS) as channel:
-            client = self.ServiceStub(channel)
-
-            resp_data = self._base_request(
-                request_message,
-                client.GetPlatformWalletsBalance,
-                bad_response_msg=f"Could not get balance for platform wallets."
-            )
+        resp_data = await self._base_request(
+            request_message,
+            self.CLIENT.GetPlatformWalletsBalance,
+            bad_response_msg=f"Could not get balance for platform wallets."
+        )
 
         return [
             WalletBalanceSchema().load(elem) for elem in resp_data['wallets']
         ]
 
-    def get_transactions_list(self, external_id: int = None,
-                              wallet_address: str = None) -> typing.List:
+    async def get_transactions_list(
+            self,
+            external_id: int = None,
+            wallet_address: str = None
+    ) -> typing.List:
 
         """Return transactions list for wallet identifiable by id or address.
         """
@@ -77,21 +73,18 @@ class BlockChainServiceGateWay(BaseGateway):
         message = self.MODULE.GetTransactionsListRequest(
             walletId=external_id, walletAddress=wallet_address)
 
-        with grpc.insecure_channel(self.GW_ADDRESS) as channel:
-            client = self.ServiceStub(channel)
-
-            response_data = self._base_request(
-                message,
-                client.GetTransactionsList,
-                bad_response_msg=f"Could not get transaction "
-                                 f"list with params {message}."
-            )
-            resp_data = response_data.get('transactions', [])
+        response_data = await self._base_request(
+            message,
+            self.CLIENT.GetTransactionsList,
+            bad_response_msg=f"Could not get transaction "
+                             f"list with params {message}."
+        )
+        resp_data = response_data.get('transactions', [])
         return [
             TransactionSchema().load(elem) for elem in resp_data
         ]
 
-    def get_exchanger_wallet_trx_list(
+    async def get_exchanger_wallet_trx_list(
             self,
             slug: str,
             from_time: typing.Optional[datetime] = None,
@@ -106,17 +99,13 @@ class BlockChainServiceGateWay(BaseGateway):
             fromTime=from_time,
             toTime=to_time
         )
-
-        with grpc.insecure_channel(self.GW_ADDRESS) as channel:
-            client = self.ServiceStub(channel)
-
-            response_data = self._base_request(
-                message,
-                client.GetTrxListExchangerWallet,
-                bad_response_msg=f"Could not get transaction "
-                                 f"list with params {message}."
-            )
-            resp_data = response_data.get('transactions', [])
+        response_data = await self._base_request(
+            message,
+            self.CLIENT.GetTrxListExchangerWallet,
+            bad_response_msg=f"Could not get transaction "
+                             f"list with params {message}."
+        )
+        resp_data = response_data.get('transactions', [])
 
         return [
             TransactionSchema().load(elem) for elem in resp_data

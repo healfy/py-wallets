@@ -6,14 +6,15 @@ from abc import ABC
 from datetime import datetime, timedelta
 from decimal import Decimal
 from flask import render_template
-from sqlalchemy import and_
-from sqlalchemy.orm import Session, Query
 
 from wallets import app
 from wallets import logger
+from wallets import objects
+from wallets import MyManager
 from wallets import request_objects
 from wallets.utils.consts import TransactionStatus
 from wallets.utils import send_message
+from wallets.utils import nested_commit_on_success
 from wallets.utils import get_exchanger_wallet
 from wallets.common import Wallet
 from wallets.common import Transaction
@@ -36,9 +37,11 @@ class ServerMethod(ABC):
     """
     request_obj_cls = None
     response_msg_cls = None
+    manager: MyManager = objects
 
     @classmethod
-    def process(cls, request, session: Session):
+    @nested_commit_on_success
+    async def process(cls, request):
         """
         The main method, which is called to process the request by the server.
         Must return an object of the message class that is defined individually
@@ -59,7 +62,7 @@ class ServerMethod(ABC):
                 response.header.status = w_pb2.INVALID_REQUEST
                 response.header.description = request_obj.error
             else:
-                response = cls._execute(request_obj, response, session)
+                response = await cls._execute(request_obj, response)
         except Exception as exc:
             output = io.StringIO()
             traceback.print_tb(exc.__traceback__, None, output)
@@ -70,9 +73,6 @@ class ServerMethod(ABC):
                          {'req': request_obj.dict()})
             response.header.status = w_pb2.ERROR
             response.header.description = str(exc)
-            session.rollback()
-        finally:
-            session.close()
         return response
 
     @classmethod
@@ -80,7 +80,7 @@ class ServerMethod(ABC):
         return cls.response_msg_cls()
 
     @classmethod
-    def _execute(cls, request_obj, response_msg, session):
+    async def _execute(cls, request_obj, response_msg):
         """Contains the individual logic for processing a request specific to
         the server method.
         Must return a message class object (response_msg_cls instance) with a
@@ -94,29 +94,24 @@ class ServerMethod(ABC):
 
 class SaveWallet:
 
+    manager: MyManager
+
     @classmethod
-    def _save(
+    async def _save(
             cls,
             request: typing.Union[
                 request_objects.MonitoringRequestObject,
                 request_objects.PlatformWLTMonitoringRequestObject
             ],
-            session: Session
     ):
         data = request.dict()
-        if Wallet.query.filter_by(external_id=data['external_id']).first():
+        if await cls.manager.exists(Wallet, external_id=data['external_id']):
             raise ValueError(f'Wallet with params: '
                              f'currency:{data["currency_slug"]} '
                              f'id:{data["external_id"]} '
                              f'address: {data["address"]} '
                              f'is already exists')
-        wallet = Wallet(**data)
-        try:
-            session.add(wallet)
-            session.commit()
-        except Exception as e:
-            session.rollback()
-            raise e
+        await cls.manager.create(Wallet, **data)
 
 
 class HeathzMethod(ServerMethod):
@@ -124,11 +119,10 @@ class HeathzMethod(ServerMethod):
     response_msg_cls = w_pb2.HealthzResponse
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
             request_obj: request_objects.HealthzRequest,
             response_msg: w_pb2.HealthzResponse,
-            session: Session
     ) -> w_pb2.HealthzResponse:
         response_msg.header.status = w_pb2.SUCCESS
         return response_msg
@@ -139,14 +133,13 @@ class CheckBalanceMethod(ServerMethod):
     response_msg_cls = w_pb2.CheckBalanceResponse
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
             request_obj: request_objects.BalanceRequestObject,
             response_msg: w_pb2.CheckBalanceResponse,
-            session: Session
     ) -> w_pb2.CheckBalanceResponse:
 
-        balance = cls.get_balance(request_obj.body_currency)
+        balance = await cls.get_balance(request_obj.body_currency)
         if balance < Decimal(request_obj.body_amount):
             ctx = dict(
                 currency=request_obj.body_currency,
@@ -155,7 +148,7 @@ class CheckBalanceMethod(ServerMethod):
             )
             html = cls.get_html(ctx)
             try:
-                send_message(html, 'Warning')
+                await send_message(html, 'Warning')
                 desc = 'success with send email'
             except Exception as exc:
                 logger.error(f"{cls.__name__} failed. "
@@ -168,8 +161,8 @@ class CheckBalanceMethod(ServerMethod):
         return response_msg
 
     @classmethod
-    def get_balance(cls, slug):
-        return blockchain_service_gw.get_balance_by_slug(slug)
+    async def get_balance(cls, slug):
+        return await blockchain_service_gw.get_balance_by_slug(slug)
 
     @classmethod
     def get_html(cls, context):
@@ -182,13 +175,12 @@ class StartMonitoringMethod(ServerMethod,
     response_msg_cls = w_pb2.MonitoringResponse
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
             request_obj: request_objects.MonitoringRequestObject,
             response_msg: w_pb2.MonitoringResponse,
-            session: Session
     ) -> w_pb2.MonitoringResponse:
-        cls._save(request_obj, session)
+        await cls._save(request_obj)
         response_msg.header.status = w_pb2.SUCCESS
         return response_msg
 
@@ -198,16 +190,20 @@ class StopMonitoringMethod(ServerMethod):
     response_msg_cls = w_pb2.MonitoringResponse
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
             request_obj: request_objects.MonitoringRequestObject,
             response_msg: w_pb2.MonitoringResponse,
-            session: Session
     ) -> w_pb2.MonitoringResponse:
-        session.query(Wallet).filter(
-            Wallet.external_id == request_obj.wallet.id
-        ).update({'on_monitoring': False})
-        session.commit()
+        try:
+            wallet = await cls.manager.get(
+                Wallet, external_id=request_obj.wallet.id)
+            wallet.on_monitoring = False
+            await cls.manager.update(wallet)
+        except Wallet.DoesNotExist:
+            text = f'Wallet with external_id ' \
+                   f'{request_obj.wallet.id} does not exists in db'
+            response_msg.header.description = text
         response_msg.header.status = w_pb2.SUCCESS
         return response_msg
 
@@ -217,23 +213,28 @@ class UpdateTrxMethod(ServerMethod):
     response_msg_cls = w_pb2.TransactionResponse
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
             request_obj: request_objects.TransactionRequestObject,
             response_msg: w_pb2.TransactionResponse,
-            session: Session
     ) -> w_pb2.TransactionResponse:
         counter = 0
         for trx in request_obj.transactions:
-            counter += session.query(Transaction).filter(
-                Transaction.hash == trx.hash).filter(
-                Transaction.status != TransactionStatus.REPORTED.value
-            ).update({
-                'status': TransactionStatus.CONFIRMED.value,
-                'confirmed_at': datetime.now(),
-                'value': Decimal(trx.value)
-            }, synchronize_session=False)
-            session.commit()
+            try:
+                query = Transaction.select().where(
+                    (Transaction.hash == trx.hash) &
+                    (Transaction.status != TransactionStatus.REPORTED.value)
+                )
+
+                trx = await cls.manager.get(query)
+                trx.status = TransactionStatus.CONFIRMED.value
+                trx.confirmed_at = datetime.now()
+                trx.value = Decimal(trx.value)
+                await cls.manager.update(trx)
+                counter += 1
+            except Transaction.DoesNotExist:
+                pass
+
         response_msg.header.status = w_pb2.SUCCESS
         response_msg.header.description = f'Confirmed {counter} Transactions'
         return response_msg
@@ -244,18 +245,31 @@ class GetInputTrxMethod(ServerMethod):
     response_msg_cls = w_pb2.InputTransactionsResponse
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
             request_obj: request_objects.GetInputTrxRequestObject,
             response_msg: w_pb2.InputTransactionsResponse,
-            session: Session
     ) -> w_pb2.InputTransactionsResponse:
 
-        query = Transaction.query.filter_by(
-            wallet_id=request_obj.wallet_id,
-            status=TransactionStatus.CONFIRMED.value
+        date_to = datetime.utcnow().replace(hour=0, minute=0, tzinfo=pytz.utc)
+        date_from = date_to - timedelta(days=1)
+
+        if getattr(request_obj, 'time_from', None):
+            date_from = datetime.fromtimestamp(request_obj.time_from).replace(
+                tzinfo=pytz.utc)
+        if getattr(request_obj, 'time_to', None):
+            date_to = datetime.fromtimestamp(request_obj.time_to).replace(
+                tzinfo=pytz.utc)
+
+        query = Transaction.select().where(
+            Transaction.wallet_id == request_obj.wallet_id,
+            TransactionStatus.status == TransactionStatus.CONFIRMED.value
+        ).where(
+            (Transaction.created_at >= date_from) &
+            (Transaction.created_at <= date_to)
         )
-        query = cls.additional_filter(request_obj, query)
+
+        query = await cls.manager.get_all(query)
 
         for trx in query:
             response_msg.transactions.append(
@@ -269,53 +283,29 @@ class GetInputTrxMethod(ServerMethod):
         response_msg.header.status = w_pb2.SUCCESS
         return response_msg
 
-    @classmethod
-    def additional_filter(
-            cls,
-            request_obj: request_objects.GetInputTrxRequestObject,
-            query: Query
-    ) -> typing.Iterable[Transaction]:
-        date_to = datetime.utcnow().replace(hour=0, minute=0, tzinfo=pytz.utc)
-        date_from = date_to - timedelta(days=1)
-
-        if getattr(request_obj, 'time_from', None):
-            date_from = datetime.fromtimestamp(request_obj.time_from).replace(
-                tzinfo=pytz.utc)
-        if getattr(request_obj, 'time_to', None):
-            date_to = datetime.fromtimestamp(request_obj.time_to).replace(
-                tzinfo=pytz.utc)
-        return query.filter(
-            and_(
-                Transaction.created_at >= date_from,
-                Transaction.created_at <= date_to
-            )
-        )
-
 
 class StartMonitoringPlatformWLTMethod(ServerMethod):
     request_obj_cls = request_objects.PlatformWLTMonitoringRequestObject
     response_msg_cls = w_pb2.PlatformWLTMonitoringResponse
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
             request_obj: request_objects.PlatformWLTMonitoringRequestObject,
             response_msg: w_pb2.PlatformWLTMonitoringResponse,
-            session: Session
     ) -> w_pb2.PlatformWLTMonitoringResponse:
-        wallet = get_exchanger_wallet(
+
+        wallet = await get_exchanger_wallet(
             request_obj.wallet_address, request_obj.expected_currency)
 
-        trx = Transaction(
+        await cls.manager.create(Transaction, **dict(
             address_to=wallet.address,
             currency_slug=request_obj.expected_currency,
             address_from=request_obj.expected_address,
             value=request_obj.expected_amount,
             wallet_id=wallet.id,
             uuid=request_obj.uuid
-        )
-        session.add(trx)
-        session.commit()
+        ))
         response_msg.header.status = w_pb2.SUCCESS
         return response_msg
 
@@ -325,18 +315,17 @@ class AddInputTransactionMethod(ServerMethod):
     response_msg_cls = w_pb2.InputTransactionResponse
 
     @classmethod
-    def _execute(
+    async def _execute(
             cls,
             request_obj: request_objects.AddInputTrxRequestObject,
             response_msg: w_pb2.PlatformWLTMonitoringResponse,
-            session: Session
     ) -> w_pb2.PlatformWLTMonitoringResponse:
-        wallet = get_exchanger_wallet(
+        wallet = await get_exchanger_wallet(
             request_obj.wallet_address, request_obj.currency)
 
-        cls.find_in_base(request_obj)
+        await cls.find_in_base(request_obj)
 
-        trx = Transaction(
+        trx = await cls.manager.create(Transaction, **dict(
             address_to=wallet.address,
             currency_slug=request_obj.currency,
             address_from=request_obj.from_address,
@@ -344,19 +333,19 @@ class AddInputTransactionMethod(ServerMethod):
             wallet_id=wallet.id,
             uuid=request_obj.uuid,
             hash=request_obj.hash
-        )
-        session.add(trx)
-        session.commit()
+        ))
         response_msg.header.status = w_pb2.SUCCESS
         response_msg.header.description = f'added Input transaction ' \
                                           f'hash: {trx.hash}'
         return response_msg
 
-    @staticmethod
-    def find_in_base(
+    @classmethod
+    async def find_in_base(
+            cls,
             request_obj: request_objects.AddInputTrxRequestObject,
     ) -> typing.NoReturn:
-        if Transaction.query.filter_by(hash=request_obj.hash).first():
+
+        if await cls.manager.exists(Transaction, hash=request_obj.hash):
             raise ValueError(
                 f'Get Transaction error: transaction '
                 f'with hash {request_obj.hash} is already in base'

@@ -2,33 +2,35 @@
 Script to create platform wallets
 """
 import os
-from wallets import db
+import asyncio
+from wallets import objects
 from wallets.common.models import Wallet
 
 
-def create_wallets():
-    wallet_btc = Wallet(
-        address=os.environ.get('EXCHANGER_BTC_ADDRESS',
-                               'mtQGkRpBVRDdRBwVkCbtGArdCYmiqkQrB1').lower(),
+async def create_wallets():
+    await objects.create(
+        Wallet,
+        address=os.environ.get(
+            'EXCHANGER_BTC_ADDRESS', 'mtQGkRpBVRDdRBwVkCbtGArdCYmiqkQrB1'
+        ).lower(),
         external_id=os.environ.get('BTC_ID', 23),
         is_platform=True,
         currency_slug=os.environ.get('BTC_SLUG', 'bitcoin').lower()
     )
 
-    wallet_eth = Wallet(
-        address=os.environ.get('EXCHANGER_ETH_ADDRESS',
-                               '0xF6E4709341426Dee13c9e9EaB6e4779b299CE2F7').lower(),
+    await objects.create(
+        Wallet,
+        address=os.environ.get(
+            'EXCHANGER_ETH_ADDRESS',
+            '0xF6E4709341426Dee13c9e9EaB6e4779b299CE2F7'
+        ).lower(),
         external_id=os.environ.get('ETH_ID', 24),
         is_platform=True,
         currency_slug=os.environ.get('ETH_SLUG', 'ethereum').lower()
     )
 
-    db.session.add(wallet_btc)
-    db.session.add(wallet_eth)
-    db.session.commit()
 
-
-def create_tokens_main_net():
+async def create_tokens_main_net():
     slugs = ['usd-coin'
              'trueusd',
              'omisego',
@@ -37,27 +39,34 @@ def create_tokens_main_net():
              'chainlink',
              'zilliqa'
              ]
-    wallets = [
-        Wallet(
-            address=os.environ.get('EXCHANGER_ETH_ADDRESS',
-                                   '0xF6E4709341426Dee13c9e9EaB6e4779b299CE2F7').lower(),
+    for slug in slugs:
+        await objects.create(
+            Wallet,
+            address=os.environ.get(
+                'EXCHANGER_ETH_ADDRESS',
+                '0xF6E4709341426Dee13c9e9EaB6e4779b299CE2F7'
+            ).lower(),
             external_id=os.environ.get('ETH_ID', 24),
             is_platform=True,
-            currency_slug=slug
-        ) for slug in slugs
-    ]
-    db.session.add_all(wallets)
-    db.session.commit()
+            currency_slug=slug)
 
 
-def create_test_token():
+async def create_test_token():
 
-    wallet = Wallet(
-        address=os.environ.get('EXCHANGER_ETH_ADDRESS',
-                               '0xF6E4709341426Dee13c9e9EaB6e4779b299CE2F7').lower(),
+    await objects.create(
+        Wallet,
+        address=os.environ.get(
+            'EXCHANGER_ETH_ADDRESS',
+            '0xF6E4709341426Dee13c9e9EaB6e4779b299CE2F7'
+        ).lower(),
         external_id=os.environ.get('ETH_ID', 24),
         is_platform=True,
         currency_slug='binance-coin'
     )
-    db.session.add(wallet)
-    db.session.commit()
+
+
+def main():
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(create_wallets())
+    loop.run_until_complete(create_test_token())
+
